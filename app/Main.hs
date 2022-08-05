@@ -13,6 +13,7 @@ import Data.Elf.PrettyPrint (readFileLazy)
 import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BSL
 import System.FilePath
+import System.Environment
 
 readElf :: FilePath -> IO (Elf)
 readElf path = do
@@ -40,11 +41,22 @@ w32' b = (fromIntegral $ BSL.index b 0)
     .|. ((fromIntegral $ BSL.index b 3) `shift` 24)
 
 w32 :: BSL.ByteString -> (Word32, BSL.ByteString)
-w32 bs = (w32' c, r)
+w32 bs = (w32' cur, rem)
     where
-        (c, r) = BSL.splitAt 4 bs
+        (cur, rem) = BSL.splitAt 4 bs
+
+main' :: Elf -> IO ()
+main' elf = do
+    text <- textSection elf
+    case text of
+        Just x  -> putStrLn $ "First Instruction: " ++ show (fst $ w32 x)
+        Nothing -> putStrLn "No text segment"
 
 main :: IO ()
 main = do
-    --elf <- readElf "/bin/ls"
-    Prelude.putStrLn "Hello, Haskell!"
+    args <- getArgs
+    if (length args) /= 1
+        then error "Accepting only a single file argument"
+        else do
+            elf <- readElf $ head args
+            main' elf
