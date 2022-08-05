@@ -3,6 +3,7 @@
 
 module Main where
 
+import Decoder
 import Data.Bits
 import Data.Int
 import Data.Word
@@ -34,22 +35,25 @@ textSection (SELFCLASS32 :&: ElfList elfs) = do
         ElfSection { esData = ElfSectionData textData } -> Just textData
         _ -> Nothing
 
-w32' :: BSL.ByteString -> Word32
-w32' b = (fromIntegral $ BSL.index b 0)
+w32 :: BSL.ByteString -> Word32
+w32 b = (fromIntegral $ BSL.index b 0)
     .|. ((fromIntegral $ BSL.index b 1) `shift` 8)
     .|. ((fromIntegral $ BSL.index b 2) `shift` 16)
     .|. ((fromIntegral $ BSL.index b 3) `shift` 24)
 
-w32 :: BSL.ByteString -> (Word32, BSL.ByteString)
-w32 bs = (w32' cur, rem)
+decodeInstr :: Word32 -> String
+decodeInstr = show . decode
+
+decodeAll :: BSL.ByteString -> String
+decodeAll bs = foldr (\bs str -> (decodeInstr $ w32 bs) ++ str) "" lst
     where
-        (cur, rem) = BSL.splitAt 4 bs
+        lst = takeWhile (not . BSL.null) $ iterate (BSL.drop 4) bs
 
 main' :: Elf -> IO ()
 main' elf = do
     text <- textSection elf
     case text of
-        Just x  -> putStrLn $ "First Instruction: " ++ show (fst $ w32 x)
+        Just x  -> putStrLn $ decodeAll x
         Nothing -> putStrLn "No text segment"
 
 main :: IO ()
