@@ -24,7 +24,16 @@ data Instruction =
     Addi Immediate Register Register |
     InvalidInstruction deriving (Show)
 
--- Convert to an unsigned word to a signed number.
+-- | Convert to an unsigned word to a signed number.
+--
+-- Examples:
+--
+-- >>> fromTwoscomp 32 0xffffffff
+-- -1
+-- >>> fromTwoscomp 3 4
+-- -4
+-- >>> fromTwoscomp 3 3
+-- 3
 fromTwoscomp :: Word32 -> Word32 -> Int32
 fromTwoscomp numBits n = fromIntegral $ -(n .&. mask) + (n .&. complement mask)
     where
