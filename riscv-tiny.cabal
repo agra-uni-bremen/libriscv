@@ -29,6 +29,7 @@ executable riscv-tiny
                    , Utils
                    , Memory
                    , Register
+                   , Executor
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

@@ -7,6 +7,7 @@ module Main where
 import Utils
 import Memory
 import Decoder
+import Executor
 import Control.Monad.Catch
 import Data.Bits
 import Data.Int
@@ -67,23 +68,6 @@ loadElf mem (SELFCLASS32 :&: ElfList elfs) = do
     mapM (\ElfSegment{..} -> copyData epData mem $ toMemAddr epPhysAddr) loadable
     pure ()
 
-decodeInstr :: Word32 -> String
-decodeInstr = show . decode
-
-dumpInstr :: Memory -> Address -> IO ()
-dumpInstr mem addr = do
-    -- XXX: byteswap32 should depend on info in ELF header.
-    -- Should also be done when writting into memory, not when loading.
-    instr <- loadWord mem addr
-    putStrLn ((show addr) ++ ": " ++ (decodeInstr $ byteSwap32 instr))
-
-dumpMem :: Memory -> IO ()
-dumpMem mem = do
-    msize <- memSize mem
-    words <- pure $ (div msize (4 :: Word32))
-    mapM (dumpInstr mem) (take (fromIntegral words) $ iterate (+4) 0)
-    pure ()
-
 main :: IO ()
 main = do
     args <- getArgs
@@ -94,4 +78,6 @@ main = do
             elf <- readElf $ head args
 
             loadElf mem elf
-            dumpMem mem
+            state <- mkArchState mem
+            -- TODO: Extract start address from elf
+            executeAll state 0x0
