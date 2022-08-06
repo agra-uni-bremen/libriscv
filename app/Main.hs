@@ -11,7 +11,6 @@ import Data.Elf
 import Data.Elf.Headers
 import Data.Singletons.Sigma
 import Data.Elf.PrettyPrint (readFileLazy)
-import qualified Data.ByteString as B
 import qualified Data.ByteString.Lazy as BSL
 import System.FilePath
 import System.Environment
