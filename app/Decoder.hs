@@ -40,7 +40,15 @@ fromTwoscomp numBits n = fromIntegral $ -(n .&. mask) + (n .&. complement mask)
         mask :: Word32
         mask = 2^(numBits - 1)
 
--- Extract a bit field from a RISC-V instruction word.
+-- | Extract a bit field from a RISC-V instruction word.
+--
+-- Examples:
+--
+-- >>> let word = 0x23421337
+-- >>> instrField 24 32 word
+-- 35
+-- >>> instrField 0 7 word
+-- 55
 instrField :: Int -> Int -> Word32 -> Word32
 instrField start end w = mask start (end + 1) .&. shiftR w start
     where
@@ -116,5 +124,13 @@ decode' instr opcode
     | opcode == op_itype = decode_itype instr (immI instr) (regRd instr) (regRs1 instr)
     | otherwise          = InvalidInstruction
 
+-- | Decode a RISC-V RV32i instruction.
+--
+-- Examples:
+--
+-- >>> decode 0x00a605b3
+-- Add 11 12 10
+-- >>> decode 0x02a30293
+-- Addi 42 5 6
 decode :: Word32 -> Instruction
 decode instr = decode' instr $ opcode instr
