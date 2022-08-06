@@ -19,7 +19,7 @@ maintainer:         soeren@soeren-tempel.net
 -- A copyright notice.
 -- copyright:
 -- category:
-extra-source-files: CHANGELOG.md
+-- extra-source-files: CHANGELOG.md
 
 executable riscv-tiny
     main-is:          Main.hs
