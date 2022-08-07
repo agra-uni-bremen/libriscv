@@ -31,6 +31,9 @@ execute state@(r, m) addr = do
     -- TODO: Do byteswap conversion elsewhere
     inst <- pure $ decode (byteSwap32 word)
 
+    -- Verbose debug output
+    putStrLn ((show addr) ++ ": " ++ (show inst))
+
     -- Address of the next instruction
     return $ (inst, addr + 4)
 
