@@ -28,7 +28,8 @@ execute' (r, m) _ = error "not implemented"
 execute :: ArchState -> Address -> IO (Instruction, Address)
 execute state@(r, m) addr = do
     word <- loadWord m addr
-    inst <- pure $ decode word
+    -- TODO: Do byteswap conversion elsewhere
+    inst <- pure $ decode (byteSwap32 word)
 
     -- Address of the next instruction
     return $ (inst, addr + 4)
