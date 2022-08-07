@@ -5,6 +5,7 @@ import Data.Int
 import Data.Bits
 import Data.Word
 import Data.Array.IO
+import qualified Data.ByteString.Lazy as BSL
 
 -- 32-bit addresses for RV32.
 type Address = Word32
@@ -72,3 +73,21 @@ storeWord mem addr word = do
     mapM (\(off, val) -> storeByte mem (addr + off) val)
         $ zip [(0 :: Address)..4] $ getBytes word
     pure ()
+
+-- | Write a ByteString to memory.
+--
+-- Examples:
+--
+-- >>> let bs = BSL.pack [0xde, 0xad, 0xbe, 0xef]
+-- >>> mem <- mkMemory 32
+-- >>> storeByteString mem 0x0 bs
+-- >>> loadWord mem 0x0
+-- 3735928559
+storeByteString :: Memory -> Address -> BSL.ByteString -> IO ()
+storeByteString mem addr bs = do
+    mapM (\(off, val) -> storeWord mem (addr + off) $ fstWord val)
+        $ zip [0..(fromIntegral $ BSL.length bs)] lst
+    pure ()
+
+    where
+        lst = takeWhile (not . BSL.null) $ iterate (BSL.drop 4) bs
