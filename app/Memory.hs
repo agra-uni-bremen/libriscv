@@ -1,5 +1,7 @@
 module Memory where
 
+import Utils
+import Data.Int
 import Data.Bits
 import Data.Word
 import Data.Array.IO
@@ -49,11 +51,6 @@ loadWord mem addr = do
 --
 storeByte :: Memory -> Address -> Word8 -> IO ()
 storeByte = writeArray
-
-getBytes :: Word32 -> [Word8]
-getBytes w = map (\off -> fromIntegral $ (shiftR w off) .&. 0xff) offs
-    where
-        offs = reverse $ take 4 $ iterate (+8) 0
 
 -- | Store a word at the given address in memory.
 --

@@ -4,4 +4,5 @@ import Test.DocTest
 
 main :: IO ()
 main = doctest ["app/Decoder.hs",
-                "app/Memory.hs"]
+                "app/Memory.hs",
+                "app/Utils.hs"]

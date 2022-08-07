@@ -3,6 +3,7 @@
 
 module Main where
 
+import Utils
 import Decoder
 import Data.Bits
 import Data.Int
@@ -34,17 +35,11 @@ textSection (SELFCLASS32 :&: ElfList elfs) = do
         ElfSection { esData = ElfSectionData textData } -> Just textData
         _ -> Nothing
 
-w32 :: BSL.ByteString -> Word32
-w32 b = (fromIntegral $ BSL.index b 0)
-    .|. ((fromIntegral $ BSL.index b 1) `shift` 8)
-    .|. ((fromIntegral $ BSL.index b 2) `shift` 16)
-    .|. ((fromIntegral $ BSL.index b 3) `shift` 24)
-
 decodeInstr :: Word32 -> String
 decodeInstr = show . decode
 
 decodeAll :: BSL.ByteString -> String
-decodeAll bs = foldr (\bs str -> (decodeInstr $ w32 bs) ++ str) "" lst
+decodeAll bs = foldr (\bs str -> (decodeInstr $ fstWord bs) ++ str) "" lst
     where
         lst = takeWhile (not . BSL.null) $ iterate (BSL.drop 4) bs
 
