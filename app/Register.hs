@@ -8,6 +8,7 @@ type RegisterIndex = Word8
 
 -- Type used to represent RISC-V registers.
 type Register = Word32
+-- TODO: Custom show instance
 
 -- Register file addressed by Word8 containing Word32.
 type RegisterFile = IOUArray RegisterIndex Register
