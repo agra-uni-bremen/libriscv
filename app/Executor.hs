@@ -8,12 +8,12 @@ import Memory
 -- Architectural state of the executor.
 type ArchState = (RegisterFile, Memory)
 
--- Create a new architectural state with a memory of the given size.
-mkArchState :: Word32 -> IO (ArchState)
-mkArchState size = do
+-- Create a new architectural state with the given memory.
+mkArchState :: Memory -> IO (ArchState)
+mkArchState mem = do
     r <- mkRegFile
-    m <- mkMemory size
-    return (r, m)
+    w <- loadWord mem 0
+    return (r, mem)
 
 -- Execute a given instruction, with fetch & decode done separately.
 execute' :: ArchState -> Instruction -> IO ()
