@@ -26,15 +26,13 @@ loadByte = readArray
 loadWord :: Memory -> Address -> IO (Word32)
 loadWord mem addr = do
     -- TODO: Could use replicateM here to read 4 bytes as a list
-    b0 <- readWord addr 0
-    b1 <- readWord addr 1
-    b2 <- readWord addr 2
-    b3 <- readWord addr 3
+    b0 <- readWord addr 3
+    b1 <- readWord addr 2
+    b2 <- readWord addr 1
+    b3 <- readWord addr 0
 
-    return $ b0
-        .|. (b1 `shift` 8)
-        .|. (b2 `shift` 16)
-        .|. (b3 `shift` 24)
+    return (b0 .|. (b1 `shift` 8) .|. (b2 `shift` 16) .|. (b3 `shift` 24))
+
     where
         readWord :: Address -> Word32 -> IO (Word32)
         readWord addr off = do
