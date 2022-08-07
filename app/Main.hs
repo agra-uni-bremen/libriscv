@@ -27,7 +27,7 @@ memoryStart = 0x10000
 
 -- Translate an ELF physical address to a memory address.
 toMemAddr :: Word32 -> Address
-toMemAddr = (-) 0x10000
+toMemAddr = (-) memoryStart
 
 readElf :: FilePath -> IO (Elf)
 readElf path = do
