@@ -3,8 +3,8 @@ module Register where
 import Data.Word
 import Data.Array.IO
 
--- Use Word8 for register index as maximum value is 32.
-type RegisterIndex = Word8
+-- XXX: TODO: Use Word8 here
+type RegisterIndex = Word32
 
 -- Type used to represent RISC-V registers.
 type Register = Word32
