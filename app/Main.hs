@@ -1,17 +1,21 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE RankNTypes #-}
 
 module Main where
 
 import Utils
 import Decoder
+import Control.Monad.Catch
 import Data.Bits
 import Data.Int
 import Data.Word
 import Data.Elf
 import Data.Elf.Headers
-import Data.Singletons.Sigma
+import Data.Elf.Constants
 import Data.Elf.PrettyPrint (readFileLazy)
+import Data.Singletons
+import Data.Singletons.Sigma
 import qualified Data.ByteString.Lazy as BSL
 import System.FilePath
 import System.Environment
@@ -27,6 +31,13 @@ startAddr (SELFCLASS32 :&: ElfList elfs) = do
     return $ case hdr of
         ElfHeader {..} -> Just ehEntry
         _ -> Nothing
+
+-- Return all ELF segments with type PT_LOAD.
+loadableSegments :: forall a m . (SingI a, MonadThrow m) => [ElfXX a] -> m [ElfXX a]
+loadableSegments elfs = pure $ filter f elfs
+    where
+        f e@ElfSegment{..} = epType == PT_LOAD
+        f _ = False
 
 textSection :: Elf -> IO (Maybe BSL.ByteString)
 textSection (SELFCLASS32 :&: ElfList elfs) = do

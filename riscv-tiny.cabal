@@ -35,6 +35,7 @@ executable riscv-tiny
         , filepath
         , singletons
         , bytestring
+        , exceptions
         , melf
 
     hs-source-dirs:   app
