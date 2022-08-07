@@ -9,9 +9,7 @@ where
 import Data.Int
 import Data.Bits
 import Data.Word
-
--- Type used to represent RISC-V registers.
-type Register = Word32
+import Register
 
 -- Type used to represent immediate values.
 type Immediate = Int32 -- TODO: Technically, 12 not 16 bits.

@@ -28,6 +28,7 @@ executable riscv-tiny
     other-modules: Decoder
                    , Utils
                    , Memory
+                   , Register
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
