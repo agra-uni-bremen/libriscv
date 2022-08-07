@@ -1,10 +1,6 @@
 {-# LANGUAGE BinaryLiterals #-}
 
-module Decoder
-(
-    decode
-)
-where
+module Decoder where
 
 import Data.Int
 import Data.Bits
