@@ -24,11 +24,19 @@ execute' s@(r, m) (Add rd rs1 rs2) = do
 execute' (r, m) _ = error "not implemented"
 
 -- Fetch, decode and execute the instruction at the given address.
--- Returns the address of the next instruction.
-execute :: ArchState -> Address -> IO (Address)
+-- Returns the executed instruction and the address of the next instruction.
+execute :: ArchState -> Address -> IO (Instruction, Address)
 execute state@(r, m) addr = do
     word <- loadWord m addr
-    execute' state $ decode word
+    inst <- pure $ decode word
 
     -- Address of the next instruction
-    return $ addr + 4
+    return $ (inst, addr + 4)
+
+-- Execute til the first invalid instruction.
+executeAll :: ArchState -> Address -> IO ()
+executeAll state addr = do
+    (instr, nextAddr) <- execute state addr
+    case instr of
+        InvalidInstruction -> pure ()
+        _ -> executeAll state nextAddr
