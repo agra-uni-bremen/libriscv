@@ -26,9 +26,9 @@ getBytes w = map (\off -> fromIntegral $ (shiftR w off) .&. 0xff) offs
 -- Examples:
 --
 -- >>> fstWord $ BSL.pack [0x23, 0x42, 0x13, 0x37]
--- 924008995
+-- 591532855
 fstWord :: BSL.ByteString -> Word32
-fstWord b = (fromIntegral $ BSL.index b 0)
-    .|. ((fromIntegral $ BSL.index b 1) `shift` 8)
-    .|. ((fromIntegral $ BSL.index b 2) `shift` 16)
-    .|. ((fromIntegral $ BSL.index b 3) `shift` 24)
+fstWord b = (fromIntegral $ BSL.index b 3)
+    .|. ((fromIntegral $ BSL.index b 2) `shift` 8)
+    .|. ((fromIntegral $ BSL.index b 1) `shift` 16)
+    .|. ((fromIntegral $ BSL.index b 0) `shift` 24)

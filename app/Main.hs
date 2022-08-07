@@ -50,7 +50,8 @@ decodeInstr :: Word32 -> String
 decodeInstr = show . decode
 
 decodeAll :: BSL.ByteString -> String
-decodeAll bs = foldr (\bs str -> (decodeInstr $ fstWord bs) ++ str) "" lst
+-- XXX: byteswap32 should depend on info in ELF header.
+decodeAll bs = foldr (\bs str -> (decodeInstr (byteSwap32 $ fstWord bs)) ++ str) "" lst
     where
         lst = takeWhile (not . BSL.null) $ iterate (BSL.drop 4) bs
 
