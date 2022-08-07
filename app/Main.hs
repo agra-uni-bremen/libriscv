@@ -14,7 +14,7 @@ import Data.Word
 import Data.Elf
 import Data.Elf.Headers
 import Data.Elf.Constants
-import Data.Elf.PrettyPrint (readFileLazy)
+import Data.Elf.PrettyPrint (readFileLazy,printElf)
 import Data.Singletons
 import Data.Singletons.Sigma
 import qualified Data.ByteString.Lazy as BSL
@@ -51,41 +51,38 @@ loadableSegments elfs = pure $ filter f elfs
 -- Copy raw data from ELF to memory at the given absolute address.
 copyData :: [ElfXX a] -> Memory -> Address -> IO ()
 copyData [] _ _ = pure ()
-copyData ((d@ElfRawData{..}):xs) mem addr = do
+copyData ((ElfRawData{..}):xs) mem addr = do
     storeByteString mem addr edData
     copyData xs mem addr
-copyData f@(x:xs) mem addr = do
+copyData ((ElfSection{esData = ElfSectionData textData}):xs) mem addr = do
+    storeByteString mem addr textData
     copyData xs mem addr
+copyData (x:xs) mem addr = copyData xs mem addr
 
 -- Load all loadable segments of an ELF file into memory.
 loadElf :: Memory -> Elf -> IO ()
 loadElf mem (SELFCLASS32 :&: ElfList elfs) = do
     loadable <- loadableSegments elfs
+    -- TODO: Load zero as specified by epAddMemSize
     mapM (\ElfSegment{..} -> copyData epData mem $ toMemAddr epPhysAddr) loadable
     pure ()
-
-textSection :: Elf -> IO (Maybe BSL.ByteString)
-textSection (SELFCLASS32 :&: ElfList elfs) = do
-    sec <- elfFindSectionByName elfs ".text"
-    return $ case sec of
-        ElfSection { esData = ElfSectionData textData } -> Just textData
-        _ -> Nothing
 
 decodeInstr :: Word32 -> String
 decodeInstr = show . decode
 
-decodeAll :: BSL.ByteString -> String
--- XXX: byteswap32 should depend on info in ELF header.
-decodeAll bs = foldr (\bs str -> (decodeInstr (byteSwap32 $ fstWord bs)) ++ str) "" lst
-    where
-        lst = takeWhile (not . BSL.null) $ iterate (BSL.drop 4) bs
+dumpInstr :: Memory -> Address -> IO ()
+dumpInstr mem addr = do
+    -- XXX: byteswap32 should depend on info in ELF header.
+    -- Should also be done when writting into memory, not when loading.
+    instr <- loadWord mem addr
+    putStrLn ((show addr) ++ ": " ++ (decodeInstr $ byteSwap32 instr))
 
-main' :: Elf -> IO ()
-main' elf = do
-    text <- textSection elf
-    case text of
-        Just x  -> putStrLn $ decodeAll x
-        Nothing -> putStrLn "No text segment"
+dumpMem :: Memory -> IO ()
+dumpMem mem = do
+    msize <- memSize mem
+    words <- pure $ (div msize (4 :: Word32))
+    mapM (dumpInstr mem) (take (fromIntegral words) $ iterate (+4) 0)
+    pure ()
 
 main :: IO ()
 main = do
@@ -93,6 +90,8 @@ main = do
     if (length args) /= 1
         then error "Accepting only a single file argument"
         else do
+            mem <- mkMemory 32
             elf <- readElf $ head args
-            --loadElf elf
-            main' elf
+
+            loadElf mem elf
+            dumpMem mem
