@@ -1,7 +1,6 @@
 module Memory where
 
 import Data.Bits
-import Data.Int
 import Data.Word
 import Data.Array.IO
 
