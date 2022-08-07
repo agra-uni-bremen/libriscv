@@ -19,6 +19,18 @@ mkMemory size = do
     array <- newArray_ (0, size - 1) :: IO (Memory)
     return array
 
+-- | Size of the memory
+--
+-- Examples:
+--
+-- >>> mem <- mkMemory 512
+-- >>> memSize mem
+-- 512
+memSize :: Memory -> IO (Word32)
+memSize mem = do
+    (start, end) <- getBounds mem
+    pure $ end + 1
+
 ------------------------------------------------------------------------
 
 loadByte :: Memory -> Address -> IO (Word8)
