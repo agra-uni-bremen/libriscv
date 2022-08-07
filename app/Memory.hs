@@ -51,5 +51,6 @@ getBytes w = map (\off -> fromIntegral $ (shiftR w off) .&. 0xff) offs
 
 storeWord :: Memory -> Address -> Word32 -> IO ()
 storeWord mem addr word = do
-    mapM (storeByte mem addr) $ getBytes word
+    mapM (\(off, val) -> storeByte mem (addr + off) val)
+        $ zip [(0 :: Address)..4] $ getBytes word
     pure ()
