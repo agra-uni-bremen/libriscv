@@ -1,3 +1,5 @@
+{-# LANGUAGE FlexibleContexts #-}
+
 module Register where
 
 import Data.Word
@@ -16,6 +18,15 @@ type RegisterFile = IOUArray RegisterIndex Register
 -- Create a new register file.
 mkRegFile :: IO (RegisterFile)
 mkRegFile = newArray (0, 31) 0
+
+-- Dump all register values.
+dumpRegs :: RegisterFile -> IO (String)
+dumpRegs r = do
+    e <- getElems r
+    return $ foldr (\(a, v) s -> "regs[" ++ (show a) ++ "] = " ++ (show v) ++ "\n" ++ s) ""
+        $ zip [0..length e] e
+
+------------------------------------------------------------------------
 
 -- Read register value at given register index.
 -- For the zero register, value 0 is always returned.
