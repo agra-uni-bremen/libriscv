@@ -82,6 +82,9 @@ main = do
             state <- mkArchState mem
 
             -- TODO: Extract start address from elf
+            putStrLn "\nExecuting all instructions…"
             executeAll state 0x0
+
+            putStrLn "\nDumping register file…"
             out <- dumpRegs $ fst state
             putStr out
