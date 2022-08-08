@@ -8,6 +8,7 @@ import Utils
 import Memory
 import Decoder
 import Executor
+import Register
 import Control.Monad.Catch
 import Data.Bits
 import Data.Int
@@ -79,5 +80,8 @@ main = do
 
             loadElf mem elf
             state <- mkArchState mem
+
             -- TODO: Extract start address from elf
             executeAll state 0x0
+            out <- dumpRegs $ fst state
+            putStr out
