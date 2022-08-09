@@ -11,30 +11,34 @@ import qualified Data.ByteString.Lazy as BSL
 type Address = Word32
 
 -- Byte-addressable memory.
-type Memory = IOUArray Address Word8
+type Memory = (Address, IOUArray Address Word8)
 
--- Create a new memory of the given size.
-mkMemory :: Word32 -> IO (Memory)
-mkMemory size = do
-    array <- newArray_ (0, size - 1) :: IO (Memory)
-    return array
+-- Create a new memory of the given size starting at the given address.
+mkMemory :: Address -> Word32 -> IO (Memory)
+mkMemory addr size = do
+    array <- newArray_ (0, size - 1) :: IO (IOUArray Address Word8)
+    return $ (addr, array)
+
+-- Translate global address to a memory-local address.
+toMemAddr :: Memory -> Address -> Address
+toMemAddr (startAddr, _) addr = addr - startAddr
 
 -- | Size of the memory
 --
 -- Examples:
 --
--- >>> mem <- mkMemory 512
+-- >>> mem <- mkMemory 0x0 512
 -- >>> memSize mem
 -- 512
 memSize :: Memory -> IO (Word32)
-memSize mem = do
-    (start, end) <- getBounds mem
+memSize (_, array) = do
+    (start, end) <- getBounds array
     pure $ end + 1
 
 ------------------------------------------------------------------------
 
 loadByte :: Memory -> Address -> IO (Word8)
-loadByte = readArray
+loadByte (_, array) = readArray array
 
 -- TODO: Refactor using hGetArray
 loadWord :: Memory -> Address -> IO (Word32)
@@ -50,26 +54,26 @@ loadWord mem addr = do
     where
         readWord :: Address -> Word32 -> IO (Word32)
         readWord addr off = do
-            word <- loadByte mem $ addr + off
+            word <- loadByte mem $ (toMemAddr mem addr) + off
             return $ fromIntegral word
 
 -- | Store a byte at the given address in memory.
 --
 -- Examples:
 --
--- >>> mem <- mkMemory 512
+-- >>> mem <- mkMemory 0x0 512
 -- >>> storeByte mem 0x4 0xab
 -- >>> loadByte mem 0x04
 -- 171
 --
 storeByte :: Memory -> Address -> Word8 -> IO ()
-storeByte = writeArray
+storeByte mem@(_, array) addr value = writeArray array (toMemAddr mem addr) value
 
 -- | Store a word at the given address in memory.
 --
 -- Examples:
 --
--- >>> mem <- mkMemory 256
+-- >>> mem <- mkMemory 0x0 256
 -- >>> storeWord mem 8 0xdeadbeef
 -- >>> loadWord mem 8
 -- 3735928559
@@ -91,7 +95,7 @@ storeWord mem addr word = do
 -- Examples:
 --
 -- >>> let bs = BSL.pack [0xde, 0xad, 0xbe, 0xef]
--- >>> mem <- mkMemory 32
+-- >>> mem <- mkMemory 0x0 32
 -- >>> storeByteString mem 0x0 bs
 -- >>> loadWord mem 0x0
 -- 3735928559

@@ -27,10 +27,6 @@ import System.Environment
 memoryStart :: Address
 memoryStart = 0x10000
 
--- Translate an ELF physical address to a memory address.
-toMemAddr :: Word32 -> Address
-toMemAddr addr = addr - memoryStart
-
 readElf :: FilePath -> IO (Elf)
 readElf path = do
     bs <- readFileLazy path
@@ -61,7 +57,7 @@ getWordXX = withSing getWordXXS
 copyData :: (IsElfClass a) => [ElfXX a] -> Memory -> IO ()
 copyData [] _ = pure ()
 copyData ((ElfSection{esData = ElfSectionData textData, ..}):xs) mem = do
-    storeByteString mem (toMemAddr $ getWordXX esAddr) textData
+    storeByteString mem (getWordXX esAddr) textData
     copyData xs mem
 copyData (x:xs) mem = copyData xs mem
 
@@ -79,14 +75,14 @@ main = do
     if (length args) /= 1
         then error "Accepting only a single file argument"
         else do
-            mem <- mkMemory 1024
+            mem <- mkMemory memoryStart 1024
             elf <- readElf $ head args
 
             entry <- loadElf mem elf
             state <- mkArchState mem
 
             putStrLn "\nExecuting all instructions…"
-            executeAll state $ toMemAddr entry
+            executeAll state entry
 
             putStrLn "\nDumping register file…"
             out <- dumpRegs $ fst state
