@@ -76,7 +76,7 @@ main = do
     if (length args) /= 1
         then error "Accepting only a single file argument"
         else do
-            mem <- mkMemory 32
+            mem <- mkMemory 1024
             elf <- readElf $ head args
 
             loadElf mem elf
