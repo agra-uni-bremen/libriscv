@@ -12,7 +12,6 @@ type ArchState = (RegisterFile, Memory)
 mkArchState :: Memory -> IO (ArchState)
 mkArchState mem = do
     r <- mkRegFile
-    w <- loadWord mem 0
     return (r, mem)
 
 -- Execute a given instruction, with fetch & decode done separately.
