@@ -51,23 +51,26 @@ loadableSegments elfs = pure $ filter f elfs
         f e@ElfSegment{..} = epType == PT_LOAD
         f _ = False
 
+getWordXXS :: Sing a -> WordXX a -> Word32
+getWordXXS SELFCLASS32 w = w
+
+getWordXX :: SingI a => WordXX a -> Word32
+getWordXX = withSing getWordXXS
+
 -- Copy raw data from ELF to memory at the given absolute address.
-copyData :: [ElfXX a] -> Memory -> Address -> IO ()
-copyData [] _ _ = pure ()
-copyData ((ElfRawData{..}):xs) mem addr = do
-    storeByteString mem addr edData
-    copyData xs mem addr
-copyData ((ElfSection{esData = ElfSectionData textData}):xs) mem addr = do
-    storeByteString mem addr textData
-    copyData xs mem addr
-copyData (x:xs) mem addr = copyData xs mem addr
+copyData :: (IsElfClass a) => [ElfXX a] -> Memory -> IO ()
+copyData [] _ = pure ()
+copyData ((ElfSection{esData = ElfSectionData textData, ..}):xs) mem = do
+    storeByteString mem (toMemAddr $ getWordXX esAddr) textData
+    copyData xs mem
+copyData (x:xs) mem = copyData xs mem
 
 -- Load all loadable segments of an ELF file into memory.
 loadElf :: Memory -> Elf -> IO (Word32)
-loadElf mem elf@(classS :&: ElfList elfs) = do
+loadElf mem elf@(classS :&: ElfList elfs) = withElfClass classS $ do
     loadable <- loadableSegments elfs
     -- TODO: Load zero as specified by epAddMemSize
-    mapM (\ElfSegment{..} -> copyData epData mem $ toMemAddr epPhysAddr) loadable
+    mapM (\ElfSegment{..} -> copyData epData mem) loadable
     startAddr elf
 
 main :: IO ()
@@ -79,12 +82,11 @@ main = do
             mem <- mkMemory 1024
             elf <- readElf $ head args
 
-            loadElf mem elf
+            entry <- loadElf mem elf
             state <- mkArchState mem
 
-            -- TODO: Extract start address from elf
             putStrLn "\nExecuting all instructions…"
-            executeAll state 0x0
+            executeAll state $ toMemAddr entry
 
             putStrLn "\nDumping register file…"
             out <- dumpRegs $ fst state
