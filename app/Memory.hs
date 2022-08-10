@@ -98,7 +98,7 @@ storeWord mem addr word = do
 storeByteString :: Memory -> Address -> BSL.ByteString -> IO ()
 storeByteString mem addr bs = do
     mapM (\(off, val) -> storeWord mem (addr + off) $ fstWord val)
-        $ zip [0..(fromIntegral $ BSL.length bs)] lst
+        $ zip [0,4..(fromIntegral $ BSL.length bs)] lst
     pure ()
 
     where
