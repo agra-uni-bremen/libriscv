@@ -67,7 +67,7 @@ loadWord mem addr = do
 -- 171
 --
 storeByte :: Memory -> Address -> Word8 -> IO ()
-storeByte mem@(_, array) addr value = writeArray array (toMemAddr mem addr) value
+storeByte mem@(_, array) addr = writeArray array $ toMemAddr mem addr
 
 -- | Store a word at the given address in memory.
 --
