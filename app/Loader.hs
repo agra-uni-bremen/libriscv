@@ -36,17 +36,11 @@ loadableSegments elfs = pure $ filter f elfs
         f e@ElfSegment{..} = epType == PT_LOAD
         f _ = False
 
-getWordXXS :: Sing a -> WordXX a -> Word32
-getWordXXS SELFCLASS32 w = w
-
-getWordXX :: SingI a => WordXX a -> Word32
-getWordXX = withSing getWordXXS
-
 -- Copy raw data from ELF to memory at the given absolute address.
 copyData :: (IsElfClass a) => [ElfXX a] -> Memory -> IO ()
 copyData [] _ = pure ()
 copyData ((ElfSection{esData = ElfSectionData textData, ..}):xs) mem = do
-    storeByteString mem (getWordXX esAddr) textData
+    storeByteString mem (fromIntegral esAddr) textData
     copyData xs mem
 copyData (x:xs) mem = copyData xs mem
 
