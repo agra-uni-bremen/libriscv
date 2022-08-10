@@ -36,12 +36,13 @@ readElf path = do
     bs <- readFileLazy path
     parseElf bs
 
-startAddr :: Elf -> IO (Maybe Word32)
+-- Return the entry point from the ELF header.
+startAddr :: Elf -> IO (Word32)
 startAddr (SELFCLASS32 :&: ElfList elfs) = do
     hdr <- elfFindHeader elfs
     return $ case hdr of
-        ElfHeader {..} -> Just ehEntry
-        _ -> Nothing
+        ElfHeader {..} -> ehEntry
+        _ -> error "no header" -- XXX
 
 -- Return all ELF segments with type PT_LOAD.
 loadableSegments :: forall a m . (SingI a, MonadThrow m) => [ElfXX a] -> m [ElfXX a]
@@ -62,12 +63,12 @@ copyData ((ElfSection{esData = ElfSectionData textData}):xs) mem addr = do
 copyData (x:xs) mem addr = copyData xs mem addr
 
 -- Load all loadable segments of an ELF file into memory.
-loadElf :: Memory -> Elf -> IO ()
-loadElf mem (SELFCLASS32 :&: ElfList elfs) = do
+loadElf :: Memory -> Elf -> IO (Word32)
+loadElf mem elf@(classS :&: ElfList elfs) = do
     loadable <- loadableSegments elfs
     -- TODO: Load zero as specified by epAddMemSize
     mapM (\ElfSegment{..} -> copyData epData mem $ toMemAddr epPhysAddr) loadable
-    pure ()
+    startAddr elf
 
 main :: IO ()
 main = do
