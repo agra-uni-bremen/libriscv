@@ -60,6 +60,4 @@ readElf path = do
 
 -- Load executable ELF from file into memory and return entry address.
 loadExecutable :: FilePath -> Memory -> IO (Address)
-loadExecutable fp mem = do
-    elf <- readElf fp
-    loadElf mem elf
+loadExecutable fp mem = readElf fp >>= loadElf mem
