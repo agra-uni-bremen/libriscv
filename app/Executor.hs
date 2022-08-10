@@ -1,5 +1,6 @@
 module Executor where
 
+import Numeric
 import Data.Word
 import Register
 import Decoder
@@ -34,7 +35,7 @@ execute state@(r, m) addr = do
     -- TODO: Do byteswap conversion elsewhere
     inst <- pure $ decode (byteSwap32 word)
 
-    putStrLn ((show addr) ++ ": " ++ (show inst))
+    putStrLn (showHex addr $ ": " ++ (show inst))
     execute' state inst
 
     -- Address of the next instruction
