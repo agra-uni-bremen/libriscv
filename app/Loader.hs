@@ -2,7 +2,7 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE RankNTypes #-}
 
-module Loader where
+module Loader (loadExecutable) where
 
 import Utils
 import Memory
