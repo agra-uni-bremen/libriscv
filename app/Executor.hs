@@ -1,4 +1,10 @@
-module Executor where
+module Executor
+(
+    ArchState
+    , mkArchState
+    , executeAll
+)
+where
 
 import Numeric
 import Data.Word
