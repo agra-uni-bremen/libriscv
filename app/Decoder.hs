@@ -7,15 +7,15 @@ import Data.Bits
 import Data.Word
 import Register
 
--- Type used to represent immediate values.
-type Immediate = Int32 -- TODO: Technically, 12 not 16 bits.
+-- Type used to represent I-immediates.
+type Iimm = Int16 -- XXX: Technically 12-bits
 
 -- Type used to represent a decoded RISC-V instruction.
 data Instruction =
     Add  RegIdx RegIdx RegIdx |
     And  RegIdx RegIdx RegIdx |
-    Andi Immediate RegIdx RegIdx |
-    Addi Immediate RegIdx RegIdx |
+    Andi Iimm RegIdx RegIdx |
+    Addi Iimm RegIdx RegIdx |
     InvalidInstruction deriving (Show)
 
 -- | Convert to an unsigned word to a signed number.
@@ -61,8 +61,8 @@ funct3 = instrField 12 14
 funct7 :: Word32 -> Word32
 funct7 = instrField 25 31
 
-immI :: Word32 -> Immediate
-immI = fromTwoscomp 12 . instrField 20 31
+immI :: Word32 -> Iimm
+immI = fromIntegral . fromTwoscomp 12 . instrField 20 31
 
 regRs1 :: Word32 -> RegIdx
 regRs1 = fromIntegral . instrField 15 19
@@ -99,7 +99,7 @@ decode_rtype instr
         f3 = funct3 instr
 
 -- Type for an I-Type instruction (two register, one immediate).
-type ITypeInstr = (Immediate -> RegIdx -> RegIdx -> Instruction)
+type ITypeInstr = (Iimm -> RegIdx -> RegIdx -> Instruction)
 
 invalid_itype :: ITypeInstr
 invalid_itype _ _ _ = InvalidInstruction
