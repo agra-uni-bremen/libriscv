@@ -90,7 +90,7 @@ storeWord mem addr word = do
         $ zip [(0 :: Address)..4] $ getBytes word
     pure ()
 
--- | Write a ByteString to memory.
+-- | Write a ByteString to memory in little endian byteorder.
 --
 -- Examples:
 --
@@ -98,10 +98,10 @@ storeWord mem addr word = do
 -- >>> mem <- mkMemory 0x0 32
 -- >>> storeByteString mem 0x0 bs
 -- >>> loadWord mem 0x0
--- 3735928559
+-- 4022250974
 storeByteString :: Memory -> Address -> BSL.ByteString -> IO ()
 storeByteString mem addr bs = do
-    mapM (\(off, val) -> storeWord mem (addr + off) $ fstWord val)
+    mapM (\(off, val) -> storeWord mem (addr + off) $ fstWordLe val)
         $ zip [0,4..(fromIntegral $ BSL.length bs)] lst
     pure ()
 
