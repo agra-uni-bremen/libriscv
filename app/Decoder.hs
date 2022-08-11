@@ -12,10 +12,10 @@ type Immediate = Int32 -- TODO: Technically, 12 not 16 bits.
 
 -- Type used to represent a decoded RISC-V instruction.
 data Instruction =
-    Add  Register Register Register |
-    And  Register Register Register |
-    Andi Immediate Register Register |
-    Addi Immediate Register Register |
+    Add  RegIdx RegIdx RegIdx |
+    And  RegIdx RegIdx RegIdx |
+    Andi Immediate RegIdx RegIdx |
+    Addi Immediate RegIdx RegIdx |
     InvalidInstruction deriving (Show)
 
 -- | Convert to an unsigned word to a signed number.
@@ -64,14 +64,14 @@ funct7 = instrField 25 31
 immI :: Word32 -> Immediate
 immI = fromTwoscomp 12 . instrField 20 31
 
-regRs1 :: Word32 -> Register
-regRs1 = instrField 15 19
+regRs1 :: Word32 -> RegIdx
+regRs1 = fromIntegral . instrField 15 19
 
-regRs2 :: Word32 -> Register
-regRs2 = instrField 20 24
+regRs2 :: Word32 -> RegIdx
+regRs2 = fromIntegral . instrField 20 24
 
-regRd :: Word32 -> Register
-regRd = instrField 7 11
+regRd :: Word32 -> RegIdx
+regRd = fromIntegral . instrField 7 11
 
 ------------------------------------------------------------------------
 
@@ -85,7 +85,7 @@ f3_addi = 0b000
 f3_andi = 0b111
 
 -- Type for an R-Type instruction (three register operands).
-type RTypeInstr = (Register -> Register -> Register -> Instruction)
+type RTypeInstr = (RegIdx -> RegIdx -> RegIdx -> Instruction)
 
 invalid_rtype :: RTypeInstr
 invalid_rtype _ _ _ = InvalidInstruction
@@ -99,7 +99,7 @@ decode_rtype instr
         f3 = funct3 instr
 
 -- Type for an I-Type instruction (two register, one immediate).
-type ITypeInstr = (Immediate -> Register -> Register -> Instruction)
+type ITypeInstr = (Immediate -> RegIdx -> RegIdx -> Instruction)
 
 invalid_itype :: ITypeInstr
 invalid_itype _ _ _ = InvalidInstruction

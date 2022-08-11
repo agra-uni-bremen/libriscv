@@ -5,15 +5,15 @@ module Register where
 import Data.Word
 import Data.Array.IO
 
--- XXX: TODO: Use Word8 here
-type RegisterIndex = Word32
+-- Type to index the register file
+type RegIdx = Word8
 
 -- Type used to represent RISC-V registers.
 type Register = Word32
 -- TODO: Custom show instance
 
 -- Register file addressed by Word8 containing Word32.
-type RegisterFile = IOUArray RegisterIndex Register
+type RegisterFile = IOUArray RegIdx Register
 
 -- Create a new register file.
 mkRegFile :: IO (RegisterFile)
@@ -30,7 +30,7 @@ dumpRegs r = do
 
 -- Read register value at given register index.
 -- For the zero register, value 0 is always returned.
-readRegister :: RegisterFile -> RegisterIndex -> IO (Register)
+readRegister :: RegisterFile -> RegIdx -> IO (Register)
 readRegister = readArray
 
 -- | Write register at given register index.
@@ -48,7 +48,7 @@ readRegister = readArray
 -- >>> readRegister r 0
 -- 0
 --
-writeRegister :: RegisterFile -> RegisterIndex -> Register -> IO ()
+writeRegister :: RegisterFile -> RegIdx -> Register -> IO ()
 writeRegister r idx val
     | idx == 0 = pure () -- ignore writes to zero register
     | otherwise = writeArray r idx val
