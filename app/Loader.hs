@@ -36,20 +36,25 @@ loadableSegments elfs = pure $ filter f elfs
         f e@ElfSegment{..} = epType == PT_LOAD
         f _ = False
 
--- Copy raw data from ELF to memory at the given absolute address.
-copyData :: (IsElfClass a) => [ElfXX a] -> Memory -> IO ()
-copyData [] _ = pure ()
-copyData ((ElfSection{esData = ElfSectionData textData, ..}):xs) mem = do
-    storeByteString mem (fromIntegral esAddr) textData
-    copyData xs mem
-copyData (x:xs) mem = copyData xs mem
+-- Copy data from ElfSection to memory at the given absolute address.
+copyData :: (IsElfClass a) => [ElfXX a] -> Int64 -> Memory -> IO ()
+copyData [] _ _ = pure ()
+copyData ((ElfSection{esData = ElfSectionData textData, ..}):xs) zeros mem = do
+    storeByteString mem (fromIntegral esAddr)
+        $ BSL.append textData (BSL.replicate zeros 0)
+    copyData xs zeros mem
+copyData (x:xs) zeros mem = copyData xs zeros mem
+
+-- Load an ElfSegment into memory at the given address.
+loadSegment :: (IsElfClass a) => Memory -> ElfXX a -> IO ()
+loadSegment mem ElfSegment{..} =
+    copyData epData (fromIntegral epAddMemSize) mem
 
 -- Load all loadable segments of an ELF file into memory.
 loadElf :: Memory -> Elf -> IO (Word32)
 loadElf mem elf@(classS :&: ElfList elfs) = withElfClass classS $ do
     loadable <- loadableSegments elfs
-    -- TODO: Load zero as specified by epAddMemSize
-    mapM (\ElfSegment{..} -> copyData epData mem) loadable
+    mapM (loadSegment mem) loadable
     startAddr elf
 
 -- Read ELF from given file.
