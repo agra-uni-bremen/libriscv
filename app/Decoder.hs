@@ -123,8 +123,8 @@ decode' instr opcode
 -- Examples:
 --
 -- >>> decode 0x00a605b3
--- Add 11 12 10
+-- Add A1 A2 A0
 -- >>> decode 0x02a30293
--- Addi 42 5 6
+-- Addi 42 T0 T1
 decode :: Word32 -> Instruction
 decode instr = decode' instr $ opcode instr
