@@ -40,10 +40,9 @@ memSize (_, array) = do
 loadByte :: Memory -> Address -> IO (Word8)
 loadByte (_, array) = readArray array
 
--- TODO: Refactor using hGetArray
 loadWord :: Memory -> Address -> IO (Word32)
 loadWord mem addr = do
-    -- TODO: Could use replicateM here to read 4 bytes as a list
+    -- TODO: Refactor, by reading bytes as a list and transforming it.
     b0 <- readWord addr 3
     b1 <- readWord addr 2
     b2 <- readWord addr 1
