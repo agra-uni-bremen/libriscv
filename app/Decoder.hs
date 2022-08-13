@@ -64,14 +64,14 @@ funct7 = instrField 25 31
 immI :: Word32 -> Iimm
 immI = fromIntegral . fromTwoscomp 12 . instrField 20 31
 
-regRs1 :: Word32 -> RegIdx
-regRs1 = toEnum . fromIntegral . instrField 15 19
+rs1 :: Word32 -> RegIdx
+rs1 = toEnum . fromIntegral . instrField 15 19
 
-regRs2 :: Word32 -> RegIdx
-regRs2 = toEnum . fromIntegral . instrField 20 24
+rs2 :: Word32 -> RegIdx
+rs2 = toEnum . fromIntegral . instrField 20 24
 
-regRd :: Word32 -> RegIdx
-regRd = toEnum . fromIntegral . instrField 7 11
+rd :: Word32 -> RegIdx
+rd = toEnum . fromIntegral . instrField 7 11
 
 ------------------------------------------------------------------------
 
@@ -114,8 +114,8 @@ decode_itype instr
 
 decode' :: Word32 -> Word32 -> Instruction
 decode' instr opcode
-    | opcode == op_rtype = decode_rtype instr (regRd instr) (regRs1 instr) (regRs2 instr)
-    | opcode == op_itype = decode_itype instr (immI instr) (regRd instr) (regRs1 instr)
+    | opcode == op_rtype = decode_rtype instr (rd instr) (rs1 instr) (rs2 instr)
+    | opcode == op_itype = decode_itype instr (immI instr) (rd instr) (rs1 instr)
     | otherwise          = InvalidInstruction
 
 -- | Decode a RISC-V RV32i instruction.
