@@ -1,5 +1,6 @@
 module Main where
 
+import Data.Word
 import Tracer
 import Loader
 import Memory
@@ -10,8 +11,8 @@ import GHC.IO.StdHandles
 import Options.Applicative
 
 data CmdArgs = CmdArgs
-    { memAddr  :: Int
-    , memStart :: Int
+    { memAddr  :: Word32
+    , memStart :: Word32
     , trace    :: Bool
     , putRegs  :: Bool
     , file     :: String }
@@ -39,7 +40,7 @@ cmdArgs = CmdArgs
 
 main' :: CmdArgs -> IO ()
 main' (CmdArgs memAddr memSize trace putReg fp) = do
-    mem <- mkMemory (fromIntegral memAddr) (fromIntegral memSize)
+    mem <- mkMemory memAddr memSize
 
     entry <- loadExecutable fp mem
     state <- mkArchState mem
