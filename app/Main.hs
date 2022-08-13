@@ -9,12 +9,9 @@ import System.Environment
 import GHC.IO.StdHandles
 import Options.Applicative
 
--- Address at which the memory is supposed to be mapped.
-memoryStart :: Address
-memoryStart = 0x10000
-
 data CmdArgs = CmdArgs
-    { memStart :: Int
+    { memAddr  :: Int
+    , memStart :: Int
     , trace    :: Bool
     , putRegs  :: Bool
     , file     :: String }
@@ -22,6 +19,10 @@ data CmdArgs = CmdArgs
 cmdArgs :: Parser CmdArgs
 cmdArgs = CmdArgs
     <$> option auto
+        ( long "memory-start"
+       <> short 'm'
+       <> value 0x10000 )
+    <*> option auto
         ( long "memory-size"
        <> short 's'
        <> value 1024
@@ -37,8 +38,8 @@ cmdArgs = CmdArgs
     <*> argument str (metavar "FILE")
 
 main' :: CmdArgs -> IO ()
-main' (CmdArgs memSize trace putReg fp) = do
-    mem <- mkMemory memoryStart $ fromIntegral memSize
+main' (CmdArgs memAddr memSize trace putReg fp) = do
+    mem <- mkMemory (fromIntegral memAddr) (fromIntegral memSize)
 
     entry <- loadExecutable fp mem
     state <- mkArchState mem
