@@ -2,29 +2,32 @@
 
 module Register where
 
+import Data.Ix
 import Data.Word
 import Data.Array.IO
 
 -- Type to index the register file
-type RegIdx = Word8
+data RegIdx = Zero | RA | SP | GP | TP | T0 | T1 | T2 | FP
+    | S1 | A0 | A1 | A2 | A3 | A4 | A5 | A6 | A7 | S2 | S3
+    | S4 | S5 | S6 | S7 | S8 | S9 | S10 | S11 | T3 | T4
+    | T5 | T6 deriving (Ord, Eq, Ix, Bounded, Show, Enum)
 
 -- Type used to represent RISC-V registers.
 type Register = Word32
--- TODO: Custom show instance
 
--- Register file addressed by Word8 containing Word32.
+-- Register file addressed by RegIdx containing Word32.
 type RegisterFile = IOUArray RegIdx Register
 
 -- Create a new register file.
 mkRegFile :: IO (RegisterFile)
-mkRegFile = newArray (0, 31) 0
+mkRegFile = newArray (minBound, maxBound) 0
 
 -- Dump all register values.
 dumpRegs :: RegisterFile -> IO (String)
 dumpRegs r = do
     e <- getElems r
-    return $ foldr (\(a, v) s -> "regs[" ++ (show a) ++ "] = " ++ (show v) ++ "\n" ++ s) ""
-        $ zip [0..length e] e
+    return $ foldr (\(a, v) s -> (show a) ++ "\t= " ++ (show v) ++ "\n" ++ s) ""
+        $ zip [(minBound :: RegIdx)..maxBound] e
 
 ------------------------------------------------------------------------
 
@@ -39,16 +42,16 @@ readRegister = readArray
 -- Examples:
 --
 -- >>> r <- mkRegFile
--- >>> writeRegister r 1 23
--- >>> readRegister r 1
+-- >>> writeRegister r A1 23
+-- >>> readRegister r A1
 -- 23
 --
 -- >>> r <- mkRegFile
--- >>> writeRegister r 0 42
--- >>> readRegister r 0
+-- >>> writeRegister r Zero 42
+-- >>> readRegister r Zero
 -- 0
 --
 writeRegister :: RegisterFile -> RegIdx -> Register -> IO ()
 writeRegister r idx val
-    | idx == 0 = pure () -- ignore writes to zero register
+    | idx == Zero = pure () -- ignore writes to zero register
     | otherwise = writeArray r idx val

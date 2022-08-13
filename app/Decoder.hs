@@ -65,13 +65,13 @@ immI :: Word32 -> Iimm
 immI = fromIntegral . fromTwoscomp 12 . instrField 20 31
 
 regRs1 :: Word32 -> RegIdx
-regRs1 = fromIntegral . instrField 15 19
+regRs1 = toEnum . fromIntegral . instrField 15 19
 
 regRs2 :: Word32 -> RegIdx
-regRs2 = fromIntegral . instrField 20 24
+regRs2 = toEnum . fromIntegral . instrField 20 24
 
 regRd :: Word32 -> RegIdx
-regRd = fromIntegral . instrField 7 11
+regRd = toEnum . fromIntegral . instrField 7 11
 
 ------------------------------------------------------------------------
 
