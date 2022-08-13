@@ -1,10 +1,12 @@
 module Main where
 
+import Tracer
 import Loader
 import Memory
 import Executor
 import Register
 import System.Environment
+import GHC.IO.StdHandles
 
 -- Address at which the memory is supposed to be mapped.
 memoryStart :: Address
@@ -22,7 +24,7 @@ main = do
             state <- mkArchState mem
 
             putStrLn "\nExecuting all instructions…"
-            executeAll state entry
+            executeAll state (MkDebugTracer stdout) entry
 
             putStrLn "\nDumping register file…"
             out <- dumpRegs $ fst state

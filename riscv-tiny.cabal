@@ -31,6 +31,7 @@ executable riscv-tiny
                    , Register
                    , Executor
                    , Loader
+                   , Tracer
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
