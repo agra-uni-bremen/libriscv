@@ -35,19 +35,21 @@ execute' _ _ = error "not implemented"
 
 -- Fetch, decode and execute the instruction at the given address.
 -- Returns the executed instruction and the address of the next instruction.
-execute :: Tracer t => ArchState -> t -> Address -> IO (Instruction, Address)
+execute :: Tracer t => ArchState -> Maybe t -> Address -> IO (Instruction, Address)
 execute state@(r, m) tracer addr = do
     word <- loadWord m addr
     inst <- pure $ decode word
 
-    trace tracer addr inst
+    case tracer of
+        (Just t) -> trace t addr inst
+        Nothing  -> pure ()
     execute' state inst
 
     -- Address of the next instruction
     return $ (inst, addr + 4)
 
 -- Execute til the first invalid instruction.
-executeAll :: Tracer t => ArchState -> t -> Address -> IO ()
+executeAll :: Tracer t => ArchState -> Maybe t -> Address -> IO ()
 executeAll state tracer addr = do
     (instr, nextAddr) <- execute state tracer addr
     case instr of
