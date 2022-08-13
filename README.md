@@ -6,6 +6,13 @@ A simulator for RISC-V implementing a subset of rv32i in Haskell.
 
 This is a toy project for playing around with Haskell a bit.
 
+## Tests
+
+There are currently some minor [doctest][doctest github] tests.
+These can be run using the following command:
+
+	$ cabal test
+
 ## License
 
 This program is free software: you can redistribute it and/or modify it
@@ -20,3 +27,5 @@ Public License for more details.
 
 You should have received a copy of the GNU General Public License along
 with this program. If not, see <https://www.gnu.org/licenses/>.
+
+[doctest github]: https://github.com/sol/doctest-haskell
