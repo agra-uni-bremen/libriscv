@@ -1,11 +1,11 @@
 # riscv-tiny
 
-A simulator for RISC-V implementing a subset of rv32i in Haskell.
+A simulator for the RISC-V ISA which implements a subset of RV32I in Haskell.
 
 # Status
 
-This is just a toy project for partially re-activating my Haskell knowledge.
-It implements a subset of RV32I, the roadmap includes the following instructions:
+This is just a toy implementation of the RISC-V ISA to improve my rusty Haskell knowledge.
+The implementation supports a subset of RV32I, the roadmap includes the following instructions:
 
 * [x] ADD
 * [x] ADDI
@@ -15,7 +15,7 @@ It implements a subset of RV32I, the roadmap includes the following instructions
 * [ ] JALR
 * [ ] BLT
 * [ ] LUI
-* [ ] AUIPC
+* [x] AUIPC
 
 ## Installation
 
@@ -35,15 +35,15 @@ Refer to the `--help` output for details.
 
 Example usage:
 
-	$ cat load.S
+	$ cat example.S
 	.globl _start
 	.myword:
 		.word 0xffffffff
 	_start:
 		lw t0, .myword
 		addi a0, a0, 1
-	$ riscv-none-elf-gcc -o load load.S -march=rv32i -mabi=ilp32 -nostdlib
-	$ riscv-tiny --trace --registers load | head
+	$ riscv-none-elf-gcc -o example example.S -march=rv32i -mabi=ilp32 -nostdlib
+	$ riscv-tiny --trace --registers example | head
 	10078: Auipc T0 0
 	1007c: Lw (-4) T0 T0
 	10080: Addi 24 T0 T0
