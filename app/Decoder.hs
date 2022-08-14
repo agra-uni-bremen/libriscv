@@ -13,12 +13,13 @@ type Uimm = Int32 -- XXX: Technically 20-bits
 
 -- Type used to represent a decoded RISC-V instruction.
 data Instruction =
-    Add  RegIdx RegIdx RegIdx |
-    And  RegIdx RegIdx RegIdx |
-    Andi Iimm RegIdx RegIdx |
-    Addi Iimm RegIdx RegIdx |
-    Lw   Iimm RegIdx RegIdx |
-    Lui  RegIdx Uimm |
+    Add   RegIdx RegIdx RegIdx |
+    And   RegIdx RegIdx RegIdx |
+    Andi  Iimm RegIdx RegIdx |
+    Addi  Iimm RegIdx RegIdx |
+    Lw    Iimm RegIdx RegIdx |
+    Lui   RegIdx Uimm |
+    Auipc RegIdx Uimm |
     InvalidInstruction deriving (Show)
 
 -- | Convert to an unsigned word to a signed number.
@@ -82,10 +83,11 @@ rd = toEnum . fromIntegral . instrField 7 11
 ------------------------------------------------------------------------
 
 -- Opcodes
-op_reg  = 0b0110011
-op_imm  = 0b0010011
-op_load = 0b0000011
-op_lui  = 0b0110111
+op_reg   = 0b0110011
+op_imm   = 0b0010011
+op_load  = 0b0000011
+op_lui   = 0b0110111
+op_auipc = 0b0010111
 
 -- Funct3 for register-immediate instructions.
 f3_addi = 0b000
@@ -139,11 +141,12 @@ decode_load instr
 
 decode' :: Word32 -> Word32 -> Instruction
 decode' instr opcode
-    | opcode == op_reg  = decode_reg instr (rd instr) (rs1 instr) (rs2 instr)
-    | opcode == op_imm  = decode_imm instr (immI instr) (rd instr) (rs1 instr)
-    | opcode == op_load = decode_load instr (immI instr) (rd instr) (rs1 instr)
-    | opcode == op_lui  = Lui (rd instr) (immU instr)
-    | otherwise         = InvalidInstruction
+    | opcode == op_reg   = decode_reg instr (rd instr) (rs1 instr) (rs2 instr)
+    | opcode == op_imm   = decode_imm instr (immI instr) (rd instr) (rs1 instr)
+    | opcode == op_load  = decode_load instr (immI instr) (rd instr) (rs1 instr)
+    | opcode == op_lui   = Lui (rd instr) (immU instr)
+    | opcode == op_auipc = Auipc (rd instr) (immU instr)
+    | otherwise          = InvalidInstruction
 
 -- | Decode a RISC-V RV32i instruction.
 --
@@ -155,6 +158,8 @@ decode' instr opcode
 -- Addi 42 T0 T1
 -- >>> decode 0xffc52503
 -- Lw (-4) A0 A0
+-- >>> decode 0x00000297
+-- Auipc T0 0
 --
 decode :: Word32 -> Instruction
 decode instr = decode' instr $ opcode instr
