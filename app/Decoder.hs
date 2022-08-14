@@ -8,7 +8,7 @@ import Data.Word
 import Register
 
 -- Types used to represent immediates.
-type Iimm = Int16 -- XXX: Technically 12-bits
+type Iimm = Int32 -- XXX: Technically 12-bits
 type Uimm = Int32 -- XXX: Technically 20-bits
 
 -- Type used to represent a decoded RISC-V instruction.

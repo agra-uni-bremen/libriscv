@@ -30,14 +30,12 @@ execute' s@(r, m) _ (Add rd rs1 rs2) = do
     writeRegister r rd $ r1 + r2
 execute' s@(r, m) _ (Addi imm rd rs1) = do
     r1 <- readRegister r rs1
-    writeRegister r rd $ r1 + (fromIntegral imm)
+    writeRegister r rd $ r1 + imm
 execute' s@(r, m) _ (Lw imm rd rs1) = do
     r1 <- readRegister r rs1
-    let addr = r1 + (fromIntegral imm) in
-        do
-            -- TODO: Alignment handling
-            word <- loadWord m $ fromIntegral addr
-            writeRegister r rd $ fromIntegral word
+    -- TODO: Alignment handling
+    word <- loadWord m $ fromIntegral (r1 + imm)
+    writeRegister r rd $ fromIntegral word
 execute' s@(r, m) pc (Auipc rd imm) = do
     writeRegister r rd $ (fromIntegral pc) + imm
 execute' _ _ InvalidInstruction = pure () -- XXX: ignore for now
