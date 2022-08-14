@@ -22,16 +22,18 @@ mkArchState mem = do
     return (r, mem)
 
 -- Execute a given instruction, with fetch & decode done separately.
-execute' :: ArchState -> Instruction -> IO ()
-execute' s@(r, m) (Add rd rs1 rs2) = do
+execute' :: ArchState -> Address -> Instruction -> IO ()
+execute' s@(r, m) _ (Add rd rs1 rs2) = do
     r1 <- readRegister r rs1
     r2 <- readRegister r rs2
     writeRegister r rd $ r1 + r2
-execute' s@(r, m) (Addi imm rd rs1) = do
+execute' s@(r, m) _ (Addi imm rd rs1) = do
     r1 <- readRegister r rs1
     writeRegister r rd $ (fromIntegral $ (fromIntegral r1) + imm)
-execute' _ InvalidInstruction = pure () -- XXX: ignore for now
-execute' _ _ = error "not implemented"
+execute' s@(r, m) pc (Auipc rd imm) = do
+    writeRegister r rd $ fromIntegral $ (fromIntegral pc) + imm
+execute' _ _ InvalidInstruction = pure () -- XXX: ignore for now
+execute' _ _ _ = error "not implemented"
 
 -- Fetch, decode and execute the instruction at the given address.
 -- Returns the executed instruction and the address of the next instruction.
@@ -43,7 +45,7 @@ execute state@(r, m) tracer addr = do
     case tracer of
         (Just t) -> trace t addr inst
         Nothing  -> pure ()
-    execute' state inst
+    execute' state addr inst
 
     -- Address of the next instruction
     return $ (inst, addr + 4)
