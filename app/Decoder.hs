@@ -16,6 +16,7 @@ data Instruction =
     And  RegIdx RegIdx RegIdx |
     Andi Iimm RegIdx RegIdx |
     Addi Iimm RegIdx RegIdx |
+    Lw   Iimm RegIdx RegIdx |
     InvalidInstruction deriving (Show)
 
 -- | Convert to an unsigned word to a signed number.
@@ -75,14 +76,21 @@ rd = toEnum . fromIntegral . instrField 7 11
 
 ------------------------------------------------------------------------
 
+-- Opcodes
 op_reg  = 0b0110011
 op_imm  = 0b0010011
+op_load = 0b0000011
 
+-- Funct3 for register-immediate instructions.
+f3_addi = 0b000
+f3_andi = 0b111
+
+-- Funct3 for register-register instructions.
 f3_add = 0b000
 f3_and = 0b111
 
-f3_addi = 0b000
-f3_andi = 0b111
+-- Funct3 for load instructions.
+f3_loadw = 0b010
 
 -- Type for an R-Type instruction (three register operands).
 type RTypeInstr = (RegIdx -> RegIdx -> RegIdx -> Instruction)
@@ -116,11 +124,19 @@ decode_imm instr
     where
         f3 = funct3 instr
 
+-- Decode load instructions.
+decode_load :: Word32 -> ITypeInstr
+decode_load instr
+    | f3 == f3_loadw = Lw
+    where
+        f3 = funct3 instr
+
 decode' :: Word32 -> Word32 -> Instruction
 decode' instr opcode
-    | opcode == op_reg = decode_reg instr (rd instr) (rs1 instr) (rs2 instr)
-    | opcode == op_imm = decode_imm instr (immI instr) (rd instr) (rs1 instr)
-    | otherwise        = InvalidInstruction
+    | opcode == op_reg  = decode_reg instr (rd instr) (rs1 instr) (rs2 instr)
+    | opcode == op_imm  = decode_imm instr (immI instr) (rd instr) (rs1 instr)
+    | opcode == op_load = decode_load instr (immI instr) (rd instr) (rs1 instr)
+    | otherwise         = InvalidInstruction
 
 -- | Decode a RISC-V RV32i instruction.
 --
@@ -130,5 +146,8 @@ decode' instr opcode
 -- Add A1 A2 A0
 -- >>> decode 0x02a30293
 -- Addi 42 T0 T1
+-- >>> decode 0xffc52503
+-- Lw (-4) A0 A0
+--
 decode :: Word32 -> Instruction
 decode instr = decode' instr $ opcode instr
