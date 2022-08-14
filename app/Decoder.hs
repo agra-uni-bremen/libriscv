@@ -71,7 +71,7 @@ immI :: Word32 -> Iimm
 immI = fromIntegral . fromTwoscomp 12 . instrField 20 31
 
 immU :: Word32 -> Uimm
-immU = fromIntegral . fromTwoscomp 12 . instrField 12 31
+immU i = fromIntegral $ instrField 12 31 i `shiftL` 12
 
 immS :: Word32 -> Simm
 immS i = fromTwoscomp 12 $ fromIntegral $

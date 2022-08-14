@@ -43,7 +43,7 @@ execute' s@(r, m) _ (Sw imm rs1 rs2) = do
     -- TODO: Alignment handling
     storeWord m (fromIntegral $ r1 + imm) $ fromIntegral r2
 execute' s@(r, m) pc (Lui rd imm) = do
-    writeRegister r rd (imm `shiftL` 12)
+    writeRegister r rd imm
 execute' s@(r, m) pc (Auipc rd imm) = do
     writeRegister r rd $ (fromIntegral pc) + imm
 execute' _ _ InvalidInstruction = pure () -- XXX: ignore for now
