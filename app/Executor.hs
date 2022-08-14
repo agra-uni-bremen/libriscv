@@ -36,6 +36,11 @@ execute' s@(r, m) _ (Lw imm rd rs1) = do
     -- TODO: Alignment handling
     word <- loadWord m $ fromIntegral (r1 + imm)
     writeRegister r rd $ fromIntegral word
+execute' s@(r, m) _ (Sw imm rs1 rs2) = do
+    r1 <- readRegister r rs1
+    r2 <- readRegister r rs2
+    -- TODO: Alignment handling
+    storeWord m (fromIntegral $ r1 + imm) $ fromIntegral r2
 execute' s@(r, m) pc (Auipc rd imm) = do
     writeRegister r rd $ (fromIntegral pc) + imm
 execute' _ _ InvalidInstruction = pure () -- XXX: ignore for now
