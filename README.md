@@ -17,6 +17,16 @@ It implements a subset of RV32I, the roadmap includes the following instructions
 * [ ] LUI
 * [ ] AUIPC
 
+## Installation
+
+This RISC-V simulator can be installed using [Cabal][cabal web] with the following commands:
+
+	$ git clone https://github.com/nmeum/riscv-tiny
+	$ cd riscv-tiny
+	$ cabal install
+
+This should install the `riscv-tiny` executable to `~/.cabal/bin`.
+
 ## Tests
 
 There are currently some minor [doctest][doctest github] tests.
@@ -40,3 +50,4 @@ You should have received a copy of the GNU General Public License along
 with this program. If not, see <https://www.gnu.org/licenses/>.
 
 [doctest github]: https://github.com/sol/doctest-haskell
+[cabal web]: https://www.haskell.org/cabal/
