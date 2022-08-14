@@ -7,8 +7,9 @@ import Data.Bits
 import Data.Word
 import Register
 
--- Type used to represent I-immediates.
+-- Types used to represent immediates.
 type Iimm = Int16 -- XXX: Technically 12-bits
+type Uimm = Int32 -- XXX: Technically 20-bits
 
 -- Type used to represent a decoded RISC-V instruction.
 data Instruction =
@@ -17,6 +18,7 @@ data Instruction =
     Andi Iimm RegIdx RegIdx |
     Addi Iimm RegIdx RegIdx |
     Lw   Iimm RegIdx RegIdx |
+    Lui  RegIdx Uimm |
     InvalidInstruction deriving (Show)
 
 -- | Convert to an unsigned word to a signed number.
@@ -65,6 +67,9 @@ funct7 = instrField 25 31
 immI :: Word32 -> Iimm
 immI = fromIntegral . fromTwoscomp 12 . instrField 20 31
 
+immU :: Word32 -> Uimm
+immU = fromIntegral . fromTwoscomp 12 . instrField 12 31
+
 rs1 :: Word32 -> RegIdx
 rs1 = toEnum . fromIntegral . instrField 15 19
 
@@ -80,6 +85,7 @@ rd = toEnum . fromIntegral . instrField 7 11
 op_reg  = 0b0110011
 op_imm  = 0b0010011
 op_load = 0b0000011
+op_lui  = 0b0110111
 
 -- Funct3 for register-immediate instructions.
 f3_addi = 0b000
@@ -136,6 +142,7 @@ decode' instr opcode
     | opcode == op_reg  = decode_reg instr (rd instr) (rs1 instr) (rs2 instr)
     | opcode == op_imm  = decode_imm instr (immI instr) (rd instr) (rs1 instr)
     | opcode == op_load = decode_load instr (immI instr) (rd instr) (rs1 instr)
+    | opcode == op_lui  = Lui (rd instr) (immU instr)
     | otherwise         = InvalidInstruction
 
 -- | Decode a RISC-V RV32i instruction.
