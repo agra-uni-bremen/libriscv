@@ -8,6 +8,7 @@ where
 
 import Tracer
 import Data.Word
+import Data.Int
 import Register
 import Decoder
 import Memory
@@ -30,6 +31,13 @@ execute' s@(r, m) _ (Add rd rs1 rs2) = do
 execute' s@(r, m) _ (Addi imm rd rs1) = do
     r1 <- readRegister r rs1
     writeRegister r rd $ (fromIntegral $ (fromIntegral r1) + imm)
+execute' s@(r, m) _ (Lw imm rd rs1) = do
+    r1 <- readRegister r rs1
+    -- TODO: Alignment handling
+    let addr = (fromIntegral r1 :: Int32) + (fromIntegral imm) in
+        do
+            word <- loadWord m $ fromIntegral addr
+            writeRegister r rd word
 execute' s@(r, m) pc (Auipc rd imm) = do
     writeRegister r rd $ fromIntegral $ (fromIntegral pc) + imm
 execute' _ _ InvalidInstruction = pure () -- XXX: ignore for now
