@@ -75,8 +75,8 @@ rd = toEnum . fromIntegral . instrField 7 11
 
 ------------------------------------------------------------------------
 
-op_reg = 0b0110011
-op_imm = 0b0010011
+op_reg  = 0b0110011
+op_imm  = 0b0010011
 
 f3_add = 0b000
 f3_and = 0b111
@@ -90,6 +90,14 @@ type RTypeInstr = (RegIdx -> RegIdx -> RegIdx -> Instruction)
 invalid_rtype :: RTypeInstr
 invalid_rtype _ _ _ = InvalidInstruction
 
+-- Type for an I-Type instruction (two register, one immediate).
+type ITypeInstr = (Iimm -> RegIdx -> RegIdx -> Instruction)
+
+invalid_itype :: ITypeInstr
+invalid_itype _ _ _ = InvalidInstruction
+
+------------------------------------------------------------------------
+
 -- Decode integer register-register instructions.
 decode_reg :: Word32 -> RTypeInstr
 decode_reg instr
@@ -98,12 +106,6 @@ decode_reg instr
     | otherwise    = invalid_rtype
     where
         f3 = funct3 instr
-
--- Type for an I-Type instruction (two register, one immediate).
-type ITypeInstr = (Iimm -> RegIdx -> RegIdx -> Instruction)
-
-invalid_itype :: ITypeInstr
-invalid_itype _ _ _ = InvalidInstruction
 
 -- Decode integer register-immediate instructions.
 decode_imm :: Word32 -> ITypeInstr
