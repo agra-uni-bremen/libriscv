@@ -2,9 +2,20 @@
 
 A simulator for RISC-V implementing a subset of rv32i in Haskell.
 
-# Motivation
+# Status
 
-This is a toy project for playing around with Haskell a bit.
+This is just a toy project for partially re-activating my Haskell knowledge.
+It implements a subset of RV32I, the roadmap includes the following instructions:
+
+* [x] ADD
+* [x] ADDI
+* [x] LW
+* [ ] SW
+* [ ] JAL
+* [ ] JALR
+* [ ] BLT
+* [ ] LUI
+* [ ] AUIPC
 
 ## Tests
 
