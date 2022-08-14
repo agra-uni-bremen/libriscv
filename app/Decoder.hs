@@ -75,8 +75,8 @@ rd = toEnum . fromIntegral . instrField 7 11
 
 ------------------------------------------------------------------------
 
-op_rtype = 0b0110011
-op_itype = 0b0010011
+op_reg = 0b0110011
+op_imm = 0b0010011
 
 f3_add = 0b000
 f3_and = 0b111
@@ -90,8 +90,9 @@ type RTypeInstr = (RegIdx -> RegIdx -> RegIdx -> Instruction)
 invalid_rtype :: RTypeInstr
 invalid_rtype _ _ _ = InvalidInstruction
 
-decode_rtype :: Word32 -> RTypeInstr
-decode_rtype instr
+-- Decode integer register-register instructions.
+decode_reg :: Word32 -> RTypeInstr
+decode_reg instr
     | f3 == f3_add = Add
     | f3 == f3_and = And
     | otherwise    = invalid_rtype
@@ -104,8 +105,9 @@ type ITypeInstr = (Iimm -> RegIdx -> RegIdx -> Instruction)
 invalid_itype :: ITypeInstr
 invalid_itype _ _ _ = InvalidInstruction
 
-decode_itype :: Word32 -> ITypeInstr
-decode_itype instr
+-- Decode integer register-immediate instructions.
+decode_imm :: Word32 -> ITypeInstr
+decode_imm instr
     | f3 == f3_addi = Addi
     | f3 == f3_andi = Andi
     | otherwise = invalid_itype
@@ -114,9 +116,9 @@ decode_itype instr
 
 decode' :: Word32 -> Word32 -> Instruction
 decode' instr opcode
-    | opcode == op_rtype = decode_rtype instr (rd instr) (rs1 instr) (rs2 instr)
-    | opcode == op_itype = decode_itype instr (immI instr) (rd instr) (rs1 instr)
-    | otherwise          = InvalidInstruction
+    | opcode == op_reg = decode_reg instr (rd instr) (rs1 instr) (rs2 instr)
+    | opcode == op_imm = decode_imm instr (immI instr) (rd instr) (rs1 instr)
+    | otherwise        = InvalidInstruction
 
 -- | Decode a RISC-V RV32i instruction.
 --
