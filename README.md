@@ -27,6 +27,34 @@ This RISC-V simulator can be installed using [Cabal][cabal web] with the followi
 
 This should install the `riscv-tiny` executable to `~/.cabal/bin`.
 
+## Usage:
+
+The `riscv-tiny` executable runs 32-bit RISC-V software until the first invalid instruction.
+There are also various command-line options for dumping the register file afterwards and tracing instructions.
+Refer to the `--help` output for details.
+
+Example usage:
+
+	$ cat load.S
+	.globl _start
+	.myword:
+		.word 0xffffffff
+	_start:
+		lw t0, .myword
+		addi a0, a0, 1
+	$ riscv-none-elf-gcc -o load load.S -march=rv32i -mabi=ilp32 -nostdlib
+	$ riscv-tiny --trace --registers load | head
+	10078: Auipc T0 0
+	1007c: Lw (-4) T0 T0
+	10080: Addi 24 T0 T0
+	10084: InvalidInstruction
+	Zero    = 0
+	RA      = 0
+	SP      = 0
+	GP      = 0
+	TP      = 0
+	T0      = 23
+
 ## Tests
 
 There are currently some minor [doctest][doctest github] tests.
