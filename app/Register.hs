@@ -4,6 +4,7 @@ module Register where
 
 import Data.Ix
 import Data.Word
+import Data.Int
 import Data.Array.IO
 
 -- | Type to index for the register file.
@@ -21,7 +22,7 @@ data RegIdx = Zero | RA | SP | GP | TP | T0 | T1 | T2 | FP
     | T5 | T6 deriving (Ord, Eq, Ix, Bounded, Show, Enum)
 
 -- Type used to represent RISC-V registers.
-type Register = Word32
+type Register = Int32
 
 -- Register file addressed by RegIdx containing Word32.
 type RegisterFile = IOUArray RegIdx Register

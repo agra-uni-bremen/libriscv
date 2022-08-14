@@ -30,16 +30,16 @@ execute' s@(r, m) _ (Add rd rs1 rs2) = do
     writeRegister r rd $ r1 + r2
 execute' s@(r, m) _ (Addi imm rd rs1) = do
     r1 <- readRegister r rs1
-    writeRegister r rd $ (fromIntegral $ (fromIntegral r1) + imm)
+    writeRegister r rd $ r1 + (fromIntegral imm)
 execute' s@(r, m) _ (Lw imm rd rs1) = do
     r1 <- readRegister r rs1
-    -- TODO: Alignment handling
-    let addr = (fromIntegral r1 :: Int32) + (fromIntegral imm) in
+    let addr = r1 + (fromIntegral imm) in
         do
+            -- TODO: Alignment handling
             word <- loadWord m $ fromIntegral addr
-            writeRegister r rd word
+            writeRegister r rd $ fromIntegral word
 execute' s@(r, m) pc (Auipc rd imm) = do
-    writeRegister r rd $ fromIntegral $ (fromIntegral pc) + imm
+    writeRegister r rd $ (fromIntegral pc) + imm
 execute' _ _ InvalidInstruction = pure () -- XXX: ignore for now
 execute' _ _ _ = error "not implemented"
 
