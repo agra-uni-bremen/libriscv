@@ -4,7 +4,7 @@ A simulator for the RISC-V ISA which implements a subset of RV32I in Haskell.
 
 # Status
 
-This is just a toy implementation of the RISC-V ISA to improve my rusty Haskell knowledge.
+This is just a partial toy implementation of the RISC-V ISA to improve my rusty Haskell knowledge.
 The implementation supports a subset of RV32I, the roadmap includes the following instructions:
 
 * [x] ADD
