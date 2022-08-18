@@ -2,6 +2,7 @@
 
 module Register where
 
+import Numeric
 import Data.Ix
 import Data.Word
 import Data.Int
@@ -35,7 +36,7 @@ mkRegFile = newArray (minBound, maxBound) 0
 dumpRegs :: RegisterFile -> IO (String)
 dumpRegs r = do
     e <- getElems r
-    return $ foldr (\(a, v) s -> (show a) ++ "\t= " ++ (show v) ++ "\n" ++ s) ""
+    return $ foldr (\(a, v) s -> (show a) ++ "\t= 0x" ++ (showHex (fromIntegral v :: Word32) $ "\n" ++ s)) ""
         $ zip [(minBound :: RegIdx)..maxBound] e
 
 ------------------------------------------------------------------------
