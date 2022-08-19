@@ -43,9 +43,9 @@ main' (CmdArgs memAddr memSize trace putReg fp) = do
     mem <- mkMemory memAddr memSize
 
     entry <- loadExecutable fp mem
-    state <- mkArchState mem
+    state <- mkArchState mem entry
 
-    executeAll state tracer entry
+    executeAll state tracer
 
     if putReg
         then do out <- dumpRegs $ fst state
