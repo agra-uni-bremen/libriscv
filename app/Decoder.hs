@@ -11,6 +11,7 @@ import Register
 type Iimm = Int32 -- XXX: Technically 12-bits
 type Uimm = Int32 -- XXX: Technically 20-bits
 type Simm = Iimm
+type Jimm = Int32 -- XXX: Technically 32-bits
 
 -- Type used to represent a decoded RISC-V instruction.
 data Instruction =
@@ -20,6 +21,7 @@ data Instruction =
     Addi  Iimm RegIdx RegIdx |
     Lw    Iimm RegIdx RegIdx |
     Sw    Simm RegIdx RegIdx |
+    Jal   Jimm RegIdx |
     Lui   RegIdx Uimm |
     Auipc RegIdx Uimm |
     InvalidInstruction deriving (Show)
@@ -77,6 +79,13 @@ immS :: Word32 -> Simm
 immS i = fromTwoscomp 12 $ fromIntegral $
     (instrField 25 31 i `shift` 5) .|.  (instrField 07 11 i)
 
+immJ :: Word32 -> Jimm
+immJ i = fromTwoscomp 21 $
+        ((instrField 31 31 i `shift` 20)
+     .|. (instrField 12 19 i `shift` 12)
+     .|. (instrField 20 20 i `shift` 11)
+     .|. (instrField 21 30 i `shift` 1))
+
 rs1 :: Word32 -> RegIdx
 rs1 = toEnum . fromIntegral . instrField 15 19
 
@@ -93,6 +102,7 @@ op_reg   = 0b0110011
 op_imm   = 0b0010011
 op_load  = 0b0000011
 op_store = 0b0100011
+op_jal   = 0b1101111
 op_lui   = 0b0110111
 op_auipc = 0b0010111
 
@@ -168,6 +178,7 @@ decode' instr opcode
     | opcode == op_imm   = decode_imm instr (immI instr) (rd instr) (rs1 instr)
     | opcode == op_load  = decode_load instr (immI instr) (rd instr) (rs1 instr)
     | opcode == op_store = decode_store instr (immS instr) (rs1 instr) (rs2 instr)
+    | opcode == op_jal   = Jal (immJ instr) (rd instr)
     | opcode == op_lui   = Lui (rd instr) (immU instr)
     | opcode == op_auipc = Auipc (rd instr) (immU instr)
     | otherwise          = InvalidInstruction
@@ -186,6 +197,8 @@ decode' instr opcode
 -- Auipc T0 0
 -- >>> decode 0x00102423
 -- Sw 8 Zero RA
+-- >>> decode 0xffdff06f
+-- Jal (-4) Zero
 --
 decode :: Word32 -> Instruction
 decode instr = decode' instr $ opcode instr
