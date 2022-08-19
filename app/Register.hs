@@ -71,3 +71,20 @@ writeRegister :: RegisterFile -> RegIdx -> Register -> IO ()
 writeRegister RegisterFile{regs=r} idx val
     | idx == Zero = pure () -- ignore writes to zero register
     | otherwise = writeArray r idx val
+
+-- Read program counter value.
+readPC :: RegisterFile -> IO (Word32)
+readPC RegisterFile{pc=pc} = readIORef pc
+
+-- | Write a new program counter value.
+--
+-- Examples:
+--
+-- >>> r <- mkRegFile
+-- >>> readPC r
+-- 0
+-- >>> writePC r 42
+-- >>> readPC r
+-- 42
+writePC :: RegisterFile -> Word32 -> IO ()
+writePC RegisterFile{pc=pc} = writeIORef pc
