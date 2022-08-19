@@ -7,6 +7,7 @@ import Data.Ix
 import Data.Word
 import Data.Int
 import Data.Array.IO
+import Data.IORef
 
 -- | Type to index for the register file.
 --
@@ -26,15 +27,20 @@ data RegIdx = Zero | RA | SP | GP | TP | T0 | T1 | T2 | FP
 type Register = Int32
 
 -- Register file addressed by RegIdx containing Word32.
-type RegisterFile = IOUArray RegIdx Register
+data RegisterFile = RegisterFile { pc   :: IORef Word32
+                                 , regs :: IOUArray RegIdx Register
+                                 }
 
 -- Create a new register file.
 mkRegFile :: IO (RegisterFile)
-mkRegFile = newArray (minBound, maxBound) 0
+mkRegFile = do
+    pc <- newIORef 0
+    array <- newArray (minBound, maxBound) 0
+    pure $ RegisterFile pc array
 
 -- Dump all register values.
 dumpRegs :: RegisterFile -> IO (String)
-dumpRegs r = do
+dumpRegs RegisterFile{regs=r} = do
     e <- getElems r
     return $ foldr (\(a, v) s -> (show a) ++ "\t= 0x" ++ (showHex (fromIntegral v :: Word32) $ "\n" ++ s)) ""
         $ zip [(minBound :: RegIdx)..maxBound] e
@@ -44,7 +50,7 @@ dumpRegs r = do
 -- Read register value at given register index.
 -- For the zero register, value 0 is always returned.
 readRegister :: RegisterFile -> RegIdx -> IO (Register)
-readRegister = readArray
+readRegister RegisterFile{regs=r} = readArray r
 
 -- | Write register at given register index.
 --   Writes to the zero register are ignored.
@@ -62,6 +68,6 @@ readRegister = readArray
 -- 0
 --
 writeRegister :: RegisterFile -> RegIdx -> Register -> IO ()
-writeRegister r idx val
+writeRegister RegisterFile{regs=r} idx val
     | idx == Zero = pure () -- ignore writes to zero register
     | otherwise = writeArray r idx val
