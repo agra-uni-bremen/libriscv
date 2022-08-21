@@ -26,31 +26,36 @@ mkArchState mem entry = do
     return (r, mem)
 
 -- Execute a given instruction, with fetch & decode done separately.
-execute' :: ArchState -> Instruction -> IO ()
-execute' s@(r, m) (Add rd rs1 rs2) = do
+-- Receives architectural state, address of the instruction and the instruction itself.
+execute' :: ArchState -> Address -> Instruction -> IO ()
+execute' s@(r, m) _ (Add rd rs1 rs2) = do
     r1 <- readRegister r rs1
     r2 <- readRegister r rs2
     writeRegister r rd $ r1 + r2
-execute' s@(r, m) (Addi imm rd rs1) = do
+execute' s@(r, m) _ (Addi imm rd rs1) = do
     r1 <- readRegister r rs1
     writeRegister r rd $ r1 + imm
-execute' s@(r, m) (Lw imm rd rs1) = do
+execute' s@(r, m) _ (Lw imm rd rs1) = do
     r1 <- readRegister r rs1
     -- TODO: Alignment handling
     word <- loadWord m $ fromIntegral (r1 + imm)
     writeRegister r rd $ fromIntegral word
-execute' s@(r, m) (Sw imm rs1 rs2) = do
+execute' s@(r, m) _ (Sw imm rs1 rs2) = do
     r1 <- readRegister r rs1
     r2 <- readRegister r rs2
     -- TODO: Alignment handling
     storeWord m (fromIntegral $ r1 + imm) $ fromIntegral r2
-execute' s@(r, m) (Lui rd imm) = do
+execute' s@(r, m) pc (Jal imm rd) = do
+    nextInstr <- readPC r
+    -- TODO: Alignment handling
+    writePC r $ fromIntegral $ (fromIntegral pc) + imm
+    writeRegister r rd $ fromIntegral nextInstr
+execute' s@(r, m) _ (Lui rd imm) = do
     writeRegister r rd imm
-execute' s@(r, m) (Auipc rd imm) = do
-    pc <- readPC r
+execute' s@(r, m) pc (Auipc rd imm) = do
     writeRegister r rd $ (fromIntegral pc) + imm
-execute' _ InvalidInstruction = pure () -- XXX: ignore for now
-execute' _ _ = error "not implemented"
+execute' _ _ InvalidInstruction = pure () -- XXX: ignore for now
+execute' _ _ _ = error "not implemented"
 
 -- Fetch, decode and execute the instruction at current pc.
 -- Returns the executed instruction.
@@ -63,10 +68,12 @@ execute state@(r, m) tracer = do
     case tracer of
         (Just t) -> trace t pc inst
         Nothing  -> pure ()
-    execute' state inst
 
-    -- Address of the next instruction
+    -- Increment PC before execute', allows setting PC to to
+    -- different values in execute' for jumps and branches.
     writePC r $ pc + 4
+    execute' state pc inst
+
     return inst
 
 -- Execute til the first invalid instruction.
