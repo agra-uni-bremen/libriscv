@@ -9,8 +9,8 @@ import Register
 
 -- Types used to represent immediates.
 type Iimm = Int32 -- XXX: Technically 12-bits
-type Uimm = Int32 -- XXX: Technically 20-bits
 type Simm = Iimm
+type Uimm = Int32 -- XXX: Technically 20-bits
 type Jimm = Int32 -- XXX: Technically 32-bits
 
 -- Type used to represent a decoded RISC-V instruction.
@@ -72,12 +72,12 @@ funct7 = instrField 25 31
 immI :: Word32 -> Iimm
 immI = fromIntegral . fromTwoscomp 12 . instrField 20 31
 
-immU :: Word32 -> Uimm
-immU i = fromIntegral $ instrField 12 31 i `shiftL` 12
-
 immS :: Word32 -> Simm
 immS i = fromTwoscomp 12 $ fromIntegral $
     (instrField 25 31 i `shift` 5) .|.  (instrField 07 11 i)
+
+immU :: Word32 -> Uimm
+immU i = fromIntegral $ instrField 12 31 i `shiftL` 12
 
 immJ :: Word32 -> Jimm
 immJ i = fromTwoscomp 21 $
