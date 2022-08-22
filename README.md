@@ -62,6 +62,11 @@ These can be run using the following command:
 
 	$ cabal test
 
+Furthermore, some minimal integration tests are available in `./tests`.
+These tests require a GCC cross compiler toolchain and can be invoked using:
+
+	$ ./tests/run.sh
+
 ## License
 
 This program is free software: you can redistribute it and/or modify it
