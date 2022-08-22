@@ -10,8 +10,9 @@ import Register
 -- Types used to represent immediates.
 type Iimm = Int32 -- XXX: Technically 12-bits
 type Simm = Iimm
+type Bimm = Int32 -- XXX: Technically 12-bits
 type Uimm = Int32 -- XXX: Technically 20-bits
-type Jimm = Int32 -- XXX: Technically 32-bits
+type Jimm = Uimm
 
 -- Type used to represent a decoded RISC-V instruction.
 data Instruction =
@@ -21,6 +22,7 @@ data Instruction =
     Addi  Iimm RegIdx RegIdx |
     Lw    Iimm RegIdx RegIdx |
     Sw    Simm RegIdx RegIdx |
+    Blt   Bimm RegIdx RegIdx |
     Jal   Jimm RegIdx |
     Lui   RegIdx Uimm |
     Auipc RegIdx Uimm |
@@ -76,6 +78,13 @@ immS :: Word32 -> Simm
 immS i = fromTwoscomp 12 $ fromIntegral $
     (instrField 25 31 i `shift` 5) .|.  (instrField 07 11 i)
 
+immB :: Word32 -> Bimm
+immB i = fromTwoscomp 13 $
+        ((instrField 31 31 i `shift` 12)
+     .|. (instrField 07 07 i `shift` 11)
+     .|. (instrField 25 30 i `shift` 05)
+     .|. (instrField 08 11 i `shift` 01))
+
 immU :: Word32 -> Uimm
 immU i = fromIntegral $ instrField 12 31 i `shiftL` 12
 
@@ -98,13 +107,14 @@ rd = toEnum . fromIntegral . instrField 7 11
 ------------------------------------------------------------------------
 
 -- Opcodes
-op_reg   = 0b0110011
-op_imm   = 0b0010011
-op_load  = 0b0000011
-op_store = 0b0100011
-op_jal   = 0b1101111
-op_lui   = 0b0110111
-op_auipc = 0b0010111
+op_reg    = 0b0110011
+op_imm    = 0b0010011
+op_load   = 0b0000011
+op_store  = 0b0100011
+op_branch = 0b1100011
+op_jal    = 0b1101111
+op_lui    = 0b0110111
+op_auipc  = 0b0010111
 
 -- Funct3 for register-immediate instructions.
 f3_addi = 0b000
@@ -119,6 +129,9 @@ f3_loadw = 0b010
 
 -- Funct3 for store instructions.
 f3_storew = 0b010
+
+--- Funct3 for branch instructions.
+f3_blt = 0b100
 
 -- Type for an R-Type instruction (three register operands).
 type RTypeInstr = (RegIdx -> RegIdx -> RegIdx -> Instruction)
@@ -137,6 +150,12 @@ type STypeInstr = (Simm -> RegIdx -> RegIdx -> Instruction)
 
 invalid_stype :: STypeInstr
 invalid_stype _ _ _ = InvalidInstruction
+
+-- Type for a B-Type instruction (branches).
+type BTypeInstr = (Bimm -> RegIdx -> RegIdx -> Instruction)
+
+invalid_btype :: BTypeInstr
+invalid_btype _ _ _ = InvalidInstruction
 
 ------------------------------------------------------------------------
 
@@ -172,16 +191,24 @@ decode_store instr
     where
         f3 = funct3 instr
 
+decode_branch :: Word32 -> BTypeInstr
+decode_branch instr
+    | f3 == f3_blt = Blt
+    | otherwise = invalid_btype
+    where
+        f3 = funct3 instr
+
 decode' :: Word32 -> Word32 -> Instruction
 decode' instr opcode
-    | opcode == op_reg   = decode_reg instr (rd instr) (rs1 instr) (rs2 instr)
-    | opcode == op_imm   = decode_imm instr (immI instr) (rd instr) (rs1 instr)
-    | opcode == op_load  = decode_load instr (immI instr) (rd instr) (rs1 instr)
-    | opcode == op_store = decode_store instr (immS instr) (rs1 instr) (rs2 instr)
-    | opcode == op_jal   = Jal (immJ instr) (rd instr)
-    | opcode == op_lui   = Lui (rd instr) (immU instr)
-    | opcode == op_auipc = Auipc (rd instr) (immU instr)
-    | otherwise          = InvalidInstruction
+    | opcode == op_reg    = decode_reg instr (rd instr) (rs1 instr) (rs2 instr)
+    | opcode == op_imm    = decode_imm instr (immI instr) (rd instr) (rs1 instr)
+    | opcode == op_load   = decode_load instr (immI instr) (rd instr) (rs1 instr)
+    | opcode == op_store  = decode_store instr (immS instr) (rs1 instr) (rs2 instr)
+    | opcode == op_branch = decode_branch instr (immB instr) (rs1 instr) (rs2 instr)
+    | opcode == op_jal    = Jal (immJ instr) (rd instr)
+    | opcode == op_lui    = Lui (rd instr) (immU instr)
+    | opcode == op_auipc  = Auipc (rd instr) (immU instr)
+    | otherwise           = InvalidInstruction
 
 -- | Decode a RISC-V RV32i instruction.
 --
@@ -199,6 +226,8 @@ decode' instr opcode
 -- Sw 8 Zero RA
 -- >>> decode 0xffdff06f
 -- Jal (-4) Zero
+-- >>> decode 0x00b54263
+-- Blt 4 A0 A1
 --
 decode :: Word32 -> Instruction
 decode instr = decode' instr $ opcode instr
