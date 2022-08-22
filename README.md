@@ -13,7 +13,7 @@ The implementation supports a subset of RV32I, the roadmap includes the followin
 * [x] SW
 * [x] JAL
 * [ ] JALR
-* [ ] BLT
+* [x] BLT
 * [x] LUI
 * [x] AUIPC
 
