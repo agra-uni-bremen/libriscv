@@ -3,7 +3,7 @@
 module Decoder where
 
 import Data.Int
-import Data.Bits
+import Data.Bits hiding (And) 
 import Data.Word
 import Register
 
