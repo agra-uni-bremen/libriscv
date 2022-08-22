@@ -45,6 +45,14 @@ execute' s@(r, m) _ (Sw imm rs1 rs2) = do
     r2 <- readRegister r rs2
     -- TODO: Alignment handling
     storeWord m (fromIntegral $ r1 + imm) $ fromIntegral r2
+execute' s@(r, m) pc (Blt imm rs1 rs2) = do
+    r1 <- readRegister r rs1
+    r2 <- readRegister r rs2
+
+    -- TODO: Alignment handling
+    if r1 < r2
+        then writePC r $ fromIntegral $ (fromIntegral pc) + imm
+        else pure()
 execute' s@(r, m) pc (Jal imm rd) = do
     nextInstr <- readPC r
     -- TODO: Alignment handling
