@@ -36,7 +36,7 @@ executable riscv-tiny
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
     build-depends:
-        base                   ^>= 4.15.0.0
+        base                   >= 4.15.0.0
         , array                ^>= 0.5.4.0
         , filepath             ^>= 1.4.100.0
         , singletons           ^>= 3.0.1
