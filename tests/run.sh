@@ -48,7 +48,7 @@ for file in *; do
 
 		printf "Running test case '%s': " "${name}"
 
-		compile test.S
+		compile test
 		diff=$(runtest test output)
 
 		if [ $? -ne 0 ]; then
