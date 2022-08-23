@@ -17,8 +17,7 @@ abort() {
 compile() {
 	[ $# -eq 1 ] || return 1
 
-	# TODO: use clang
-	${TRIPLET}-gcc "${1}" -o ${1%%.*} -march=rv32i -mabi=ilp32 -nostdlib
+	clang --target=${TRIPLET} "${1}" -o ${1%%.*} -march=rv32i -mabi=ilp32 -nostdlib
 }
 
 runtest() {
@@ -28,8 +27,8 @@ runtest() {
 	diff -ur "${2}" "${TESTDIR}/out"
 }
 
-command -v "${TRIPLET}"-gcc 1>/dev/null 2>&1 || \
-	abort "Cross compiler toolchain for '${TRIPLET}' not found"
+command -v clang 1>/dev/null 2>&1 || \
+	abort "Tests require Clang with rv32i support"
 command -v riscv-tiny 1>/dev/null 2>&1 || \
 	abort "riscv-tiny not in \$PATH"
 
