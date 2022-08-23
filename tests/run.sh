@@ -17,7 +17,12 @@ abort() {
 compile() {
 	[ $# -eq 1 ] || return 1
 
-	clang --target=${TRIPLET} "${1}" -o ${1%%.*} -march=rv32i -mabi=ilp32 -nostdlib
+	# Compile test cases with clang (easier cross-compilation).
+	# Also: Use implicit make(1) rules to avoid re-compilations.
+	make --quiet \
+		CC=clang \
+		ASFLAGS="--target=${TRIPLET} -march=rv32i -mabi=ilp32 -nostdlib" \
+		"${1}"
 }
 
 runtest() {
@@ -27,11 +32,12 @@ runtest() {
 	diff -ur "${2}" "${TESTDIR}/out"
 }
 
+command -v make 1>/dev/null 2>&1 || \
+	abort "GNU make is required to compile test cases"
 command -v clang 1>/dev/null 2>&1 || \
 	abort "Tests require Clang with rv32i support"
 command -v riscv-tiny 1>/dev/null 2>&1 || \
 	abort "riscv-tiny not in \$PATH"
-
 
 for file in *; do
 	[ -d "${file}" ] || continue
