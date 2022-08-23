@@ -26,7 +26,7 @@ cmdArgs = CmdArgs
     <*> option auto
         ( long "memory-size"
        <> short 's'
-       <> value 1024
+       <> value (1024 * 1024 * 1) -- 1 MB RAM
        <> help "Size of the memory region" )
     <*> switch
         ( long "trace"
