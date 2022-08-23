@@ -28,7 +28,7 @@ compile() {
 runtest() {
 	[ $# -eq 2 ] || return 1
 
-	riscv-tiny -r "${1}" 1>"${TESTDIR}/out" 2>&1
+	riscv-tiny -r "${1}" 1>"${TESTDIR}/out"
 	diff -ur "${2}" "${TESTDIR}/out"
 }
 
