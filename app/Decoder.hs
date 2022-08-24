@@ -3,7 +3,7 @@
 module Decoder where
 
 import Data.Int
-import Data.Bits hiding (And) 
+import Data.Bits hiding (And)
 import Data.Word
 import Register
 
@@ -24,6 +24,7 @@ data Instruction =
     Sw    Simm RegIdx RegIdx |
     Blt   Bimm RegIdx RegIdx |
     Jal   Jimm RegIdx |
+    Jalr  Iimm RegIdx RegIdx |
     Lui   RegIdx Uimm |
     Auipc RegIdx Uimm |
     InvalidInstruction deriving (Show)
@@ -113,6 +114,7 @@ op_load   = 0b0000011
 op_store  = 0b0100011
 op_branch = 0b1100011
 op_jal    = 0b1101111
+op_jalr   = 0b1100111
 op_lui    = 0b0110111
 op_auipc  = 0b0010111
 
@@ -206,6 +208,7 @@ decode' instr opcode
     | opcode == op_store  = decode_store instr (immS instr) (rs1 instr) (rs2 instr)
     | opcode == op_branch = decode_branch instr (immB instr) (rs1 instr) (rs2 instr)
     | opcode == op_jal    = Jal (immJ instr) (rd instr)
+    | opcode == op_jalr   = Jalr (immI instr) (rs1 instr) (rd instr)
     | opcode == op_lui    = Lui (rd instr) (immU instr)
     | opcode == op_auipc  = Auipc (rd instr) (immU instr)
     | otherwise           = InvalidInstruction

@@ -58,6 +58,11 @@ execute' s@(r, m) pc (Jal imm rd) = do
     -- TODO: Alignment handling
     writePC r $ fromIntegral $ (fromIntegral pc) + imm
     writeRegister r rd $ fromIntegral nextInstr
+execute' s@(r, m) pc (Jalr imm rs1 rd) = do
+    nextInstr <- readPC r
+    rs1Val <- readRegister r rs1 
+    writePC r $ fromIntegral $ (rs1Val + imm) .&. 0xfffffffe
+    writeRegister r rd $ fromIntegral nextInstr
 execute' s@(r, m) _ (Lui rd imm) = do
     writeRegister r rd imm
 execute' s@(r, m) pc (Auipc rd imm) = do
@@ -72,7 +77,6 @@ execute state@(r, m) tracer = do
     pc   <- readPC r
     word <- loadWord m pc
     inst <- pure $ decode word
-
     case tracer of
         (Just t) -> trace t pc inst
         Nothing  -> pure ()
