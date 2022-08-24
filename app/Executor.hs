@@ -6,24 +6,34 @@ module Executor
 )
 where
 
-import Tracer
-import Data.Word
-import Data.Int
-import Data.Bits
+import Tracer ( Tracer(..) )
+import Data.Word ()
+import Data.Int ()
+import Data.Bits ( Bits((.&.)) )
 import Register
+    ( mkRegFile,
+      readPC,
+      readRegister,
+      writePC,
+      writeRegister,
+      RegisterFile )
 import Decoder
-import Memory
+    ( Instruction(InvalidInstruction, Add, Addi, Lw, Sw, Blt, Jal,
+                  Jalr, Lui, Auipc),
+      decode )
+import Memory ( loadWord, storeWord, Address, Memory )
+import Control.Monad (when)
 
 -- Architectural state of the executor.
 type ArchState = (RegisterFile, Memory)
 
 -- Create a new architectural state with the given memory and the given
 -- initial program counter value.
-mkArchState :: Memory -> Address -> IO (ArchState)
+mkArchState :: Memory -> Address -> IO ArchState
 mkArchState mem entry = do
     r <- mkRegFile
     writePC r entry
-    return (r, mem)
+    pure (r, mem)
 
 -- Execute a given instruction, with fetch & decode done separately.
 -- Receives architectural state, address of the instruction and the instruction itself.
@@ -50,13 +60,12 @@ execute' s@(r, m) pc (Blt imm rs1 rs2) = do
     r2 <- readRegister r rs2
 
     -- TODO: Alignment handling
-    if r1 < r2
-        then writePC r $ fromIntegral $ (fromIntegral pc) + imm
-        else pure()
+    when (r1 < r2) $
+        writePC r $ fromIntegral $ fromIntegral pc + imm
 execute' s@(r, m) pc (Jal imm rd) = do
     nextInstr <- readPC r
     -- TODO: Alignment handling
-    writePC r $ fromIntegral $ (fromIntegral pc) + imm
+    writePC r $ fromIntegral $ fromIntegral pc + imm
     writeRegister r rd $ fromIntegral nextInstr
 execute' s@(r, m) pc (Jalr imm rs1 rd) = do
     nextInstr <- readPC r
@@ -66,19 +75,19 @@ execute' s@(r, m) pc (Jalr imm rs1 rd) = do
 execute' s@(r, m) _ (Lui rd imm) = do
     writeRegister r rd imm
 execute' s@(r, m) pc (Auipc rd imm) = do
-    writeRegister r rd $ (fromIntegral pc) + imm
+    writeRegister r rd $ fromIntegral pc + imm
 execute' _ _ InvalidInstruction = pure () -- XXX: ignore for now
 execute' _ _ _ = error "not implemented"
 
 -- Fetch, decode and execute the instruction at current pc.
 -- Returns the executed instruction.
-execute :: Tracer t => ArchState -> Maybe t -> IO (Instruction)
+execute :: Tracer t => ArchState -> Maybe t -> IO Instruction
 execute state@(r, m) tracer = do
     pc   <- readPC r
     word <- loadWord m pc
-    inst <- pure $ decode word
+    let inst = decode word
     case tracer of
-        (Just t) -> trace t pc inst
+        Just t -> trace t pc inst
         Nothing  -> pure ()
 
     -- Increment PC before execute', allows setting PC to to

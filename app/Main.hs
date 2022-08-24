@@ -1,14 +1,33 @@
 module Main where
 
-import Data.Word
-import Tracer
-import Loader
-import Memory
-import Executor
-import Register
-import System.Environment
-import GHC.IO.StdHandles
+import Data.Word ( Word32 )
+import Tracer ( DebugTracer(MkDebugTracer) )
+import Loader ( loadExecutable )
+import Memory ( mkMemory )
+import Executor ( mkArchState, executeAll )
+import Register ( dumpRegs )
+import System.Environment ()
+import GHC.IO.StdHandles ( stdout )
 import Options.Applicative
+    ( (<**>),
+      argument,
+      auto,
+      fullDesc,
+      header,
+      help,
+      info,
+      long,
+      metavar,
+      option,
+      progDesc,
+      short,
+      str,
+      switch,
+      value,
+      execParser,
+      helper,
+      Parser )
+import Control.Monad (when)
 
 data CmdArgs = CmdArgs
     { memAddr  :: Word32
@@ -47,10 +66,8 @@ main' (CmdArgs memAddr memSize trace putReg fp) = do
 
     executeAll state tracer
 
-    if putReg
-        then do out <- dumpRegs $ fst state
-                putStr out
-        else pure ()
+    when putReg $ 
+        dumpRegs (fst state) >>= putStr 
 
     where
         tracer = if trace
