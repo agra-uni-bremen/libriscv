@@ -21,11 +21,9 @@ maintainer:         soeren@soeren-tempel.net
 -- category:
 -- extra-source-files: CHANGELOG.md
 
-executable riscv-tiny
-    main-is:          Main.hs
-
+library
     -- Modules included in this executable, other than Main.
-    other-modules: Decoder
+    exposed-modules: Decoder
                    , Utils
                    , Memory
                    , Register
@@ -43,11 +41,18 @@ executable riscv-tiny
         , bytestring           ^>= 0.11.3.1
         , exceptions           ^>= 0.10.5
         , melf                 ^>= 1.1.0
-        , optparse-applicative  >= 0.16.1 && <0.17
 
-    hs-source-dirs:   app
+    hs-source-dirs:   src
     default-language: Haskell2010
 
+executable riscv-tiny
+    main-is:              Main.hs
+    hs-source-dirs:       app
+    build-depends:        
+        base >= 4.15.0.0 
+        , optparse-applicative  >= 0.16.1 && <0.17
+        , riscv-tiny >= 0.1.0.0
+    
 Test-Suite doctest
     type:                 exitcode-stdio-1.0
     default-language:     Haskell2010
