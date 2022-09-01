@@ -20,6 +20,11 @@ import Register
 import Decoder
     ( Instruction(InvalidInstruction, Add, Addi, Lw, Sw, Blt, Jal,
                   Jalr, Lui, Auipc),
+      Jimm(getJimm),
+      Uimm(getUimm),
+      Bimm(getBimm),
+      Simm(getSimm),
+      Iimm(getIimm),
       decode )
 import Memory ( loadWord, storeWord, Address, Memory )
 import Control.Monad (when)
@@ -44,38 +49,38 @@ execute' s@(r, m) _ (Add rd rs1 rs2) = do
     writeRegister r rd $ r1 + r2
 execute' s@(r, m) _ (Addi imm rd rs1) = do
     r1 <- readRegister r rs1
-    writeRegister r rd $ r1 + imm
+    writeRegister r rd $ r1 + getIimm imm
 execute' s@(r, m) _ (Lw imm rd rs1) = do
     r1 <- readRegister r rs1
     -- TODO: Alignment handling
-    word <- loadWord m $ fromIntegral (r1 + imm)
+    word <- loadWord m $ fromIntegral (r1 + getIimm imm)
     writeRegister r rd $ fromIntegral word
 execute' s@(r, m) _ (Sw imm rs1 rs2) = do
     r1 <- readRegister r rs1
     r2 <- readRegister r rs2
     -- TODO: Alignment handling
-    storeWord m (fromIntegral $ r1 + imm) $ fromIntegral r2
+    storeWord m (fromIntegral $ r1 + getSimm imm) $ fromIntegral r2
 execute' s@(r, m) pc (Blt imm rs1 rs2) = do
     r1 <- readRegister r rs1
     r2 <- readRegister r rs2
 
     -- TODO: Alignment handling
     when (r1 < r2) $
-        writePC r $ fromIntegral $ fromIntegral pc + imm
+        writePC r $ fromIntegral $ fromIntegral pc + getBimm imm
 execute' s@(r, m) pc (Jal imm rd) = do
     nextInstr <- readPC r
     -- TODO: Alignment handling
-    writePC r $ fromIntegral $ fromIntegral pc + imm
+    writePC r $ fromIntegral $ fromIntegral pc + getJimm imm
     writeRegister r rd $ fromIntegral nextInstr
 execute' s@(r, m) pc (Jalr imm rs1 rd) = do
     nextInstr <- readPC r
     rs1Val <- readRegister r rs1 
-    writePC r $ fromIntegral $ (rs1Val + imm) .&. 0xfffffffe
+    writePC r $ fromIntegral $ (rs1Val + getIimm imm) .&. 0xfffffffe
     writeRegister r rd $ fromIntegral nextInstr
-execute' s@(r, m) _ (Lui rd imm) = do
-    writeRegister r rd imm
-execute' s@(r, m) pc (Auipc rd imm) = do
-    writeRegister r rd $ fromIntegral pc + imm
+execute' s@(r, m) _ (Lui rd imm) = 
+    writeRegister r rd $ getUimm imm
+execute' s@(r, m) pc (Auipc rd imm) =
+    writeRegister r rd $ fromIntegral pc + getUimm imm
 execute' _ _ InvalidInstruction = pure () -- XXX: ignore for now
 execute' _ _ _ = error "not implemented"
 

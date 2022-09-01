@@ -8,11 +8,11 @@ import Data.Word ( Word32 )
 import Register ( RegIdx )
 
 -- Types used to represent immediates.
-type Iimm = Int32 -- XXX: Technically 12-bits
-type Simm = Iimm
-type Bimm = Int32 -- XXX: Technically 12-bits
-type Uimm = Int32 -- XXX: Technically 20-bits
-type Jimm = Uimm
+newtype Iimm = Iimm { getIimm :: Int32 } deriving Show-- XXX: Technically 12-bits
+newtype Simm = Simm { getSimm :: Int32 } deriving Show
+newtype Bimm = Bimm { getBimm :: Int32 } deriving Show-- XXX: Technically 12-bits
+newtype Uimm = Uimm { getUimm :: Int32 } deriving Show-- XXX: Technically 20-bits
+newtype Jimm = Jimm { getJimm :: Int32 } deriving Show
 
 -- Type used to represent a decoded RISC-V instruction.
 data Instruction =
@@ -73,24 +73,24 @@ funct7 :: Word32 -> Word32
 funct7 = instrField 25 31
 
 immI :: Word32 -> Iimm
-immI = fromIntegral . fromTwoscomp 12 . instrField 20 31
+immI = Iimm . fromIntegral . fromTwoscomp 12 . instrField 20 31
 
 immS :: Word32 -> Simm
-immS i = fromTwoscomp 12 $ fromIntegral $
+immS i = Simm $ fromTwoscomp 12 $ fromIntegral $
     (instrField 25 31 i `shift` 5) .|.  instrField 07 11 i
 
 immB :: Word32 -> Bimm
-immB i = fromTwoscomp 13 $
+immB i = Bimm $ fromTwoscomp 13 $
          (instrField 31 31 i `shift` 12)
      .|. (instrField 07 07 i `shift` 11)
      .|. (instrField 25 30 i `shift` 05)
      .|. (instrField 08 11 i `shift` 01)
 
 immU :: Word32 -> Uimm
-immU i = fromIntegral $ instrField 12 31 i `shiftL` 12
+immU i = Uimm $ fromIntegral $ instrField 12 31 i `shiftL` 12
 
 immJ :: Word32 -> Jimm
-immJ i = fromTwoscomp 21 $
+immJ i = Jimm $fromTwoscomp 21 $
         (instrField 31 31 i `shift` 20)
      .|. (instrField 12 19 i `shift` 12)
      .|. (instrField 20 20 i `shift` 11)
