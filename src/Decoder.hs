@@ -1,4 +1,7 @@
 {-# LANGUAGE BinaryLiterals #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE EmptyDataDeriving #-}
 
 module Decoder where
 
@@ -8,25 +11,41 @@ import Data.Word ( Word32 )
 import Register ( RegIdx )
 
 -- Types used to represent immediates.
-newtype Iimm = Iimm { getIimm :: Int32 } deriving Show-- XXX: Technically 12-bits
-newtype Simm = Simm { getSimm :: Int32 } deriving Show
-newtype Bimm = Bimm { getBimm :: Int32 } deriving Show-- XXX: Technically 12-bits
-newtype Uimm = Uimm { getUimm :: Int32 } deriving Show-- XXX: Technically 20-bits
-newtype Jimm = Jimm { getJimm :: Int32 } deriving Show
+data Iimm deriving Show -- XXX: Technically 12-bits
+data Simm deriving Show
+data Bimm deriving Show -- XXX: Technically 12-bits
+data Uimm deriving Show -- XXX: Technically 20-bits
+data Jimm  deriving Show
+
+data Immediate a where 
+    Iimm :: Int32 -> Immediate Iimm
+    Simm :: Int32 -> Immediate Simm
+    Bimm :: Int32 -> Immediate Bimm
+    Uimm :: Int32 -> Immediate Uimm
+    Jimm :: Int32 -> Immediate Jimm
+
+deriving instance Show a => Show (Immediate a)
+
+getImmediate :: Immediate a -> Int32
+getImmediate (Iimm i) = i
+getImmediate (Simm i) = i
+getImmediate (Bimm i) = i
+getImmediate (Uimm i) = i
+getImmediate (Jimm i) = i
 
 -- Type used to represent a decoded RISC-V instruction.
 data Instruction =
     Add   RegIdx RegIdx RegIdx |
     And   RegIdx RegIdx RegIdx |
-    Andi  Iimm RegIdx RegIdx |
-    Addi  Iimm RegIdx RegIdx |
-    Lw    Iimm RegIdx RegIdx |
-    Sw    Simm RegIdx RegIdx |
-    Blt   Bimm RegIdx RegIdx |
-    Jal   Jimm RegIdx |
-    Jalr  Iimm RegIdx RegIdx |
-    Lui   RegIdx Uimm |
-    Auipc RegIdx Uimm |
+    Andi  (Immediate Iimm) RegIdx RegIdx |
+    Addi  (Immediate Iimm) RegIdx RegIdx |
+    Lw    (Immediate Iimm) RegIdx RegIdx |
+    Sw    (Immediate Simm) RegIdx RegIdx |
+    Blt   (Immediate Bimm) RegIdx RegIdx |
+    Jal   (Immediate Jimm) RegIdx |
+    Jalr  (Immediate Iimm) RegIdx RegIdx |
+    Lui   RegIdx (Immediate Uimm) |
+    Auipc RegIdx (Immediate Uimm) |
     InvalidInstruction deriving (Show)
 
 -- | Convert to an unsigned word to a signed number.
@@ -72,25 +91,25 @@ funct3 = instrField 12 14
 funct7 :: Word32 -> Word32
 funct7 = instrField 25 31
 
-immI :: Word32 -> Iimm
+immI :: Word32 -> Immediate Iimm
 immI = Iimm . fromIntegral . fromTwoscomp 12 . instrField 20 31
 
-immS :: Word32 -> Simm
+immS :: Word32 -> Immediate Simm
 immS i = Simm $ fromTwoscomp 12 $ fromIntegral $
     (instrField 25 31 i `shift` 5) .|.  instrField 07 11 i
 
-immB :: Word32 -> Bimm
+immB :: Word32 -> Immediate Bimm
 immB i = Bimm $ fromTwoscomp 13 $
          (instrField 31 31 i `shift` 12)
      .|. (instrField 07 07 i `shift` 11)
      .|. (instrField 25 30 i `shift` 05)
      .|. (instrField 08 11 i `shift` 01)
 
-immU :: Word32 -> Uimm
+immU :: Word32 -> Immediate Uimm
 immU i = Uimm $ fromIntegral $ instrField 12 31 i `shiftL` 12
 
-immJ :: Word32 -> Jimm
-immJ i = Jimm $fromTwoscomp 21 $
+immJ :: Word32 -> Immediate Jimm
+immJ i = Jimm $ fromTwoscomp 21 $
         (instrField 31 31 i `shift` 20)
      .|. (instrField 12 19 i `shift` 12)
      .|. (instrField 20 20 i `shift` 11)
@@ -168,19 +187,19 @@ invalidRtype :: RTypeInstr
 invalidRtype _ _ _ = InvalidInstruction
 
 -- Type for an I-Type instruction (two register, one immediate).
-type ITypeInstr = Iimm -> RegIdx -> RegIdx -> Instruction
+type ITypeInstr = Immediate Iimm -> RegIdx -> RegIdx -> Instruction
 
 invalidItype :: ITypeInstr
 invalidItype _ _ _ = InvalidInstruction
 
 -- Type for an S-Type instruction (two register, one S-Immediate).
-type STypeInstr = Simm -> RegIdx -> RegIdx -> Instruction
+type STypeInstr = Immediate Simm -> RegIdx -> RegIdx -> Instruction
 
 invalidStype :: STypeInstr
 invalidStype _ _ _ = InvalidInstruction
 
 -- Type for a B-Type instruction (branches).
-type BTypeInstr = Bimm -> RegIdx -> RegIdx -> Instruction
+type BTypeInstr = Immediate Bimm -> RegIdx -> RegIdx -> Instruction
 
 invalidBtype :: BTypeInstr
 invalidBtype _ _ _ = InvalidInstruction
