@@ -72,6 +72,21 @@ If these dependencies are installed, run the tests using:
 
 	$ ./tests/run.sh
 
+## Related Work
+
+There are several "formal models" of the RISC-V ISA many of them are
+written in Haskell and also allow interpretation of RISC-V machine code:
+
+* https://github.com/GaloisInc/grift
+* https://github.com/mit-plv/riscv-semantics/
+* https://github.com/rsnikhil/Forvis_RISCV-ISA-Spec
+* https://github.com/sifive/RiscvSpecFormal
+
+A survey of different "formal models" was conducted by RISC-V working
+group in 2019. As the result of this survey, the formal model provided
+by [SAIL](https://github.com/rems-project/sail/) was established
+as the "golden formal model" for the RISC-V architecture.
+
 ## License
 
 This program is free software: you can redistribute it and/or modify it
