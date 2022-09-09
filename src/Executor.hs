@@ -66,10 +66,10 @@ execute' s@(r, m) pc (Jal imm rd) = do
     writeRegister r rd $ fromIntegral nextInstr
 execute' s@(r, m) pc (Jalr imm rs1 rd) = do
     nextInstr <- readPC r
-    rs1Val <- readRegister r rs1 
-    writePC r $ fromIntegral $ (rs1Val + getImmediate imm) .&. 0xfffffffe
+    rs1Val <- readRegister r rs1
+    writePC r $ (fromIntegral $ rs1Val + getImmediate imm) .&. 0xfffffffe
     writeRegister r rd $ fromIntegral nextInstr
-execute' s@(r, m) _ (Lui rd imm) = 
+execute' s@(r, m) _ (Lui rd imm) =
     writeRegister r rd $ getImmediate imm
 execute' s@(r, m) pc (Auipc rd imm) =
     writeRegister r rd $ fromIntegral pc + getImmediate imm
