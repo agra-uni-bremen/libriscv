@@ -1,4 +1,3 @@
-{-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
 module Interpreter.Concrete.Executor where
 
@@ -23,33 +22,18 @@ dumpState (r, m) =
     REG.dumpRegs r >>= putStr
 
 instance ByteAddrsMem ArchState where
-    storeByteString (_, mem) addr bs =
-        MEM.storeByteString mem addr bs
+    storeByteString (_, mem) = MEM.storeByteString mem
 
 ------------------------------------------------------------------------
 
 run' :: ArchState -> InstructionF Address (IO a) -> IO a
-run' (regFile, _) (ReadRegister idx f) = do
-    REG.readRegister regFile idx >>= f
-run' (regFile, _) (WriteRegister idx reg next) = do
-    REG.writeRegister regFile idx reg
-    next
-run' (_, mem) (LoadWord addr f) = do
-    MEM.loadWord mem addr >>= f
-run' (_, mem) (StoreWord addr w next) = do
-    MEM.storeWord mem addr w
-    next
-run' (regFile, _) (WritePC w next) = do
-    REG.writePC regFile w
-    next
-run' (regFile, _) (ReadPC f) = do
-    REG.readPC regFile >>= f
+run' (regFile, _) (ReadRegister idx f) = REG.readRegister regFile idx >>= f
+run' (regFile, _) (WriteRegister idx reg next) = REG.writeRegister regFile idx reg >> next
+run' (_, mem) (LoadWord addr f) = MEM.loadWord mem addr >>= f
+run' (_, mem) (StoreWord addr w next) = MEM.storeWord mem addr w >> next
+run' (regFile, _) (WritePC w next) = REG.writePC regFile w >> next
+run' (regFile, _) (ReadPC f) = REG.readPC regFile >>= f
 run' _ UnexpectedError = fail "Unexpected error"
 
-run :: ArchState -> Address ->  InstructionM Address a -> IO a
-run s@(reg, mem) startAddr ast = do
-    REG.writePC reg startAddr -- TODO: Prepend this as a node to AST
-
-    -- XXX
-    res <- iterM (run' s) ast
-    pure res
+run :: ArchState -> InstructionM Address a -> IO a
+run st = iterM (run' st)

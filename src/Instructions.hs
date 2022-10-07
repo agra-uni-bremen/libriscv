@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveFunctor, TemplateHaskell #-}
 {-# LANGUAGE FlexibleContexts #-}
-module Instructions where
+module Instructions (buildAST, InstructionF(..), InstructionM(..)) where
 
 import Data.Bits
 import Types (Address)
@@ -89,5 +89,5 @@ buildInstruction = do
 
     buildInstruction' pc inst
 
-buildAST :: InstructionM Address ()
-buildAST = buildInstruction
+buildAST :: Address -> InstructionM Address ()
+buildAST entry = writePC entry >> buildInstruction

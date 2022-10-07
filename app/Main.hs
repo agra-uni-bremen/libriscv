@@ -60,7 +60,7 @@ main' (CmdArgs memAddr memSize trace putReg fp) = do
     state <- mkArchState memAddr memSize
     entry <- loadExecutable fp state
 
-    run state entry buildAST
+    run state (buildAST entry)
     when putReg $
         dumpState state
 
