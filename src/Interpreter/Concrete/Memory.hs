@@ -1,6 +1,7 @@
 {-# LANGUAGE TupleSections #-}
-module Memory where
+module Interpreter.Concrete.Memory where
 
+import Types
 import Utils ( fstWordLe, getBytes )
 import Data.Int ()
 import Data.Bits ( Bits((.|.), shift) )
@@ -8,9 +9,6 @@ import Data.Word ( Word8, Word32 )
 import Data.Array.IO
     ( IOUArray, readArray, writeArray, MArray(getBounds, newArray_) )
 import qualified Data.ByteString.Lazy as BSL
-
--- 32-bit addresses for RV32.
-type Address = Word32
 
 -- Byte-addressable memory.
 type Memory = (Address, IOUArray Address Word8)

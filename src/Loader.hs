@@ -5,10 +5,9 @@
 module Loader (loadExecutable) where
 
 import Utils ()
-import Memory ( storeByteString, Address, Memory )
+import Types
 import Decoder ()
-import Register ()
-import Control.Monad.Catch ( MonadThrow )
+import Control.Monad.Catch ( MonadThrow, MonadCatch )
 import Data.Bits ()
 import Data.Int ( Int64 )
 import Data.Word ( Word32 )
@@ -33,22 +32,18 @@ import qualified Data.ByteString.Lazy as BSL
 import System.FilePath ()
 
 -- Return the entry point from the ELF header.
-startAddr :: Elf -> IO Word32
-startAddr (SELFCLASS32 :&: ElfList elfs) = do
-    hdr <- elfFindHeader elfs
-    return $ case hdr of
-        ElfHeader {..} -> ehEntry
-        _ -> error "no header" -- XXX
+startAddr :: MonadCatch m => Elf -> m Word32
+startAddr (SELFCLASS32 :&: ElfList elfs) = ehEntry <$> elfFindHeader elfs
 
 -- Return all ELF segments with type PT_LOAD.
-loadableSegments :: forall a m . (SingI a, MonadThrow m) => [ElfXX a] -> m [ElfXX a]
-loadableSegments elfs = pure $ filter f elfs
+loadableSegments :: forall a. (SingI a) => [ElfXX a] -> [ElfXX a]
+loadableSegments = filter f 
     where
         f e@ElfSegment{..} = epType == PT_LOAD
         f _ = False
 
 -- Copy data from ElfSection to memory at the given absolute address.
-copyData :: IsElfClass a => [ElfXX a] -> Int64 -> Memory -> IO ()
+copyData :: (IsElfClass a, ByteAddrsMem m) => [ElfXX a] -> Int64 -> m -> IO ()
 copyData [] _ _ = pure ()
 copyData ((ElfSection{esData = ElfSectionData textData, ..}):xs) zeros mem = do
     storeByteString mem (fromIntegral esAddr)
@@ -57,14 +52,14 @@ copyData ((ElfSection{esData = ElfSectionData textData, ..}):xs) zeros mem = do
 copyData (x:xs) zeros mem = copyData xs zeros mem
 
 -- Load an ElfSegment into memory at the given address.
-loadSegment :: IsElfClass a => Memory -> ElfXX a -> IO ()
+loadSegment :: (IsElfClass a, ByteAddrsMem m) => m -> ElfXX a -> IO ()
 loadSegment mem ElfSegment{..} =
     copyData epData (fromIntegral epAddMemSize) mem
 
 -- Load all loadable segments of an ELF file into memory.
-loadElf :: Memory -> Elf -> IO Word32
+loadElf :: (ByteAddrsMem m) => m -> Elf -> IO Word32
 loadElf mem elf@(classS :&: ElfList elfs) = withElfClass classS $ do
-    loadable <- loadableSegments elfs
+    let loadable = loadableSegments elfs
     mapM_ (loadSegment mem) loadable
     startAddr elf
 
@@ -73,5 +68,5 @@ readElf :: FilePath -> IO Elf
 readElf path = readFileLazy path >>= parseElf
 
 -- Load executable ELF from file into memory and return entry address.
-loadExecutable :: FilePath -> Memory -> IO Address
+loadExecutable :: ByteAddrsMem m => FilePath -> m -> IO Address
 loadExecutable fp mem = readElf fp >>= loadElf mem

@@ -1,11 +1,9 @@
 module Main where
 
+import Loader
+import Instructions
+import Interpreter.Concrete.Executor
 import Data.Word ( Word32 )
-import Tracer ( DebugTracer(MkDebugTracer) )
-import Loader ( loadExecutable )
-import Memory ( mkMemory )
-import Executor ( mkArchState, executeAll )
-import Register ( dumpRegs )
 import System.Environment ()
 import GHC.IO.StdHandles ( stdout )
 import Options.Applicative
@@ -59,20 +57,12 @@ cmdArgs = CmdArgs
 
 main' :: CmdArgs -> IO ()
 main' (CmdArgs memAddr memSize trace putReg fp) = do
-    mem <- mkMemory memAddr memSize
+    state <- mkArchState memAddr memSize
+    entry <- loadExecutable fp state
 
-    entry <- loadExecutable fp mem
-    state <- mkArchState mem entry
-
-    executeAll state tracer
-
-    when putReg $ 
-        dumpRegs (fst state) >>= putStr 
-
-    where
-        tracer = if trace
-            then Just $ MkDebugTracer stdout
-            else Nothing
+    run state (buildAST entry)
+    when putReg $
+        dumpState state
 
 main :: IO ()
 main = main' =<< execParser opts
