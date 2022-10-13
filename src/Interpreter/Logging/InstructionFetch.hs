@@ -17,8 +17,7 @@ type LogInstructionFetchM = Free LogInstructionFetch
 makeFree ''LogInstructionFetch
 
 -- default log interpreter
-runIO :: Free LogInstructionFetch a -> IO a
-runIO = iterM run' where 
-    run' (LogInstructionFetch addr inst next) = do
-        putStrLn $ showHex addr $ ": " ++ show inst
-        next
+runIO :: LogInstructionFetch (IO a) -> IO a
+runIO (LogInstructionFetch addr inst next) = do
+    putStrLn $ showHex addr $ ": " ++ show inst
+    next
