@@ -31,6 +31,8 @@ library
                    , Interpreter.Concrete.Register
                    , Interpreter.Concrete.Memory
                    , Interpreter.Concrete.Executor
+                   , Interpreter.Logging.InstructionFetch
+                   , Common.Coproduct
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

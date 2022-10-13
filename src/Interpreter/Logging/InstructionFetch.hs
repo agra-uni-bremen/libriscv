@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE FlexibleContexts #-}
-module InstructionFetch where
+module Interpreter.Logging.InstructionFetch where
 
 import Control.Monad.Free
 import Control.Monad.Free.TH
