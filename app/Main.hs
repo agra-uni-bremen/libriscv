@@ -1,3 +1,5 @@
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
 module Main where
 
 import Loader
@@ -26,6 +28,9 @@ import Options.Applicative
       helper,
       Parser )
 import Control.Monad (when)
+import Interpreter.Logging.InstructionFetch
+import Common.Coproduct
+import Types (Address)
 
 data CmdArgs = CmdArgs
     { memAddr  :: Word32
@@ -60,7 +65,7 @@ main' (CmdArgs memAddr memSize trace putReg fp) = do
     state <- mkArchState memAddr memSize
     entry <- loadExecutable fp state
 
-    run state (buildAST entry)
+    runIO state (buildAST @(InstructionF Address :+: LogInstructionFetch) entry)
     when putReg $
         dumpState state
 

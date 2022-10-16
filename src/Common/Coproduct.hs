@@ -2,12 +2,14 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
 module Common.Coproduct where
 import Control.Monad.Free
 
 data (f :+: g) a where
     InL :: f a -> (f :+: g) a
     InR :: g a -> (f :+: g) a
+infixr 8 :+:
 
 instance (Functor f, Functor g) => Functor (f :+: g) where
     fmap h (InL f) = InL $ h <$> f
@@ -22,9 +24,9 @@ instance (Functor f) => f :<: f where
 instance (Functor f, Functor g) => f :<: (f :+: g) where
     inj = InL 
 
-instance (Functor f, Functor g, Functor h, f :<: g) => f :<: (g :+: h) where 
+instance {-# OVERLAPPABLE #-} (Functor f, Functor g, Functor h, f :<: g) => f :<: (g :+: h) where 
     inj = InL . inj
-
 
 inject :: (f :<: g) => f (Free g a) -> Free g a
 inject = Free . inj
+
