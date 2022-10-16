@@ -9,13 +9,13 @@
 module Interpreter.Logging.InstructionFetch where
 
 import Types (Address)
-import Decoder (Instruction)
+import Decoder (InstructionType)
 import Numeric (showHex)
 import Control.Monad.Freer
 import Control.Monad.Freer.TH
 
 data LogInstructionFetch r where
-    LogFetch :: Address -> Instruction -> LogInstructionFetch ()
+    LogFetch :: Address -> InstructionType -> LogInstructionFetch ()
 
 makeEffect ''LogInstructionFetch
 

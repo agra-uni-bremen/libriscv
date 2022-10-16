@@ -35,7 +35,7 @@ instance ByteAddrsMem ArchState where
 
 -- Interpreter 
 
-runInstructionM :: forall r effs . LastMember IO effs => ArchState -> Eff (InstructionF ': effs) r -> Eff effs r 
+runInstructionM :: forall r effs . LastMember IO effs => ArchState -> Eff (Instruction ': effs) r -> Eff effs r 
 runInstructionM (regFile, mem) = interpretM $ \case
     (ReadRegister idx) -> REG.readRegister regFile idx
     (WriteRegister idx reg) -> REG.writeRegister regFile idx reg

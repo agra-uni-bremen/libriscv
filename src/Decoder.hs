@@ -34,7 +34,7 @@ getImmediate (Uimm i) = i
 getImmediate (Jimm i) = i
 
 -- Type used to represent a decoded RISC-V instruction.
-data Instruction =
+data InstructionType =
     Add   RegIdx RegIdx RegIdx |
     And   RegIdx RegIdx RegIdx |
     Andi  (Immediate Iimm) RegIdx RegIdx |
@@ -181,25 +181,25 @@ f3Blt :: Word32
 f3Blt = 0b100
 
 -- Type for an R-Type instruction (three register operands).
-type RTypeInstr = RegIdx -> RegIdx -> RegIdx -> Instruction
+type RTypeInstr = RegIdx -> RegIdx -> RegIdx -> InstructionType
 
 invalidRtype :: RTypeInstr
 invalidRtype _ _ _ = InvalidInstruction
 
 -- Type for an I-Type instruction (two register, one immediate).
-type ITypeInstr = Immediate Iimm -> RegIdx -> RegIdx -> Instruction
+type ITypeInstr = Immediate Iimm -> RegIdx -> RegIdx -> InstructionType
 
 invalidItype :: ITypeInstr
 invalidItype _ _ _ = InvalidInstruction
 
 -- Type for an S-Type instruction (two register, one S-Immediate).
-type STypeInstr = Immediate Simm -> RegIdx -> RegIdx -> Instruction
+type STypeInstr = Immediate Simm -> RegIdx -> RegIdx -> InstructionType
 
 invalidStype :: STypeInstr
 invalidStype _ _ _ = InvalidInstruction
 
 -- Type for a B-Type instruction (branches).
-type BTypeInstr = Immediate Bimm -> RegIdx -> RegIdx -> Instruction
+type BTypeInstr = Immediate Bimm -> RegIdx -> RegIdx -> InstructionType
 
 invalidBtype :: BTypeInstr
 invalidBtype _ _ _ = InvalidInstruction
@@ -245,7 +245,7 @@ decodeBranch instr
     where
         f3 = funct3 instr
 
-decode' :: Word32 -> Word32 -> Instruction
+decode' :: Word32 -> Word32 -> InstructionType
 decode' instr opcode
     | opcode == opReg    = decodeReg instr (rd instr) (rs1 instr) (rs2 instr)
     | opcode == opImm    = decodeImm instr (immI instr) (rd instr) (rs1 instr)
@@ -277,5 +277,5 @@ decode' instr opcode
 -- >>> decode 0x00b54263
 -- Blt 4 A0 A1
 --
-decode :: Word32 -> Instruction
+decode :: Word32 -> InstructionType
 decode instr = decode' instr $ opcode instr

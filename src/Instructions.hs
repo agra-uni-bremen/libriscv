@@ -9,7 +9,7 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE TemplateHaskell #-}
-module Instructions (buildAST, InstructionF(..)) where
+module Instructions (buildAST, Instruction(..)) where
 
 import Data.Bits
 import Types (Address)
@@ -22,18 +22,18 @@ import Control.Monad.Freer.TH
 
 import Interpreter.Logging.InstructionFetch
 
-data InstructionF r where
-    ReadRegister :: RegIdx -> InstructionF Register
-    WriteRegister :: RegIdx -> Register -> InstructionF ()
-    LoadWord :: Address -> InstructionF Word32
-    StoreWord :: Address ->  Word32 -> InstructionF ()
-    WritePC :: Word32 -> InstructionF ()
-    ReadPC :: InstructionF Word32
-    UnexpectedError :: InstructionF r
+data Instruction r where
+    ReadRegister :: RegIdx -> Instruction Register
+    WriteRegister :: RegIdx -> Register -> Instruction ()
+    LoadWord :: Address -> Instruction Word32
+    StoreWord :: Address ->  Word32 -> Instruction ()
+    WritePC :: Word32 -> Instruction ()
+    ReadPC :: Instruction Word32
+    UnexpectedError :: Instruction r
 
-makeEffect ''InstructionF
+makeEffect ''Instruction
 
-buildInstruction' :: (Member InstructionF r, Member LogInstructionFetch r) => Word32 -> Instruction -> Eff r ()
+buildInstruction' :: (Member Instruction r, Member LogInstructionFetch r) => Word32 -> InstructionType -> Eff r ()
 buildInstruction' _ (Add rd rs1 rs2) = do
     r1 <- readRegister rs1  
     r2 <- readRegister rs2
@@ -83,7 +83,7 @@ buildInstruction' pc (Auipc rd imm) = do
 buildInstruction' _ InvalidInstruction = pure () -- XXX: ignore for now
 buildInstruction' _ _ = unexpectedError
 
-buildInstruction :: (Member InstructionF r, Member LogInstructionFetch r) => Eff r ()
+buildInstruction :: (Member Instruction r, Member LogInstructionFetch r) => Eff r ()
 buildInstruction = do
     -- fetch & decode instruction at current PC
     pc <- readPC
@@ -98,5 +98,5 @@ buildInstruction = do
 
     buildInstruction' pc inst
 
-buildAST :: (Member InstructionF r, Member LogInstructionFetch r) => Word32 -> Eff r ()
+buildAST :: (Member Instruction r, Member LogInstructionFetch r) => Word32 -> Eff r ()
 buildAST entry = writePC entry >> buildInstruction
