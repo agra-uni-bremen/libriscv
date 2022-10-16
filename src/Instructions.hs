@@ -1,13 +1,14 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE TemplateHaskell #-}
 module Instructions (buildAST, InstructionF(..)) where
 
 import Data.Bits
@@ -16,48 +17,23 @@ import Types
 import Decoder
 import Data.Word
 import Control.Monad (when)
-import Control.Monad.Free
+import Control.Monad.Freer 
+import Control.Monad.Freer.TH
 
 import Interpreter.Logging.InstructionFetch
-import Common.Coproduct
 
-data InstructionF i r =
-    ReadRegister RegIdx (Register -> r) |
-    WriteRegister RegIdx Register r |
-    LoadWord i (Word32 -> r) |
-    StoreWord i Word32 r |
-    WritePC Word32 r |
-    ReadPC (Word32 -> r) |
-    UnexpectedError deriving Functor
+data InstructionF r where
+    ReadRegister :: RegIdx -> InstructionF Register
+    WriteRegister :: RegIdx -> Register -> InstructionF ()
+    LoadWord :: Address -> InstructionF Word32
+    StoreWord :: Address ->  Word32 -> InstructionF ()
+    WritePC :: Word32 -> InstructionF ()
+    ReadPC :: InstructionF Word32
+    UnexpectedError :: InstructionF r
 
---makeFree ''InstructionF
+makeEffect ''InstructionF
 
--- those functions are now only working with the fixed Address type. 
--- TODO: add a type class and gtgtgt
-readRegister :: (InstructionF Address :<: f) => RegIdx -> Free f Register
-readRegister r = inject $ ReadRegister @Address r Pure
-
-writeRegister :: (InstructionF Address :<: f) => RegIdx -> Register -> Free f ()
-writeRegister r r' = inject $ WriteRegister @Address r r' $ Pure ()
-
-loadWord :: (InstructionF Address :<: f) => Address -> Free f Word32 
-loadWord i = inject $ LoadWord @Address i Pure 
-
-storeWord :: (InstructionF Address :<: f) => Address -> Word32 -> Free f ()
-storeWord i w = inject $ StoreWord i w $ Pure ()
-
-writePC :: (InstructionF Address :<: f) => Word32 -> Free f ()
-writePC w = inject $ WritePC @Address w $ Pure ()
-
-readPC :: (InstructionF Address :<: f) => Free f Word32
-readPC = inject $ ReadPC @Address Pure
-
-unexpectedError :: (InstructionF Address :<: f) => Free f a
-unexpectedError = inject $ UnexpectedError @Address
-
-------------------------------------------------------------------------
-
-buildInstruction' :: (InstructionF Address :<: f, LogInstructionFetch :<: f) => Word32 -> Instruction -> Free f ()
+buildInstruction' :: (Member InstructionF r, Member LogInstructionFetch r) => Word32 -> Instruction -> Eff r ()
 buildInstruction' _ (Add rd rs1 rs2) = do
     r1 <- readRegister rs1  
     r2 <- readRegister rs2
@@ -104,11 +80,10 @@ buildInstruction' _ (Lui rd imm) = do
 buildInstruction' pc (Auipc rd imm) = do
     writeRegister rd $ fromIntegral pc + getImmediate imm
     buildInstruction
-buildInstruction' _ InvalidInstruction = Pure () -- XXX: ignore for now
+buildInstruction' _ InvalidInstruction = pure () -- XXX: ignore for now
 buildInstruction' _ _ = unexpectedError
 
---buildInstruction :: InstructionM Address ()
-buildInstruction :: (LogInstructionFetch :<: f, InstructionF Address :<: f) => Free f ()
+buildInstruction :: (Member InstructionF r, Member LogInstructionFetch r) => Eff r ()
 buildInstruction = do
     -- fetch & decode instruction at current PC
     pc <- readPC
@@ -123,6 +98,5 @@ buildInstruction = do
 
     buildInstruction' pc inst
 
---buildAST :: (InstructionF Address :<: f, LogInstructionFetch :<: f) => Word32 -> Free f ()
-buildAST :: (InstructionF Address :<: f, LogInstructionFetch :<: f) => Word32 -> Free f ()
+buildAST :: (Member InstructionF r, Member LogInstructionFetch r) => Word32 -> Eff r ()
 buildAST entry = writePC entry >> buildInstruction

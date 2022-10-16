@@ -1,4 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 module Main where
 
@@ -28,8 +27,8 @@ import Options.Applicative
       helper,
       Parser )
 import Control.Monad (when)
+import Control.Monad.Freer
 import Interpreter.Logging.InstructionFetch
-import Common.Coproduct
 import Types (Address)
 
 data CmdArgs = CmdArgs
@@ -65,7 +64,13 @@ main' (CmdArgs memAddr memSize trace putReg fp) = do
     state <- mkArchState memAddr memSize
     entry <- loadExecutable fp state
 
-    runIO state (buildAST @(InstructionF Address :+: LogInstructionFetch) entry)
+    let interpreter = 
+            if trace then 
+                runInstructionM state . runLogInstructionFetchM
+            else
+                runInstructionM state . runNoLogging
+    runM $ interpreter $ buildAST entry 
+
     when putReg $
         dumpState state
 
