@@ -1,19 +1,41 @@
-{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE DataKinds #-}
-module Interpreter.Concrete.Executor where
+module Effects.Machine.Instruction where
 
-import Types
+import Data.Bits
+import Common.Types (Address)
+import Common.Types
+import Decoder
 import Data.Word
-import Instructions
-import qualified Interpreter.Concrete.Memory as MEM
-import qualified Interpreter.Concrete.Register as REG
-import Interpreter.Logging.InstructionFetch (LogInstructionFetch)
-import Control.Monad.Freer
+import Control.Monad (when)
+import Control.Monad.Freer 
+import Control.Monad.Freer.TH
+
+import Effects.Logging.InstructionFetch
+import qualified Common.Machine.Standard.Register as REG
+import qualified Common.Machine.Standard.Memory as MEM
+
+data Instruction r where
+    ReadRegister :: RegIdx -> Instruction Register
+    WriteRegister :: RegIdx -> Register -> Instruction ()
+    LoadWord :: Address -> Instruction Word32
+    StoreWord :: Address ->  Word32 -> Instruction ()
+    WritePC :: Word32 -> Instruction ()
+    ReadPC :: Instruction Word32
+    UnexpectedError :: Instruction r
+
+makeEffect ''Instruction
 
 -- Architectural state of the executor.
 type ArchState = (REG.RegisterFile, MEM.Memory)

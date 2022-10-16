@@ -8,30 +8,19 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE GADTs #-}
-{-# LANGUAGE TemplateHaskell #-}
-module Instructions (buildAST, Instruction(..)) where
+module Descriptions.Standard.AST (buildAST) where
 
 import Data.Bits
-import Types (Address)
-import Types
+import Common.Types (Address)
+import Common.Types
 import Decoder
 import Data.Word
 import Control.Monad (when)
 import Control.Monad.Freer 
 import Control.Monad.Freer.TH
 
-import Interpreter.Logging.InstructionFetch
-
-data Instruction r where
-    ReadRegister :: RegIdx -> Instruction Register
-    WriteRegister :: RegIdx -> Register -> Instruction ()
-    LoadWord :: Address -> Instruction Word32
-    StoreWord :: Address ->  Word32 -> Instruction ()
-    WritePC :: Word32 -> Instruction ()
-    ReadPC :: Instruction Word32
-    UnexpectedError :: Instruction r
-
-makeEffect ''Instruction
+import Effects.Logging.InstructionFetch
+import Effects.Machine.Instruction 
 
 buildInstruction' :: (Member Instruction r, Member LogInstructionFetch r) => Word32 -> InstructionType -> Eff r ()
 buildInstruction' _ (Add rd rs1 rs2) = do

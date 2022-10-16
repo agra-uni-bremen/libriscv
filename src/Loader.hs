@@ -4,8 +4,8 @@
 
 module Loader (loadExecutable) where
 
-import Utils ()
-import Types
+import Common.Utils ()
+import Common.Types
 import Decoder ()
 import Control.Monad.Catch ( MonadThrow, MonadCatch )
 import Data.Bits ()

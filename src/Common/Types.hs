@@ -1,4 +1,4 @@
-module Types where
+module Common.Types where
 
 import Data.Int
 import Data.Word

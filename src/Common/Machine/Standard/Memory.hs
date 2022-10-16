@@ -1,8 +1,8 @@
 {-# LANGUAGE TupleSections #-}
-module Interpreter.Concrete.Memory where
+module Common.Machine.Standard.Memory where
 
-import Types
-import Utils ( fstWordLe, getBytes )
+import Common.Types
+import Common.Utils ( fstWordLe, getBytes )
 import Data.Int ()
 import Data.Bits ( Bits((.|.), shift) )
 import Data.Word ( Word8, Word32 )

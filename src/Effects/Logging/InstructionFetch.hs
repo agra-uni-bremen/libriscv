@@ -6,9 +6,9 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE DataKinds #-}
-module Interpreter.Logging.InstructionFetch where
+module Effects.Logging.InstructionFetch where
 
-import Types (Address)
+import Common.Types (Address)
 import Decoder (InstructionType)
 import Numeric (showHex)
 import Control.Monad.Freer

@@ -1,4 +1,4 @@
-module Utils
+module Common.Utils
 (
     getBytes
     , fstWordLe

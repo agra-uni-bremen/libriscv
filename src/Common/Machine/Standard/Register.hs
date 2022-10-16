@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
-module Interpreter.Concrete.Register where
+module Common.Machine.Standard.Register where
 
-import Types
+import Common.Types
 import Numeric ( showHex )
 import Data.Ix ( Ix )
 import Data.Word ( Word32 )

@@ -1,9 +1,6 @@
-{-# LANGUAGE TypeOperators #-}
 module Main where
 
 import Loader
-import Instructions
-import Interpreter.Concrete.Executor
 import Data.Word ( Word32 )
 import System.Environment ()
 import GHC.IO.StdHandles ( stdout )
@@ -28,8 +25,10 @@ import Options.Applicative
       Parser )
 import Control.Monad (when)
 import Control.Monad.Freer
-import Interpreter.Logging.InstructionFetch
-import Types (Address)
+import Effects.Logging.InstructionFetch
+import Effects.Machine.Instruction
+import Descriptions.Standard.AST
+import Common.Types (Address)
 
 data CmdArgs = CmdArgs
     { memAddr  :: Word32

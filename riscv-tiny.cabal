@@ -24,14 +24,14 @@ maintainer:         soeren@soeren-tempel.net
 library
     -- Modules included in this executable, other than Main.
     exposed-modules: Decoder
-                   , Types
-                   , Utils
                    , Loader
-                   , Instructions
-                   , Interpreter.Concrete.Register
-                   , Interpreter.Concrete.Memory
-                   , Interpreter.Concrete.Executor
-                   , Interpreter.Logging.InstructionFetch
+                   , Common.Types
+                   , Common.Utils
+                   , Common.Machine.Standard.Register
+                   , Common.Machine.Standard.Memory
+                   , Effects.Logging.InstructionFetch
+                   , Effects.Machine.Instruction 
+                   , Descriptions.Standard.AST
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

@@ -8,7 +8,7 @@ module Decoder where
 import Data.Int ( Int32 )
 import Data.Bits ( Bits((.|.), complement, shiftR, (.&.), shiftL, shift) )
 import Data.Word ( Word32 )
-import Types ( RegIdx )
+import Common.Types ( RegIdx )
 
 -- Types used to represent immediates.
 data Iimm deriving Show -- XXX: Technically 12-bits
