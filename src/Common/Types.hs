@@ -3,8 +3,11 @@ module Common.Types where
 import Data.Int
 import Data.Word
 import Data.Ix
-
+import Conversion
 import qualified Data.ByteString.Lazy as BSL
+
+type Signed32 = Int32
+type Unsigned32 = Word32
 
 -- Type used to represent RISC-V registers.
 type Register = Int32

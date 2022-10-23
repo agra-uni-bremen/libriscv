@@ -31,6 +31,7 @@ library
                    , Common.Machine.Standard.Memory
                    , Effects.Logging.InstructionFetch
                    , Effects.Machine.Instruction 
+                   , Effects.Machine.Expression
                    , Descriptions.Standard.AST
 
     -- LANGUAGE extensions used by modules in this package.
@@ -44,6 +45,7 @@ library
         , exceptions           ^>= 0.10.5
         , melf                 ^>= 1.1.0
         , freer-simple         ^>= 1.2.1.2
+        , conversion           ^>= 1.2.1
 
     hs-source-dirs:   src
     default-language: Haskell2010

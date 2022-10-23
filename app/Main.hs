@@ -29,6 +29,7 @@ import Effects.Logging.InstructionFetch
 import Effects.Machine.Instruction
 import Descriptions.Standard.AST
 import Common.Types (Address)
+import Effects.Machine.Expression (runExpression)
 
 data CmdArgs = CmdArgs
     { memAddr  :: Word32
@@ -66,11 +67,11 @@ main' (CmdArgs memAddr memSize trace putReg fp) = do
     -- Let stack pointer start at end of memory by default.
     let initalSP = fromIntegral $ memAddr + memSize
 
-    let interpreter = 
-            if trace then 
-                runInstructionM state . runLogInstructionFetchM
+    let interpreter =
+            if trace then
+                runInstructionM runExpression state . runLogInstructionFetchM
             else
-                runInstructionM state . runNoLogging
+                runInstructionM runExpression state . runNoLogging
     runM $ interpreter $ buildAST entry initalSP
 
     when putReg $

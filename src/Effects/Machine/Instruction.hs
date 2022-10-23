@@ -11,6 +11,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE DataKinds #-}
+{-# LANGUAGE RankNTypes #-}
 module Effects.Machine.Instruction where
 
 import Data.Bits
@@ -25,14 +26,17 @@ import Control.Monad.Freer.TH
 import Effects.Logging.InstructionFetch
 import qualified Common.Machine.Standard.Register as REG
 import qualified Common.Machine.Standard.Memory as MEM
+import Effects.Machine.Expression
+import Conversion
 
 data Instruction r where
-    ReadRegister :: RegIdx -> Instruction Register
-    WriteRegister :: RegIdx -> Register -> Instruction ()
-    LoadWord :: Address -> Instruction Word32
-    StoreWord :: Address ->  Word32 -> Instruction ()
-    WritePC :: Word32 -> Instruction ()
-    ReadPC :: Instruction Word32
+    ReadRegister :: RegIdx -> Instruction (Expr Register)
+    WriteRegister :: Conversion a (Expr Register) => RegIdx -> a -> Instruction ()
+    LoadWord :: Expr Address -> Instruction (Expr Unsigned32)
+    StoreWord :: Expr Address -> Expr Unsigned32 -> Instruction ()
+    WritePC :: Expr Address -> Instruction ()
+    ReadPC :: Instruction (Expr Address)
+    LiftE :: Expr a -> Instruction a 
     UnexpectedError :: Instruction r
 
 makeEffect ''Instruction
@@ -57,12 +61,13 @@ instance ByteAddrsMem ArchState where
 
 -- Interpreter 
 
-runInstructionM :: forall r effs . LastMember IO effs => ArchState -> Eff (Instruction ': effs) r -> Eff effs r 
-runInstructionM (regFile, mem) = interpretM $ \case
-    (ReadRegister idx) -> REG.readRegister regFile idx
-    (WriteRegister idx reg) -> REG.writeRegister regFile idx reg
-    (LoadWord addr) -> MEM.loadWord mem addr
-    (StoreWord addr w) -> MEM.storeWord mem addr w
-    (WritePC w) -> REG.writePC regFile w
-    ReadPC -> REG.readPC regFile
+runInstructionM :: forall r effs . LastMember IO effs => (forall a . Expr a -> a) -> ArchState -> Eff (Instruction ': effs) r -> Eff effs r 
+runInstructionM evalE (regFile, mem) = interpretM $ \case
+    (ReadRegister idx) -> Signed <$> REG.readRegister regFile idx
+    (WriteRegister idx reg) -> REG.writeRegister regFile idx (evalE $ convert reg)
+    (LoadWord addr) -> Unsigned <$> MEM.loadWord mem (evalE addr)
+    (StoreWord addr w) -> MEM.storeWord mem (evalE addr) (evalE w)
+    (WritePC w) -> REG.writePC regFile (evalE w)
+    ReadPC -> Unsigned <$> REG.readPC regFile
+    LiftE e -> pure $ evalE e
     UnexpectedError -> fail "Unexpected error"
