@@ -1,4 +1,5 @@
 data {{ .InstType }} =
 {{- range $name, $instr := .Instrs }}
-  {{ (makeRecord $name $instr) }}
+  {{ (makeRecord $name $instr) }} |
 {{- end }}
+  InvalidInstruction deriving (Show)
