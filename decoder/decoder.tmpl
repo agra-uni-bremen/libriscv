@@ -1,0 +1,4 @@
+data {{ .InstType }} =
+{{- range $name, $instr := .Instrs }}
+  {{ (makeRecord $name $instr) }}
+{{- end }}
