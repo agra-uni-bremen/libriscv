@@ -79,8 +79,8 @@ buildInstruction = do
     instrWord <- loadWord pc
     let inst = decode instrWord
 
-    logFetch pc inst
-    
+    logFetched pc inst
+
     -- Increment PC before execute', allows setting PC to to
     -- different values in execute' for jumps and branches.
     writePC $ pc + 4
