@@ -54,7 +54,7 @@ func makeRecord(name string, inst Instruction) string {
 }
 
 func makeConstructor(name string, inst Instruction) string {
-	return "ADD {}"
+	return strings.ToUpper(name) + " {}"
 }
 
 func getTmpl(name string) (*template.Template, error) {
