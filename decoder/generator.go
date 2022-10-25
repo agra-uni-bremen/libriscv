@@ -22,12 +22,26 @@ func fieldType(field string) string {
 }
 
 func formatFields(fields []string) string {
-	recordField := make([]string, len(fields))
-	for i, field := range fields {
-		recordField[i] = fmt.Sprintf("%s :: %s", field, fieldType(field))
+	var recordFields []string
+	for _, field := range fields {
+		// Ignore high immediates and only handle the low ones.
+		//
+		// Assumption: For every high immediate field there is an
+		// equally sized low immediate field in `variable_fields`.
+		if strings.HasSuffix(field, "hi") {
+			continue
+		}
+
+		// Use the same record name for all immediate types.
+		if strings.Contains(field, "imm") {
+			field = "imm"
+		}
+
+		field := fmt.Sprintf("%s :: %s", field, fieldType(field))
+		recordFields = append(recordFields, field)
 	}
 
-	return strings.Join(recordField, ", ")
+	return strings.Join(recordFields, ", ")
 }
 
 func makeRecord(name string, inst Instruction) string {
