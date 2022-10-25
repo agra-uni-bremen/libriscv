@@ -4,6 +4,7 @@ import (
 	"os"
 	"fmt"
 	"strings"
+	"path/filepath"
 	"text/template"
 )
 
@@ -76,7 +77,8 @@ func getTmpl(name string) (*template.Template, error) {
 	}
 	tmpl = tmpl.Funcs(funcMap)
 
-	tmpl, err := tmpl.ParseFiles(name)
+	fp := filepath.Join(filepath.Dir(os.Args[0]), name)
+	tmpl, err := tmpl.ParseFiles(fp)
 	if err != nil {
 		return nil, err
 	}
