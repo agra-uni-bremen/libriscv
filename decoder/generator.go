@@ -12,6 +12,10 @@ type GeneratorInput struct {
 	Instrs   Instructions
 }
 
+func toIdentifier(name string) string {
+	return strings.ToUpper(name)
+}
+
 func fieldType(field string) string {
 	// TODO
 	if field == "rs1" || field == "rs2" || field == "rd" {
@@ -45,7 +49,7 @@ func formatFields(fields []string) string {
 }
 
 func makeRecord(name string, inst Instruction) string {
-	identifier := strings.ToUpper(name)
+	identifier := toIdentifier(name)
 	if len(inst.Fields) == 0 {
 		return identifier
 	} else {
@@ -54,7 +58,43 @@ func makeRecord(name string, inst Instruction) string {
 }
 
 func makeConstructor(name string, inst Instruction) string {
-	return strings.ToUpper(name) + " {}"
+	var assigns []string
+	for _, field := range inst.Fields {
+		// Ignore high immediates and only handle the low ones.
+		//
+		// Assumption: For every high immediate field there is an
+		// equally sized low immediate field in `variable_fields`.
+		if strings.HasSuffix(field, "hi") {
+			continue
+		}
+
+		var assign string
+		switch field {
+		case "rs1":
+			assign = "rs1=mkRs1"
+		case "rs2":
+			assign = "rs2=mkRs2"
+		case "rd":
+			assign = "rd=mkRd"
+		case "imm12":
+			assign = "imm=immI"
+		case "imm20":
+			assign = "imm=immU"
+		case "imm12lo":
+			assign = "imm=immS"
+		case "bimm12lo":
+			assign = "imm=immB"
+		case "jimm20":
+			assign = "imm=immJ"
+		default:
+			panic(fmt.Sprintf("unknown field name: %q", field))
+		}
+
+		assign += " instrWord"
+		assigns = append(assigns, assign)
+	}
+
+	return fmt.Sprintf("%s { %s }", toIdentifier(name), strings.Join(assigns, ", "))
 }
 
 func getTmpl(name string) (*template.Template, error) {
