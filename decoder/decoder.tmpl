@@ -89,8 +89,19 @@ mkRd = toEnum . fromIntegral . instrField 7 11
 
 ------------------------------------------------------------------------
 
+----
+-- Match and mask constants taken from the riscv-opcodes repository
+-- For details, see <https://github.com/riscv/riscv-opcodes>.
+----
+{{ range $name, $instr := .Instrs }}
+{{ printf "%s_%s" $name "mask" }} = {{ .RawMask }}
+{{ printf "%s_%s" $name "match" }} = {{ .RawMatch }}
+{{- end }}
+
+------------------------------------------------------------------------
+
 decode :: Word32 -> {{ .InstType }}
 decode instrWord
 {{- range $name, $instr := .Instrs }}
-  | instrWord .&. {{ .RawMask }} == {{ .RawMatch }} = {{ (makeConstructor $name $instr) }}
+  | instrWord .&. {{ printf "%s_%s" $name "mask" }} == {{ printf "%s_%s" $name "match" }} = {{ (makeConstructor $name $instr) }}
 {{- end }}

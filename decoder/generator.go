@@ -12,89 +12,60 @@ type GeneratorInput struct {
 	Instrs   Instructions
 }
 
-func toIdentifier(name string) string {
+// Creates Haskell type constructor identifier from given string.
+func makeId(name string) string {
 	return strings.ToUpper(name)
 }
 
-func fieldType(field string) string {
-	// TODO
-	if field == "rs1" || field == "rs2" || field == "rd" {
-		return "RegIdx"
-	} else {
-		return "Immediate"
-	}
-}
-
-func formatFields(fields []string) string {
-	var recordFields []string
+func formatFields(fields []Field) string {
+	var recFields []string
 	for _, field := range fields {
-		// Ignore high immediates and only handle the low ones.
-		//
-		// Assumption: For every high immediate field there is an
-		// equally sized low immediate field in `variable_fields`.
-		if strings.HasSuffix(field, "hi") {
-			continue
+		var t string
+		switch field.Type {
+		case Register:
+			t = "RegIdx"
+		case Immediate:
+			t = "Immediate"
 		}
 
-		// Use the same record name for all immediate types.
-		if strings.Contains(field, "imm") {
-			field = "imm"
-		}
-
-		field := fmt.Sprintf("%s :: %s", field, fieldType(field))
-		recordFields = append(recordFields, field)
+		recField := fmt.Sprintf("%s :: %s", field.RecordName, t)
+		recFields = append(recFields, recField)
 	}
 
-	return strings.Join(recordFields, ", ")
+	return strings.Join(recFields, ", ")
 }
 
-func makeRecord(name string, inst Instruction) string {
-	identifier := toIdentifier(name)
-	if len(inst.Fields) == 0 {
-		return identifier
+func makeRecord(name string, inst Instruction) (string, error) {
+	instFields, err := inst.Fields()
+	if err != nil {
+		return "", err
+	}
+
+	id := makeId(name)
+	if len(instFields) == 0 {
+		return id, nil
 	} else {
-		return fmt.Sprintf("%s { %s }", identifier, formatFields(inst.Fields))
+		return fmt.Sprintf("%s { %s }", id, formatFields(instFields)), nil
 	}
 }
 
-func makeConstructor(name string, inst Instruction) string {
+func makeConstructor(name string, inst Instruction) (string, error) {
+	const instParam = "instrWord"
+
+	instFields, err := inst.Fields()
+	if err != nil {
+		return "", err
+	}
+
 	var assigns []string
-	for _, field := range inst.Fields {
-		// Ignore high immediates and only handle the low ones.
-		//
-		// Assumption: For every high immediate field there is an
-		// equally sized low immediate field in `variable_fields`.
-		if strings.HasSuffix(field, "hi") {
-			continue
-		}
-
-		var assign string
-		switch field {
-		case "rs1":
-			assign = "rs1=mkRs1"
-		case "rs2":
-			assign = "rs2=mkRs2"
-		case "rd":
-			assign = "rd=mkRd"
-		case "imm12":
-			assign = "imm=immI"
-		case "imm20":
-			assign = "imm=immU"
-		case "imm12lo":
-			assign = "imm=immS"
-		case "bimm12lo":
-			assign = "imm=immB"
-		case "jimm20":
-			assign = "imm=immJ"
-		default:
-			panic(fmt.Sprintf("unknown field name: %q", field))
-		}
-
-		assign += " instrWord"
+	for _, field := range instFields {
+		fnCall := fmt.Sprintf("%s %s", field.ParserFunc, instParam)
+		assign := fmt.Sprintf("%s=%s", field.RecordName, fnCall)
 		assigns = append(assigns, assign)
 	}
 
-	return fmt.Sprintf("%s { %s }", toIdentifier(name), strings.Join(assigns, ", "))
+	constructor := fmt.Sprintf("%s { %s }", makeId(name), strings.Join(assigns, ", "))
+	return constructor, nil
 }
 
 func getTmpl(name string) (*template.Template, error) {

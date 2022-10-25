@@ -3,6 +3,7 @@ package main
 import (
 	"os"
 	"fmt"
+	"strings"
 	"gopkg.in/yaml.v3"
 )
 
@@ -11,7 +12,7 @@ type Instruction struct {
 	Extension []string `yaml:"extension"`
 	RawMask   string   `yaml:"mask"`
 	RawMatch  string   `yaml:"match"`
-	Fields    []string `yaml:"variable_fields"`
+	RawFields []string `yaml:"variable_fields"`
 }
 
 type Instructions map[string]Instruction
@@ -34,6 +35,23 @@ func (i Instruction) Match() (uint, error) {
 	}
 
 	return n, nil
+}
+
+func (i Instruction) Fields() ([]Field, error) {
+	var fields []Field
+	for _, rawField := range i.RawFields {
+		// Ignore high immediates and only handle the low ones.
+		//
+		// Assumption: For every high immediate field there is an
+		// equally sized low immediate field in `variable_fields`.
+		if strings.HasSuffix(rawField, "hi") {
+			continue
+		}
+
+		fields = append(fields, MakeField(rawField))
+	}
+
+	return fields, nil
 }
 
 func ParseInstrs(fp string) (Instructions, error) {
