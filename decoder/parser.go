@@ -1,10 +1,10 @@
 package main
 
 import (
-	"os"
 	"fmt"
-	"strings"
 	"gopkg.in/yaml.v3"
+	"os"
+	"strings"
 )
 
 type Instruction struct {

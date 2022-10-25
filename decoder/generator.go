@@ -1,10 +1,10 @@
 package main
 
 import (
-	"os"
 	"fmt"
-	"strings"
+	"os"
 	"path/filepath"
+	"strings"
 	"text/template"
 )
 
@@ -72,7 +72,7 @@ func makeConstructor(name string, inst Instruction) (string, error) {
 func getTmpl(name string) (*template.Template, error) {
 	tmpl := template.New(name)
 	funcMap := template.FuncMap{
-		"makeRecord": makeRecord,
+		"makeRecord":      makeRecord,
 		"makeConstructor": makeConstructor,
 	}
 	tmpl = tmpl.Funcs(funcMap)

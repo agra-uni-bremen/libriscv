@@ -67,8 +67,8 @@ func MakeField(field string) Field {
 	t := fieldType(field)
 
 	return Field{
-		Type: t,
-		RawName: field,
+		Type:       t,
+		RawName:    field,
 		RecordName: toRecord(field, t),
 		ParserFunc: getParser(field),
 	}
