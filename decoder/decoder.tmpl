@@ -3,3 +3,9 @@ data {{ .InstType }} =
   {{ (makeRecord $name $instr) }} |
 {{- end }}
   InvalidInstruction deriving (Show)
+
+decode :: Word32 -> {{ .InstType }}
+decode instrWord
+{{- range $name, $instr := .Instrs }}
+  | instrWord .&. {{ .RawMask }} == {{ .RawMatch }} = {{ (makeConstructor $name $instr) }}
+{{- end }}

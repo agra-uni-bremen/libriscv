@@ -53,10 +53,15 @@ func makeRecord(name string, inst Instruction) string {
 	}
 }
 
+func makeConstructor(name string, inst Instruction) string {
+	return "ADD {}"
+}
+
 func getTmpl(name string) (*template.Template, error) {
 	tmpl := template.New(name)
 	funcMap := template.FuncMap{
 		"makeRecord": makeRecord,
+		"makeConstructor": makeConstructor,
 	}
 	tmpl = tmpl.Funcs(funcMap)
 
