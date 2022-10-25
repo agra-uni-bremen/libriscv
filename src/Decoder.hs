@@ -1,52 +1,30 @@
-{-# LANGUAGE BinaryLiterals #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE EmptyDataDeriving #-}
+--
+-- !! THIS FILE IS AUTO-GENERATED !!
+--
 
 module Decoder where
 
-import Data.Int ( Int32 )
-import Data.Bits ( Bits((.|.), complement, shiftR, (.&.), shiftL, shift) )
-import Data.Word ( Word32 )
-import Common.Types ( RegIdx )
+import Data.Ix
+import Data.Int
+import Data.Word
+import Data.Bits
+import Common.Types (RegIdx)
 
--- Types used to represent immediates.
-data Iimm deriving Show -- XXX: Technically 12-bits
-data Simm deriving Show
-data Bimm deriving Show -- XXX: Technically 12-bits
-data Uimm deriving Show -- XXX: Technically 20-bits
-data Jimm  deriving Show
+type Immediate = Int32
 
-data Immediate a where 
-    Iimm :: Int32 -> Immediate Iimm
-    Simm :: Int32 -> Immediate Simm
-    Bimm :: Int32 -> Immediate Bimm
-    Uimm :: Int32 -> Immediate Uimm
-    Jimm :: Int32 -> Immediate Jimm
-
-deriving instance Show a => Show (Immediate a)
-
-getImmediate :: Immediate a -> Int32
-getImmediate (Iimm i) = i
-getImmediate (Simm i) = i
-getImmediate (Bimm i) = i
-getImmediate (Uimm i) = i
-getImmediate (Jimm i) = i
-
--- Type used to represent a decoded RISC-V instruction.
 data InstructionType =
-    Add   RegIdx RegIdx RegIdx |
-    And   RegIdx RegIdx RegIdx |
-    Andi  (Immediate Iimm) RegIdx RegIdx |
-    Addi  (Immediate Iimm) RegIdx RegIdx |
-    Lw    (Immediate Iimm) RegIdx RegIdx |
-    Sw    (Immediate Simm) RegIdx RegIdx |
-    Blt   (Immediate Bimm) RegIdx RegIdx |
-    Jal   (Immediate Jimm) RegIdx |
-    Jalr  (Immediate Iimm) RegIdx RegIdx |
-    Lui   RegIdx (Immediate Uimm) |
-    Auipc RegIdx (Immediate Uimm) |
-    InvalidInstruction deriving (Show)
+  ADD { rd :: RegIdx, rs1 :: RegIdx, rs2 :: RegIdx } |
+  ADDI { rd :: RegIdx, rs1 :: RegIdx, imm :: Immediate } |
+  AUIPC { rd :: RegIdx, imm :: Immediate } |
+  BLT { rs1 :: RegIdx, rs2 :: RegIdx, imm :: Immediate } |
+  JAL { rd :: RegIdx, imm :: Immediate } |
+  JALR { rd :: RegIdx, rs1 :: RegIdx, imm :: Immediate } |
+  LUI { rd :: RegIdx, imm :: Immediate } |
+  LW { rd :: RegIdx, rs1 :: RegIdx, imm :: Immediate } |
+  SW { rs1 :: RegIdx, rs2 :: RegIdx, imm :: Immediate } |
+  InvalidInstruction deriving (Show)
+
+------------------------------------------------------------------------
 
 -- | Convert to an unsigned word to a signed number.
 --
@@ -82,200 +60,76 @@ instrField start end w = mask start (end + 1) .&. shiftR w start
 
 ------------------------------------------------------------------------
 
-opcode :: Word32 -> Word32
-opcode = instrField 0 6
+immI :: Word32 -> Immediate
+immI = fromIntegral . fromTwoscomp 12 . instrField 20 31
 
-funct3 :: Word32 -> Word32
-funct3 = instrField 12 14
-
-funct7 :: Word32 -> Word32
-funct7 = instrField 25 31
-
-immI :: Word32 -> Immediate Iimm
-immI = Iimm . fromIntegral . fromTwoscomp 12 . instrField 20 31
-
-immS :: Word32 -> Immediate Simm
-immS i = Simm $ fromTwoscomp 12 $ fromIntegral $
+immS :: Word32 -> Immediate
+immS i = fromTwoscomp 12 $ fromIntegral $
     (instrField 25 31 i `shift` 5) .|.  instrField 07 11 i
 
-immB :: Word32 -> Immediate Bimm
-immB i = Bimm $ fromTwoscomp 13 $
+immB :: Word32 -> Immediate
+immB i = fromTwoscomp 13 $
          (instrField 31 31 i `shift` 12)
      .|. (instrField 07 07 i `shift` 11)
      .|. (instrField 25 30 i `shift` 05)
      .|. (instrField 08 11 i `shift` 01)
 
-immU :: Word32 -> Immediate Uimm
-immU i = Uimm $ fromIntegral $ instrField 12 31 i `shiftL` 12
+immU :: Word32 -> Immediate
+immU i = fromIntegral $ instrField 12 31 i `shiftL` 12
 
-immJ :: Word32 -> Immediate Jimm
-immJ i = Jimm $ fromTwoscomp 21 $
+immJ :: Word32 -> Immediate
+immJ i = fromTwoscomp 21 $
         (instrField 31 31 i `shift` 20)
      .|. (instrField 12 19 i `shift` 12)
      .|. (instrField 20 20 i `shift` 11)
      .|. (instrField 21 30 i `shift` 1)
 
-rs1 :: Word32 -> RegIdx
-rs1 = toEnum . fromIntegral . instrField 15 19
+mkRs1 :: Word32 -> RegIdx
+mkRs1 = toEnum . fromIntegral . instrField 15 19
 
-rs2 :: Word32 -> RegIdx
-rs2 = toEnum . fromIntegral . instrField 20 24
+mkRs2 :: Word32 -> RegIdx
+mkRs2 = toEnum . fromIntegral . instrField 20 24
 
-rd :: Word32 -> RegIdx
-rd = toEnum . fromIntegral . instrField 7 11
-
-------------------------------------------------------------------------
-
--- Opcodes
-opReg :: Word32
-opReg    = 0b0110011
-
-opImm :: Word32
-opImm    = 0b0010011
-
-opLoad :: Word32
-opLoad   = 0b0000011
-
-opStore :: Word32
-opStore  = 0b0100011
-
-opBranch :: Word32
-opBranch = 0b1100011
-
-opJal :: Word32
-opJal    = 0b1101111
-
-opJalr :: Word32
-opJalr   = 0b1100111
-
-opLui :: Word32
-opLui    = 0b0110111
-
-opAuipc :: Word32
-opAuipc  = 0b0010111
-
--- Funct3 for register-immediate instructions.
-f3AddI :: Word32
-f3AddI = 0b000
-
-f3AndI :: Word32
-f3AndI = 0b111
-
--- Funct3 for register-register instructions.
-f3Add :: Word32
-f3Add = 0b000
-
-f3And :: Word32
-f3And = 0b111
-
--- Funct3 for load instructions.
-f3LoadW :: Word32
-f3LoadW = 0b010
-
--- Funct3 for store instructions.
-f3StoreW :: Word32
-f3StoreW = 0b010
-
---- Funct3 for branch instructions.
-f3Blt :: Word32
-f3Blt = 0b100
-
--- Type for an R-Type instruction (three register operands).
-type RTypeInstr = RegIdx -> RegIdx -> RegIdx -> InstructionType
-
-invalidRtype :: RTypeInstr
-invalidRtype _ _ _ = InvalidInstruction
-
--- Type for an I-Type instruction (two register, one immediate).
-type ITypeInstr = Immediate Iimm -> RegIdx -> RegIdx -> InstructionType
-
-invalidItype :: ITypeInstr
-invalidItype _ _ _ = InvalidInstruction
-
--- Type for an S-Type instruction (two register, one S-Immediate).
-type STypeInstr = Immediate Simm -> RegIdx -> RegIdx -> InstructionType
-
-invalidStype :: STypeInstr
-invalidStype _ _ _ = InvalidInstruction
-
--- Type for a B-Type instruction (branches).
-type BTypeInstr = Immediate Bimm -> RegIdx -> RegIdx -> InstructionType
-
-invalidBtype :: BTypeInstr
-invalidBtype _ _ _ = InvalidInstruction
+mkRd :: Word32 -> RegIdx
+mkRd = toEnum . fromIntegral . instrField 7 11
 
 ------------------------------------------------------------------------
 
--- Decode integer register-register instructions.
-decodeReg :: Word32 -> RTypeInstr
-decodeReg instr
-    | f3 == f3Add = Add
-    | f3 == f3And = And
-    | otherwise    = invalidRtype
-    where
-        f3 = funct3 instr
+----
+-- Match and mask constants taken from the riscv-opcodes repository
+-- For details, see <https://github.com/riscv/riscv-opcodes>.
+----
 
--- Decode integer register-immediate instructions.
-decodeImm :: Word32 -> ITypeInstr
-decodeImm instr
-    | f3 == f3AddI = Addi
-    | f3 == f3AndI = Andi
-    | otherwise = invalidItype
-    where
-        f3 = funct3 instr
+add_mask = 0xfe00707f
+add_match = 0x33
+addi_mask = 0x707f
+addi_match = 0x13
+auipc_mask = 0x7f
+auipc_match = 0x17
+blt_mask = 0x707f
+blt_match = 0x4063
+jal_mask = 0x7f
+jal_match = 0x6f
+jalr_mask = 0x707f
+jalr_match = 0x67
+lui_mask = 0x7f
+lui_match = 0x37
+lw_mask = 0x707f
+lw_match = 0x2003
+sw_mask = 0x707f
+sw_match = 0x2023
 
--- Decode load instructions.
-decodeLoad :: Word32 -> ITypeInstr
-decodeLoad instr
-    | f3 == f3LoadW = Lw
-    where
-        f3 = funct3 instr
+------------------------------------------------------------------------
 
--- Decode store instructions.
-decodeStore :: Word32 -> STypeInstr
-decodeStore instr
-    | f3 == f3StoreW = Sw
-    where
-        f3 = funct3 instr
-
-decodeBranch :: Word32 -> BTypeInstr
-decodeBranch instr
-    | f3 == f3Blt = Blt
-    | otherwise = invalidBtype
-    where
-        f3 = funct3 instr
-
-decode' :: Word32 -> Word32 -> InstructionType
-decode' instr opcode
-    | opcode == opReg    = decodeReg instr (rd instr) (rs1 instr) (rs2 instr)
-    | opcode == opImm    = decodeImm instr (immI instr) (rd instr) (rs1 instr)
-    | opcode == opLoad   = decodeLoad instr (immI instr) (rd instr) (rs1 instr)
-    | opcode == opStore  = decodeStore instr (immS instr) (rs1 instr) (rs2 instr)
-    | opcode == opBranch = decodeBranch instr (immB instr) (rs1 instr) (rs2 instr)
-    | opcode == opJal    = Jal (immJ instr) (rd instr)
-    | opcode == opJalr   = Jalr (immI instr) (rs1 instr) (rd instr)
-    | opcode == opLui    = Lui (rd instr) (immU instr)
-    | opcode == opAuipc  = Auipc (rd instr) (immU instr)
-    | otherwise           = InvalidInstruction
-
--- | Decode a RISC-V RV32i instruction.
---
--- Examples:
---
--- >>> decode 0x00a605b3
--- Add A1 A2 A0
--- >>> decode 0x02a30293
--- Addi 42 T0 T1
--- >>> decode 0xffc52503
--- Lw (-4) A0 A0
--- >>> decode 0x00000297
--- Auipc T0 0
--- >>> decode 0x00102423
--- Sw 8 Zero RA
--- >>> decode 0xffdff06f
--- Jal (-4) Zero
--- >>> decode 0x00b54263
--- Blt 4 A0 A1
---
 decode :: Word32 -> InstructionType
-decode instr = decode' instr $ opcode instr
+decode instrWord
+  | instrWord .&. add_mask == add_match = ADD { rd=mkRd instrWord, rs1=mkRs1 instrWord, rs2=mkRs2 instrWord }
+  | instrWord .&. addi_mask == addi_match = ADDI { rd=mkRd instrWord, rs1=mkRs1 instrWord, imm=immI instrWord }
+  | instrWord .&. auipc_mask == auipc_match = AUIPC { rd=mkRd instrWord, imm=immU instrWord }
+  | instrWord .&. blt_mask == blt_match = BLT { rs1=mkRs1 instrWord, rs2=mkRs2 instrWord, imm=immB instrWord }
+  | instrWord .&. jal_mask == jal_match = JAL { rd=mkRd instrWord, imm=immJ instrWord }
+  | instrWord .&. jalr_mask == jalr_match = JALR { rd=mkRd instrWord, rs1=mkRs1 instrWord, imm=immI instrWord }
+  | instrWord .&. lui_mask == lui_match = LUI { rd=mkRd instrWord, imm=immU instrWord }
+  | instrWord .&. lw_mask == lw_match = LW { rd=mkRd instrWord, rs1=mkRs1 instrWord, imm=immI instrWord }
+  | instrWord .&. sw_mask == sw_match = SW { rs1=mkRs1 instrWord, rs2=mkRs2 instrWord, imm=immS instrWord }
+  | True = InvalidInstruction
