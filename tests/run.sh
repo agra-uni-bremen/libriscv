@@ -16,18 +16,26 @@ abort() {
 compile() {
 	[ $# -eq 1 ] || return 1
 
+	# Cross-compilation flags for rv32i.
+	flags="--target=${TRIPLET} -march=rv32i -mabi=ilp32 -nostdlib"
+
 	# Compile test cases with clang (easier cross-compilation).
 	# Also: Use implicit make(1) rules to avoid re-compilations.
-	make --quiet \
-		CC=clang \
-		ASFLAGS="--target=${TRIPLET} -march=rv32i -mabi=ilp32 -nostdlib" \
-		"${1}"
+	make --quiet CC=clang LDFLAGS="$flags" CFLAGS="$flags" ASFLAGS="$flags" "${1}"
 }
 
 runtest() {
 	[ $# -eq 2 ] || return 1
 
-	riscv-tiny -r "${1}" 1>"${TESTDIR}/out"
+	riscv-tiny -r "${1}" 1>"${TESTDIR}/out.in"
+
+	# Post process $outfile to remove toolchain-specific output.
+	if [ -x post-process.sh ]; then
+		./post-process.sh < "${TESTDIR}/out.in" > "${TESTDIR}/out"
+	else
+		mv "${TESTDIR}/out.in" "${TESTDIR}/out"
+	fi
+
 	diff -ur "${2}" "${TESTDIR}/out"
 }
 
