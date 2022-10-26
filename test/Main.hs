@@ -1,9 +1,15 @@
-module Main where
+import Test.Tasty
+import Test.Tasty.HUnit
 
-import Test.DocTest
+import DecoderTest
+import ArchStateTest
 
-main :: IO ()
-main = doctest ["app/Register.hs",
-                "app/Decoder.hs",
-                "app/Memory.hs",
-                "app/Utils.hs"]
+main = defaultMain tests
+
+tests :: TestTree
+tests = testGroup "Tests"
+  [
+    decoderTests
+  , registerTests
+  , memoryTests
+  ]
