@@ -57,20 +57,19 @@ Example usage:
 
 ## Tests
 
-There are currently some minor [doctest][doctest github] tests.
-These can be run using the following command:
+There are currently some minor unit tests.
 
 	$ cabal test
 
-Furthermore, some minimal integration tests are available in `./tests`.
+Furthermore, some minimal integration tests are available in `./golden`.
 These tests require `riscv-tiny` in `$PATH` and the following software:
 
 * [GNU Make][make web]
 * [Clang][clang web] with rv32i support
 
-If these dependencies are installed, run the tests using:
+If these dependencies are installed, run the golden tests using:
 
-	$ ./tests/run.sh
+	$ ./golden/run.sh
 
 ## Related Work
 
@@ -102,7 +101,6 @@ Public License for more details.
 You should have received a copy of the GNU General Public License along
 with this program. If not, see <https://www.gnu.org/licenses/>.
 
-[doctest github]: https://github.com/sol/doctest-haskell
 [cabal web]: https://www.haskell.org/cabal/
 [make web]: https://www.gnu.org/software/make
 [clang web]: https://clang.llvm.org/
