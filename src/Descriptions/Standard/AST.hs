@@ -87,5 +87,5 @@ buildInstruction = do
 
     buildInstruction' pc inst
 
-buildAST :: (Member Instruction r, Member LogInstructionFetch r) => Word32 -> Eff r ()
-buildAST entry = writePC entry >> buildInstruction
+buildAST :: (Member Instruction r, Member LogInstructionFetch r) => Word32 -> Register -> Eff r ()
+buildAST entry sp = writePC entry >> writeRegister SP sp >> buildInstruction
