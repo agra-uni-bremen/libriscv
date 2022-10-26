@@ -16,35 +16,18 @@ data {{ .InstType }} =
 {{- range $name, $instr := .Instrs }}
   {{ (makeRecord $name $instr) }} |
 {{- end }}
-  InvalidInstruction deriving (Show)
+  InvalidInstruction deriving (Eq,Show)
 
 ------------------------------------------------------------------------
 
--- | Convert to an unsigned word to a signed number.
---
--- Examples:
---
--- >>> fromTwoscomp 32 0xffffffff
--- -1
--- >>> fromTwoscomp 3 4
--- -4
--- >>> fromTwoscomp 3 3
--- 3
+-- Convert to an unsigned word (in two's complement) to a signed number.
 fromTwoscomp :: Word32 -> Word32 -> Int32
 fromTwoscomp numBits n = fromIntegral $ -(n .&. mask) + (n .&. complement mask)
     where
         mask :: Word32
         mask = 2^(numBits - 1)
 
--- | Extract a bit field from a RISC-V instruction word.
---
--- Examples:
---
--- >>> let word = 0x23421337
--- >>> instrField 24 32 word
--- 35
--- >>> instrField 0 7 word
--- 55
+-- Extract a bit field from a RISC-V instruction word.
 instrField :: Int -> Int -> Word32 -> Word32
 instrField start end w = mask start (end + 1) .&. shiftR w start
     where

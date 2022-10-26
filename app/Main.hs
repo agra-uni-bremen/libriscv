@@ -63,12 +63,15 @@ main' (CmdArgs memAddr memSize trace putReg fp) = do
     state <- mkArchState memAddr memSize
     entry <- loadExecutable fp state
 
+    -- Let stack pointer start at end of memory by default.
+    let initalSP = fromIntegral $ memAddr + memSize
+
     let interpreter = 
             if trace then 
                 runInstructionM state . runLogInstructionFetchM
             else
                 runInstructionM state . runNoLogging
-    runM $ interpreter $ buildAST entry 
+    runM $ interpreter $ buildAST entry initalSP
 
     when putReg $
         dumpState state

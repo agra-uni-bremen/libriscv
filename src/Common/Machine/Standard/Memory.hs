@@ -21,13 +21,7 @@ mkMemory addr size = fmap (addr, ) (newArray_ (0, size - 1) :: IO (IOUArray Addr
 toMemAddr :: Memory -> Address -> Address
 toMemAddr (startAddr, _) addr = addr - startAddr
 
--- | Size of the memory
---
--- Examples:
---
--- >>> mem <- mkMemory 0x0 512
--- >>> memSize mem
--- 512
+-- Returns the size of the memory in bytes.
 memSize :: Memory -> IO Word32
 memSize = fmap ((+1) . snd) .  getBounds . snd
 
@@ -50,47 +44,17 @@ loadWord mem addr = do
         readWord :: Address -> Word32 -> IO Word32
         readWord addr off = fromIntegral <$> loadByte mem (toMemAddr mem addr + off)
 
--- | Store a byte at the given address in memory.
---
--- Examples:
---
--- >>> mem <- mkMemory 0x0 512
--- >>> storeByte mem 0x4 0xab
--- >>> loadByte mem 0x04
--- 171
---
+-- Store a byte at the given address in memory.
 storeByte :: Memory -> Address -> Word8 -> IO ()
 storeByte mem@(_, array) addr = writeArray array $ toMemAddr mem addr
 
--- | Store a word at the given address in memory.
---
--- Examples:
---
--- >>> mem <- mkMemory 0x0 256
--- >>> storeWord mem 8 0xdeadbeef
--- >>> loadWord mem 8
--- 3735928559
--- >>> loadByte mem 8
--- 222
--- >>> loadByte mem 9
--- 173
--- >>> loadByte mem 11
--- 239
---
+-- Store a word at the given address in memory.
 storeWord :: Memory -> Address -> Word32 -> IO ()
 storeWord mem addr =
     mapM_ (\(off, val) -> storeByte mem (addr + off) val)
         . zip [(0 :: Address)..4] . getBytes
 
--- | Write a ByteString to memory in little endian byteorder.
---
--- Examples:
---
--- >>> let bs = BSL.pack [0xde, 0xad, 0xbe, 0xef]
--- >>> mem <- mkMemory 0x0 32
--- >>> storeByteString mem 0x0 bs
--- >>> loadWord mem 0x0
--- 4022250974
+-- Write a ByteString to memory in little endian byteorder.
 storeByteString :: Memory -> Address -> BSL.ByteString -> IO ()
 storeByteString mem addr bs =
     mapM_ (\(off, val) -> storeWord mem (addr + off) $ fstWordLe val)

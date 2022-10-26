@@ -32,21 +32,8 @@ dumpRegs = fmap (foldr (\(a, v) s -> show a ++ "\t= 0x" ++ showHex (fromIntegral
 readRegister :: RegisterFile -> RegIdx -> IO Register
 readRegister = readArray . regs
 
--- | Write register at given register index.
---   Writes to the zero register are ignored.
---
--- Examples:
---
--- >>> r <- mkRegFile
--- >>> writeRegister r A1 23
--- >>> readRegister r A1
--- 23
---
--- >>> r <- mkRegFile
--- >>> writeRegister r Zero 42
--- >>> readRegister r Zero
--- 0
---
+-- Write register at given register index.
+-- Writes to the zero register are ignored.
 writeRegister :: RegisterFile -> RegIdx -> Register -> IO ()
 writeRegister RegisterFile{regs=r} idx val = unless (idx == Zero) $ writeArray r idx val
 
@@ -54,15 +41,6 @@ writeRegister RegisterFile{regs=r} idx val = unless (idx == Zero) $ writeArray r
 readPC :: RegisterFile -> IO Word32
 readPC = readIORef . pc
 
--- | Write a new program counter value.
---
--- Examples:
---
--- >>> r <- mkRegFile
--- >>> readPC r
--- 0
--- >>> writePC r 42
--- >>> readPC r
--- 42
+-- Write a new program counter value.
 writePC :: RegisterFile -> Word32 -> IO ()
 writePC = writeIORef . pc
