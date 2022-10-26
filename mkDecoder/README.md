@@ -10,9 +10,9 @@ Furthermore, this directory contains a [Go](https://golang.org) tool which gener
 
 In order to utilize the tool run the following commands:
 
-    $ cd decoder/
+    $ cd mkDecoder/
     $ go build
-    $ ./decoder instr_dict.yaml ../src/Decoder.hs
+    $ ./mkDecoder instr_dict.yaml ../src/Decoder.hs
 
 These commands will write the Haskell decoder implementation to `../src/Decoder.hs`.
 

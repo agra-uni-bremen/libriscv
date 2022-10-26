@@ -1,4 +1,4 @@
-module github.com/nmeum/libriscv/decoder
+module github.com/nmeum/libriscv/mkDecoder
 
 go 1.19
 
