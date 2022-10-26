@@ -8,6 +8,7 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE RecordWildCards #-}
 module Descriptions.Standard.AST (buildAST) where
 
 import Data.Bits
@@ -23,54 +24,53 @@ import Effects.Logging.InstructionFetch
 import Effects.Machine.Instruction 
 
 buildInstruction' :: (Member Instruction r, Member LogInstructionFetch r) => Word32 -> InstructionType -> Eff r ()
-buildInstruction' _ (Add rd rs1 rs2) = do
+buildInstruction' _ ADD{..} = do
     r1 <- readRegister rs1  
     r2 <- readRegister rs2
     writeRegister rd $ r1 + r2
     buildInstruction
-buildInstruction' _ (Addi imm rd rs1) = do
+buildInstruction' _ ADDI{..} = do
     r1 <- readRegister rs1
-    writeRegister rd $ r1 + getImmediate imm
+    writeRegister rd $ r1 + imm
     buildInstruction
-buildInstruction' _ (Lw imm rd rs1) = do
+buildInstruction' _ LW{..} = do
     r1 <- readRegister rs1
     -- TODO: Alignment handling
-    word <- loadWord $ fromIntegral (r1 + getImmediate imm)
+    word <- loadWord $ fromIntegral (r1 + imm)
     writeRegister rd $ fromIntegral word
     buildInstruction
-buildInstruction' _ (Sw imm rs1 rs2) = do
+buildInstruction' _ SW{..} = do
     r1 <- readRegister rs1
     r2 <- readRegister rs2
     -- TODO: Alignment handling
-    storeWord (fromIntegral $ r1 + getImmediate imm) $ fromIntegral r2
+    storeWord (fromIntegral $ r1 + imm) $ fromIntegral r2
     buildInstruction
-buildInstruction' pc (Blt imm rs1 rs2) = do
+buildInstruction' pc BLT{..} = do
     r1 <- readRegister rs1
     r2 <- readRegister rs2
     -- TODO: Alignment handling
     when (r1 < r2) $
-        writePC $ fromIntegral $ fromIntegral pc + getImmediate imm
+        writePC $ fromIntegral $ fromIntegral pc + imm
     buildInstruction
-buildInstruction' pc (Jal imm rd) = do
+buildInstruction' pc JAL{..} = do
     nextInstr <- readPC
     -- TODO: Alignment handling
-    writePC $ fromIntegral $ fromIntegral pc + getImmediate imm
+    writePC $ fromIntegral $ fromIntegral pc + imm
     writeRegister rd $ fromIntegral nextInstr
     buildInstruction
-buildInstruction' pc (Jalr imm rs1 rd) = do
+buildInstruction' pc JALR{..} = do
     nextInstr <- readPC
     rs1Val <- readRegister rs1
-    writePC $ fromIntegral (rs1Val + getImmediate imm) .&. 0xfffffffe
+    writePC $ fromIntegral (rs1Val + imm) .&. 0xfffffffe
     writeRegister rd $ fromIntegral nextInstr
     buildInstruction
-buildInstruction' _ (Lui rd imm) = do
-    writeRegister rd $ getImmediate imm
+buildInstruction' _ LUI{..} = do
+    writeRegister rd $ imm
     buildInstruction
-buildInstruction' pc (Auipc rd imm) = do
-    writeRegister rd $ fromIntegral pc + getImmediate imm
+buildInstruction' pc AUIPC{..} = do
+    writeRegister rd $ fromIntegral pc + imm
     buildInstruction
 buildInstruction' _ InvalidInstruction = pure () -- XXX: ignore for now
-buildInstruction' _ _ = unexpectedError
 
 buildInstruction :: (Member Instruction r, Member LogInstructionFetch r) => Eff r ()
 buildInstruction = do

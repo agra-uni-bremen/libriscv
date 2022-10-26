@@ -12,16 +12,10 @@ import Common.Types (RegIdx)
 
 type Immediate = Int32
 
-data InstructionType =
-  ADD { rd :: RegIdx, rs1 :: RegIdx, rs2 :: RegIdx } |
-  ADDI { rd :: RegIdx, rs1 :: RegIdx, imm :: Immediate } |
-  AUIPC { rd :: RegIdx, imm :: Immediate } |
-  BLT { rs1 :: RegIdx, rs2 :: RegIdx, imm :: Immediate } |
-  JAL { rd :: RegIdx, imm :: Immediate } |
-  JALR { rd :: RegIdx, rs1 :: RegIdx, imm :: Immediate } |
-  LUI { rd :: RegIdx, imm :: Immediate } |
-  LW { rd :: RegIdx, rs1 :: RegIdx, imm :: Immediate } |
-  SW { rs1 :: RegIdx, rs2 :: RegIdx, imm :: Immediate } |
+data {{ .InstType }} =
+{{- range $name, $instr := .Instrs }}
+  {{ (makeRecord $name $instr) }} |
+{{- end }}
   InvalidInstruction deriving (Show)
 
 ------------------------------------------------------------------------
@@ -99,37 +93,16 @@ mkRd = toEnum . fromIntegral . instrField 7 11
 -- Match and mask constants taken from the riscv-opcodes repository
 -- For details, see <https://github.com/riscv/riscv-opcodes>.
 ----
-
-add_mask = 0xfe00707f
-add_match = 0x33
-addi_mask = 0x707f
-addi_match = 0x13
-auipc_mask = 0x7f
-auipc_match = 0x17
-blt_mask = 0x707f
-blt_match = 0x4063
-jal_mask = 0x7f
-jal_match = 0x6f
-jalr_mask = 0x707f
-jalr_match = 0x67
-lui_mask = 0x7f
-lui_match = 0x37
-lw_mask = 0x707f
-lw_match = 0x2003
-sw_mask = 0x707f
-sw_match = 0x2023
+{{ range $name, $instr := .Instrs }}
+{{ printf "%s_%s" $name "mask" }} = {{ .RawMask }}
+{{ printf "%s_%s" $name "match" }} = {{ .RawMatch }}
+{{- end }}
 
 ------------------------------------------------------------------------
 
-decode :: Word32 -> InstructionType
+decode :: Word32 -> {{ .InstType }}
 decode instrWord
-  | instrWord .&. add_mask == add_match = ADD { rd=mkRd instrWord, rs1=mkRs1 instrWord, rs2=mkRs2 instrWord }
-  | instrWord .&. addi_mask == addi_match = ADDI { rd=mkRd instrWord, rs1=mkRs1 instrWord, imm=immI instrWord }
-  | instrWord .&. auipc_mask == auipc_match = AUIPC { rd=mkRd instrWord, imm=immU instrWord }
-  | instrWord .&. blt_mask == blt_match = BLT { rs1=mkRs1 instrWord, rs2=mkRs2 instrWord, imm=immB instrWord }
-  | instrWord .&. jal_mask == jal_match = JAL { rd=mkRd instrWord, imm=immJ instrWord }
-  | instrWord .&. jalr_mask == jalr_match = JALR { rd=mkRd instrWord, rs1=mkRs1 instrWord, imm=immI instrWord }
-  | instrWord .&. lui_mask == lui_match = LUI { rd=mkRd instrWord, imm=immU instrWord }
-  | instrWord .&. lw_mask == lw_match = LW { rd=mkRd instrWord, rs1=mkRs1 instrWord, imm=immI instrWord }
-  | instrWord .&. sw_mask == sw_match = SW { rs1=mkRs1 instrWord, rs2=mkRs2 instrWord, imm=immS instrWord }
+{{- range $name, $instr := .Instrs }}
+  | instrWord .&. {{ printf "%s_%s" $name "mask" }} == {{ printf "%s_%s" $name "match" }} = {{ (makeConstructor $name $instr) }}
+{{- end }}
   | True = InvalidInstruction
