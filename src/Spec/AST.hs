@@ -104,5 +104,5 @@ buildInstruction = do
 
     buildInstruction' pc inst
 
-buildAST :: forall v r . (Conversion v Word32, Member (Instruction v) r, Member LogInstructionFetch r) => Expr v -> Expr v -> Eff r ()
-buildAST entry sp = writePC @v entry >> writeRegister @v SP sp >> buildInstruction @v
+buildAST :: forall v r . (Conversion v Word32, Member (Instruction v) r, Member LogInstructionFetch r) => v -> v -> Eff r ()
+buildAST entry sp = writePC @v (FromImm entry) >> writeRegister @v SP (FromImm sp) >> buildInstruction @v

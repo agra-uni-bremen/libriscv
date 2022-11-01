@@ -29,7 +29,6 @@ import Spec.AST
 import Common.Types (Address)
 import Effects.Logging.InstructionFetch
 import Machine.Standard.Interpreter
-import Spec.Expr
 
 data CmdArgs = CmdArgs
     { memAddr  :: Word32
@@ -72,7 +71,7 @@ main' (CmdArgs memAddr memSize trace putReg fp) = do
                 runInstructionM runExpression state . runLogInstructionFetchM
             else
                 runInstructionM runExpression state . runNoLogging
-    runM $ interpreter $ buildAST (FromImm entry) (FromImm initalSP)
+    runM $ interpreter $ buildAST entry initalSP
 
     when putReg $
         dumpState state
