@@ -20,8 +20,8 @@ data LogInstructionFetch r where
 makeEffect ''LogInstructionFetch
 
 -- default log interpreter
-runLogInstructionFetchM :: forall effs r . LastMember IO effs => Eff (LogInstructionFetch  ': effs) r -> Eff effs r
-runLogInstructionFetchM = interpretM $ \case  
+runLogInstructionFetchM :: forall effs r . LastMember IO effs => Eff (LogInstructionFetch ': effs) r -> Eff effs r
+runLogInstructionFetchM = interpretM $ \case
     LogFetched addr inst -> putStrLn $ showHex addr $ ": " ++ show inst
 
 runNoLogging :: forall effs r . Eff (LogInstructionFetch ': effs) r -> Eff effs r

@@ -1,45 +1,25 @@
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE TypeOperators #-}
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE PolyKinds #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE RankNTypes #-}
-module Effects.Machine.Instruction where
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE TypeFamilies #-}
+module Machine.Standard.Interpreter where
 
+import Conversion
 import Data.Bits
-import Common.Types (Address)
-import Common.Types
-import Decoder
 import Data.Word
-import Control.Monad (when)
-import Control.Monad.Freer 
+import Common.Types
+import Spec.Expr
+import Spec.AST
+import Control.Monad
+import Control.Monad.Freer
 import Control.Monad.Freer.TH
 
-import Effects.Logging.InstructionFetch
-import qualified Common.Machine.Standard.Register as REG
-import qualified Common.Machine.Standard.Memory as MEM
-import Effects.Machine.Expression
-import Conversion
-
-data Instruction r where
-    ReadRegister :: RegIdx -> Instruction (Expr Register)
-    WriteRegister :: Conversion a (Expr Register) => RegIdx -> a -> Instruction ()
-    LoadWord :: Expr Address -> Instruction (Expr Unsigned32)
-    StoreWord :: Expr Address -> Expr Unsigned32 -> Instruction ()
-    WritePC :: Expr Address -> Instruction ()
-    ReadPC :: Instruction (Expr Address)
-    LiftE :: Expr a -> Instruction a 
-    UnexpectedError :: Instruction r
-
-makeEffect ''Instruction
+import qualified Machine.Standard.Register as REG
+import qualified Machine.Standard.Memory as MEM
 
 -- Architectural state of the executor.
 type ArchState = (REG.RegisterFile, MEM.Memory)
@@ -59,7 +39,13 @@ instance ByteAddrsMem ArchState where
 
 ------------------------------------------------------------------------
 
--- Interpreter 
+runExpression :: Expr a -> a
+runExpression (Signed r) = r
+runExpression (Unsigned a) = a
+runExpression (LossyConvert e) = fromIntegral $ runExpression e
+runExpression (e :+: e') = runExpression e + runExpression (convert e')
+runExpression (e :&: e') = runExpression e .&. runExpression (convert e')
+runExpression (e :<: e') = runExpression e < runExpression e'
 
 runInstructionM :: forall r effs . LastMember IO effs => (forall a . Expr a -> a) -> ArchState -> Eff (Instruction ': effs) r -> Eff effs r 
 runInstructionM evalE (regFile, mem) = interpretM $ \case

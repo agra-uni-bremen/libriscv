@@ -27,12 +27,12 @@ library
                    , Loader
                    , Common.Types
                    , Common.Utils
-                   , Common.Machine.Standard.Register
-                   , Common.Machine.Standard.Memory
                    , Effects.Logging.InstructionFetch
-                   , Effects.Machine.Instruction 
-                   , Effects.Machine.Expression
-                   , Descriptions.Standard.AST
+                   , Machine.Standard.Register
+                   , Machine.Standard.Memory
+                   , Machine.Standard.Interpreter
+                   , Spec.AST
+                   , Spec.Expr
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

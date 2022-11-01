@@ -8,25 +8,39 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE RecordWildCards #-}
-module Descriptions.Standard.AST (buildAST) where
+{-# LANGUAGE TemplateHaskell #-}
+module Spec.AST where
 
 import Data.Bits
 import Common.Types
 import Decoder
 import Data.Word
-import Control.Monad.Freer 
+import Control.Monad.Freer
 import Control.Monad.Freer.TH
 
-import Effects.Logging.InstructionFetch
-import Effects.Machine.Instruction 
-import Effects.Machine.Expression
+import Spec.Expr
 import Data.Int
 import Common.Utils (whenM)
+import Effects.Logging.InstructionFetch
 import Conversion
+
+data Instruction r where
+    ReadRegister :: RegIdx -> Instruction (Expr Register)
+    WriteRegister :: Conversion a (Expr Register) => RegIdx -> a -> Instruction ()
+    LoadWord :: Expr Address -> Instruction (Expr Unsigned32)
+    StoreWord :: Expr Address -> Expr Unsigned32 -> Instruction ()
+    WritePC :: Expr Address -> Instruction ()
+    ReadPC :: Instruction (Expr Address)
+    LiftE :: Expr a -> Instruction a 
+    UnexpectedError :: Instruction r
+
+makeEffect ''Instruction
+
+------------------------------------------------------------------------
 
 buildInstruction' :: (Member Instruction r, Member LogInstructionFetch r) => Expr Word32 -> InstructionType -> Eff r ()
 buildInstruction' _ ADD{..} = do
-    r1 <- readRegister rs1  
+    r1 <- readRegister rs1
     r2 <- readRegister rs2
     writeRegister rd $ r1 :+: r2
     buildInstruction
@@ -49,7 +63,7 @@ buildInstruction' pc BLT{..} = do
     r1 <- readRegister rs1
     r2 <- readRegister rs2
     -- TODO: Alignment handling
-    whenM (liftE $ r1 :<: r2) $ 
+    whenM (liftE $ r1 :<: r2) $
         writePC $ LossyConvert $ LossyConvert @Unsigned32 @Signed32 pc :+: imm
     buildInstruction
 buildInstruction' pc JAL{..} = do
@@ -71,6 +85,8 @@ buildInstruction' pc AUIPC{..} = do
     writeRegister rd $ LossyConvert @Unsigned32 @Signed32 pc :+: imm
     buildInstruction
 buildInstruction' _ InvalidInstruction = pure () -- XXX: ignore for now
+
+------------------------------------------------------------------------
 
 buildInstruction :: (Member Instruction r, Member LogInstructionFetch r) => Eff r ()
 buildInstruction = do

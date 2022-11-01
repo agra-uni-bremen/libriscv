@@ -25,11 +25,10 @@ import Options.Applicative
       Parser )
 import Control.Monad (when)
 import Control.Monad.Freer
-import Effects.Logging.InstructionFetch
-import Effects.Machine.Instruction
-import Descriptions.Standard.AST
+import Spec.AST
 import Common.Types (Address)
-import Effects.Machine.Expression (runExpression)
+import Effects.Logging.InstructionFetch
+import Machine.Standard.Interpreter
 
 data CmdArgs = CmdArgs
     { memAddr  :: Word32

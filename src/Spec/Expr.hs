@@ -12,25 +12,22 @@
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE PostfixOperators #-}
 {-# LANGUAGE StandaloneDeriving #-}
-module Effects.Machine.Expression where
+module Spec.Expr where
 
 import Data.Bits
-import Common.Types
 import Data.Int
 import Data.Word
 import Control.Monad (when)
 import Control.Monad.Freer 
 import Control.Monad.Freer.TH
 
+import Common.Types
 import Effects.Logging.InstructionFetch
-import qualified Common.Machine.Standard.Register as REG
-import qualified Common.Machine.Standard.Memory as MEM
 import Data.Function ((&))
 import Decoder (Immediate)
 import Control.Monad.Freer.Error
 import Control.Monad.Freer.State
 import Conversion
-
 
 data Expr a where
     Signed :: Signed32 -> Expr Signed32
@@ -55,15 +52,3 @@ instance Conversion (Expr Signed32) Signed32 where
 
 instance Conversion (Expr Unsigned32) Unsigned32 where
     convert (Unsigned v) = v
-
-------------------------------------------------------------------------
-
--- Interpreter
-
-runExpression :: Expr a -> a
-runExpression (Signed r) = r
-runExpression (Unsigned a) = a
-runExpression (LossyConvert e) = fromIntegral $ runExpression e
-runExpression (e :+: e') = runExpression e + runExpression (convert e')
-runExpression (e :&: e') = runExpression e .&. runExpression (convert e')
-runExpression (e :<: e') = runExpression e < runExpression e'

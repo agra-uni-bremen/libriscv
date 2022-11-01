@@ -1,5 +1,5 @@
 {-# LANGUAGE TupleSections #-}
-module Common.Machine.Standard.Memory where
+module Machine.Standard.Memory where
 
 import Common.Types
 import Common.Utils ( fstWordLe, getBytes )

@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
-module Common.Machine.Standard.Register where
+module Machine.Standard.Register where
 
 import Common.Types
 import Numeric ( showHex )

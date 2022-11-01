@@ -4,8 +4,8 @@ import Test.Tasty
 import Test.Tasty.HUnit
 
 import Common.Types (RegIdx(..))
-import Common.Machine.Standard.Memory
-import Common.Machine.Standard.Register
+import Machine.Standard.Memory
+import Machine.Standard.Register
 
 import qualified Data.ByteString.Lazy as BSL
 
