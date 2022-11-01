@@ -10,6 +10,7 @@ module Machine.Standard.Interpreter where
 
 import Conversion
 import Data.Bits
+import Data.Int
 import Data.Word
 import Common.Types
 import Spec.Expr
@@ -40,6 +41,7 @@ instance ByteAddrsMem ArchState where
 ------------------------------------------------------------------------
 
 runExpression :: Expr a -> a
+runExpression (SExt r) = (fromIntegral (convert r :: Unsigned32) :: Int32)
 runExpression (Signed r) = r
 runExpression (Unsigned a) = a
 runExpression (LossyConvert e) = fromIntegral $ runExpression e
@@ -47,13 +49,12 @@ runExpression (e :+: e') = runExpression e + runExpression (convert e')
 runExpression (e :&: e') = runExpression e .&. runExpression (convert e')
 runExpression (e :<: e') = runExpression e < runExpression e'
 
-runInstructionM :: forall r effs . LastMember IO effs => (forall a . Expr a -> a) -> ArchState -> Eff (Instruction ': effs) r -> Eff effs r 
+runInstructionM :: forall r effs . LastMember IO effs => (forall a . Expr a -> a) -> ArchState -> Eff (Instruction Word32 ': effs) r -> Eff effs r
 runInstructionM evalE (regFile, mem) = interpretM $ \case
-    (ReadRegister idx) -> Signed <$> REG.readRegister regFile idx
-    (WriteRegister idx reg) -> REG.writeRegister regFile idx (evalE $ convert reg)
-    (LoadWord addr) -> Unsigned <$> MEM.loadWord mem (evalE addr)
+    (ReadRegister idx) -> fromIntegral <$> REG.readRegister regFile idx
+    (WriteRegister idx reg) -> REG.writeRegister regFile idx (fromIntegral $ evalE reg)
+    (LoadWord addr) -> fromIntegral <$> MEM.loadWord mem (evalE addr)
     (StoreWord addr w) -> MEM.storeWord mem (evalE addr) (evalE w)
     (WritePC w) -> REG.writePC regFile (evalE w)
-    ReadPC -> Unsigned <$> REG.readPC regFile
+    ReadPC -> REG.readPC regFile
     LiftE e -> pure $ evalE e
-    UnexpectedError -> fail "Unexpected error"

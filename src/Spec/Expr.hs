@@ -30,10 +30,11 @@ import Control.Monad.Freer.State
 import Conversion
 
 data Expr a where
+    SExt :: (Conversion a Unsigned32) => a -> Expr Signed32
     Signed :: Signed32 -> Expr Signed32
     Unsigned :: Unsigned32 -> Expr Unsigned32
     LossyConvert :: (Integral a, Num b) => Expr a -> Expr b
-    (:+:) :: (Num a, Conversion b (Expr a)) => Expr a -> b -> Expr a 
+    (:+:) :: (Num a, Conversion b (Expr a)) => Expr a -> b -> Expr a
     (:&:) :: (Bits a, Conversion b (Expr a)) => Expr a -> b -> Expr a
     (:<:) :: Ord a => Expr a -> Expr a -> Expr Bool
 
