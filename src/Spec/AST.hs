@@ -42,22 +42,22 @@ buildInstruction' :: forall v r. (Conversion v Word32, Member (Instruction v) r,
 buildInstruction' _ ADD{..} = do
     r1 <- readRegister @v rs1
     r2 <- readRegister @v rs2
-    writeRegister @v rd $ (FromImm r1) `AddS` (FromImm r2)
+    writeRegister @v rd $ r1 `addSImm` r2
     buildInstruction @v
 buildInstruction' _ ADDI{..} = do
     r1 <- readRegister @v rs1
-    writeRegister @v rd $ (FromImm r1) `AddS` (FromInt imm)
+    writeRegister @v rd $ r1 `addSInt` imm
     buildInstruction @v
 buildInstruction' _ LW{..} = do
     r1 <- readRegister @v rs1
     -- TODO: Alignment handling
-    word <- loadWord @v $ (FromImm r1) `AddS` (FromInt imm)
+    word <- loadWord @v $ r1 `addSInt` imm
     writeRegister @v rd (FromImm word)
     buildInstruction @v
 buildInstruction' _ SW{..} = do
     r1 <- readRegister @v rs1
     r2 <- readRegister @v rs2
-    storeWord @v ((FromImm r1) `AddS` (FromInt imm)) $ (FromImm r2)
+    storeWord @v (r1 `addSInt` imm) $ FromImm r2
     buildInstruction @v
 buildInstruction' pc BLT{..} = do
     r1 <- readRegister @v rs1
@@ -70,20 +70,20 @@ buildInstruction' pc BLT{..} = do
 buildInstruction' pc JAL{..} = do
     nextInstr <- readPC
     -- TODO: Alignment handling
-    writePC @v $ (FromImm pc) `AddS` (FromInt imm)
+    writePC @v $ pc `addSInt` imm
     writeRegister @v rd (FromImm nextInstr)
     buildInstruction @v
 buildInstruction' pc JALR{..} = do
     nextInstr <- readPC
     r1 <- readRegister @v rs1
-    writePC @v $ ((FromImm r1) `AddS` (FromInt imm)) `BAnd` (FromUInt 0xfffffffe)
+    writePC @v $ (r1 `addSInt` imm) `BAnd` (FromUInt 0xfffffffe)
     writeRegister @v rd $ FromImm nextInstr
     buildInstruction @v
 buildInstruction' _ LUI{..} = do
     writeRegister @v rd $ FromInt imm
     buildInstruction @v
 buildInstruction' pc AUIPC{..} = do
-    writeRegister @v rd $ (FromImm pc) `AddS` (FromInt imm)
+    writeRegister @v rd $ pc `addSInt` imm
     buildInstruction @v
 buildInstruction' _ InvalidInstruction = pure () -- XXX: ignore for now
 

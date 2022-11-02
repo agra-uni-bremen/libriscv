@@ -1,17 +1,3 @@
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE PolyKinds #-}
-{-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE PostfixOperators #-}
-{-# LANGUAGE StandaloneDeriving #-}
 module Spec.Expr where
 
 import Data.Bits
@@ -37,3 +23,9 @@ data Expr a =
     AddU (Expr a) (Expr a) |
     AddS (Expr a) (Expr a) |
     Slt (Expr a) (Expr a)
+
+addSImm :: a -> a -> Expr a
+addSImm a b = (FromImm a) `AddS` (FromImm b)
+
+addSInt :: a -> Int32 -> Expr a
+addSInt a b = (FromImm a) `AddS` (FromInt b)
