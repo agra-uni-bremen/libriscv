@@ -21,7 +21,7 @@ import Control.Monad.Freer.TH
 
 import Spec.Expr
 import Data.Int
-import Common.Utils (whenM)
+import Common.Utils (whenMword)
 import Effects.Logging.InstructionFetch
 import Conversion
 
@@ -64,7 +64,7 @@ buildInstruction' pc BLT{..} = do
     r2 <- readRegister @v rs2
     -- TODO: Alignment handling
     let cond = (FromImm r1) `Slt` (FromImm r2)
-    whenM (liftE cond >>= pure . convert) $
+    whenMword (liftE cond >>= pure . convert) $
         writePC @v $ (FromImm pc) `AddS` (FromInt imm)
     buildInstruction @v
 buildInstruction' pc JAL{..} = do

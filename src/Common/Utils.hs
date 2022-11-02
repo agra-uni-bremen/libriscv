@@ -2,7 +2,7 @@ module Common.Utils
 (
     getBytes
     , fstWordLe
-    , whenM
+    , whenMword
 )
 where
 
@@ -24,5 +24,9 @@ fstWordLe b = fromIntegral (BSL.index b 0)
     .|. (fromIntegral (BSL.index b 2) `shift` 16)
     .|. (fromIntegral (BSL.index b 3) `shift` 24)
 
-whenM :: Monad m => m Word32 -> m () -> m()
-whenM mb act = mb >>= (pure . (==) 1) >>= flip when act
+-- Check if a Word32 represents a true value.
+wordPred :: Word32 -> Bool
+wordPred = (==) 1
+
+whenMword :: Monad m => m Word32 -> m () -> m()
+whenMword mb act = mb >>= (pure . wordPred) >>= flip when act
