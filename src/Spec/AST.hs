@@ -3,7 +3,6 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -37,6 +36,12 @@ data Instruction v r where
 makeEffect ''Instruction
 
 ------------------------------------------------------------------------
+
+-- We require type annotations here to workaround a limitation of
+-- GHC type inference in conjunction with freer-simple. Alternatively,
+-- we could use a proxy type.
+--
+-- See: https://github.com/lexi-lambda/freer-simple/issues/7
 
 buildInstruction' :: forall v r. (Conversion v Word32, Member (Instruction v) r, Member LogInstructionFetch r) => v -> InstructionType -> Eff r ()
 buildInstruction' _ ADD{..} = do
