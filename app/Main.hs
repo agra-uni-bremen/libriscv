@@ -72,7 +72,7 @@ main' (CmdArgs memAddr memSize trace putReg fp) = do
                 runInstructionM runExpression state . runLogInstructionFetchM
             else
                 runInstructionM runExpression state . runNoLogging
-    runM $ interpreter $ buildAST (Unsigned entry) (Unsigned initalSP)
+    runM $ interpreter $ buildAST (FromImm entry) (FromImm initalSP)
 
     when putReg $
         dumpState state

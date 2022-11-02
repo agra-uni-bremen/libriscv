@@ -24,5 +24,5 @@ fstWordLe b = fromIntegral (BSL.index b 0)
     .|. (fromIntegral (BSL.index b 2) `shift` 16)
     .|. (fromIntegral (BSL.index b 3) `shift` 24)
 
-whenM :: Monad m => m Bool -> m () -> m() 
-whenM mb act = mb >>= flip when act
+whenM :: Monad m => m Word32 -> m () -> m()
+whenM mb act = mb >>= (pure . (==) 1) >>= flip when act

@@ -38,72 +38,71 @@ makeEffect ''Instruction
 
 ------------------------------------------------------------------------
 
-buildInstruction' :: forall v r. (Num v, Ord v, Bits v, Conversion v (Expr v), Conversion v Address, Member (Instruction v) r, Member LogInstructionFetch r) => v -> InstructionType -> Eff r ()
+buildInstruction' :: forall v r. (Conversion v Word32, Member (Instruction v) r, Member LogInstructionFetch r) => v -> InstructionType -> Eff r ()
 buildInstruction' _ ADD{..} = do
     r1 <- readRegister @v rs1
     r2 <- readRegister @v rs2
-    writeRegister @v rd $ (convert r1) :+: r2
+    writeRegister @v rd $ (FromImm r1) `AddS` (FromImm r2)
     buildInstruction @v
 buildInstruction' _ ADDI{..} = do
     r1 <- readRegister @v rs1
-    writeRegister @v rd $ LossyConvert ((SExt r1) :+: imm)
+    writeRegister @v rd $ (FromImm r1) `AddS` (FromInt imm)
     buildInstruction @v
 buildInstruction' _ LW{..} = do
     r1 <- readRegister @v rs1
     -- TODO: Alignment handling
-    word <- loadWord @v $ LossyConvert ((SExt r1) :+: imm)
-    writeRegister @v rd $ convert word
+    word <- loadWord @v $ (FromImm r1) `AddS` (FromInt imm)
+    writeRegister @v rd (FromImm word)
     buildInstruction @v
 buildInstruction' _ SW{..} = do
     r1 <- readRegister @v rs1
     r2 <- readRegister @v rs2
-    storeWord @v (LossyConvert $ (SExt r1) :+: imm) $ (convert @v r2)
+    storeWord @v ((FromImm r1) `AddS` (FromInt imm)) $ (FromImm r2)
     buildInstruction @v
--- buildInstruction' pc BLT{..} = do
---     r1 <- readRegister @v rs1
---     r2 <- readRegister @v rs2
---     -- TODO: Alignment handling
---     let cond = (convert r1 :: Expr v) :<: (convert r2 :: Expr v)
---     whenM (liftE cond) $
---         writePC @v $ LossyConvert ((SExt pc) :+: imm)
---     buildInstruction @v
+buildInstruction' pc BLT{..} = do
+    r1 <- readRegister @v rs1
+    r2 <- readRegister @v rs2
+    -- TODO: Alignment handling
+    let cond = (FromImm r1) `Slt` (FromImm r2)
+    whenM (liftE cond >>= pure . convert) $
+        writePC @v $ (FromImm pc) `AddS` (FromInt imm)
+    buildInstruction @v
 buildInstruction' pc JAL{..} = do
     nextInstr <- readPC
     -- TODO: Alignment handling
-    writePC @v $ LossyConvert ((SExt pc) :+: imm)
-    writeRegister @v rd $ (convert @v nextInstr)
+    writePC @v $ (FromImm pc) `AddS` (FromInt imm)
+    writeRegister @v rd (FromImm nextInstr)
     buildInstruction @v
 buildInstruction' pc JALR{..} = do
     nextInstr <- readPC
     r1 <- readRegister @v rs1
-    writePC @v $ (LossyConvert ((SExt r1) :+: imm)) :&: (0xfffffffe :: v)
-    writeRegister @v rd $ (convert @v nextInstr)
+    writePC @v $ ((FromImm r1) `AddS` (FromInt imm)) `BAnd` (FromUInt 0xfffffffe)
+    writeRegister @v rd $ FromImm nextInstr
     buildInstruction @v
 buildInstruction' _ LUI{..} = do
-    writeRegister @v rd $ LossyConvert (Signed imm)
+    writeRegister @v rd $ FromInt imm
     buildInstruction @v
 buildInstruction' pc AUIPC{..} = do
-    writeRegister @v rd $ LossyConvert ((SExt pc) :+: imm)
+    writeRegister @v rd $ (FromImm pc) `AddS` (FromInt imm)
     buildInstruction @v
 buildInstruction' _ InvalidInstruction = pure () -- XXX: ignore for now
 
 ------------------------------------------------------------------------
 
-buildInstruction :: forall v r . (Num v, Ord v, Bits v, Conversion v (Expr v), Conversion v Address, Member (Instruction v) r, Member LogInstructionFetch r) => Eff r ()
+buildInstruction :: forall v r . (Conversion v Word32, Member (Instruction v) r, Member LogInstructionFetch r) => Eff r ()
 buildInstruction = do
     -- fetch & decode instruction at current PC
     pc <- readPC @v
-    let pcExpr = (convert pc :: Expr v)
-    instrWord <- loadWord pcExpr
+    instrWord <- loadWord $ FromImm pc
     let inst = decode $ convert instrWord
 
     logFetched (convert pc) inst
 
     -- Increment PC before execute', allows setting PC to to
     -- different values in execute' for jumps and branches.
-    writePC $ pcExpr :+: (4 :: v)
+    writePC $ (FromImm pc) `AddU` (FromInt 4)
 
     buildInstruction' pc inst
 
-buildAST :: forall v r . (Num v, Ord v, Bits v, Conversion v (Expr v), Conversion v Address, Member (Instruction v) r, Member LogInstructionFetch r) => Expr v -> Expr v -> Eff r ()
+buildAST :: forall v r . (Conversion v Word32, Member (Instruction v) r, Member LogInstructionFetch r) => Expr v -> Expr v -> Eff r ()
 buildAST entry sp = writePC @v entry >> writeRegister @v SP sp >> buildInstruction @v

@@ -29,27 +29,11 @@ import Control.Monad.Freer.Error
 import Control.Monad.Freer.State
 import Conversion
 
-data Expr a where
-    SExt :: (Conversion a Unsigned32) => a -> Expr Signed32
-    Signed :: Signed32 -> Expr Signed32
-    Unsigned :: Unsigned32 -> Expr Unsigned32
-    LossyConvert :: (Integral a, Num b) => Expr a -> Expr b
-    (:+:) :: (Num a, Conversion b (Expr a)) => Expr a -> b -> Expr a
-    (:&:) :: (Bits a, Conversion b (Expr a)) => Expr a -> b -> Expr a
-    (:<:) :: Ord a => Expr a -> Expr a -> Expr Bool
-
-infixl 6 :+:
-infixl 7 :&:
-infix 4 :<:
-
-instance Conversion Signed32 (Expr Signed32) where
-    convert = Signed
-
-instance Conversion Unsigned32 (Expr Unsigned32) where
-    convert = Unsigned
-
-instance Conversion (Expr Signed32) Signed32 where
-    convert (Signed v) = v
-
-instance Conversion (Expr Unsigned32) Unsigned32 where
-    convert (Unsigned v) = v
+data Expr a =
+    FromImm a |
+    FromInt Int32 |
+    FromUInt Word32 |
+    BAnd (Expr a) (Expr a) |
+    AddU (Expr a) (Expr a) |
+    AddS (Expr a) (Expr a) |
+    Slt (Expr a) (Expr a)

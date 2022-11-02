@@ -40,16 +40,20 @@ instance ByteAddrsMem ArchState where
 
 ------------------------------------------------------------------------
 
-runExpression :: Expr a -> a
-runExpression (SExt r) = (fromIntegral (convert r :: Unsigned32) :: Int32)
-runExpression (Signed r) = r
-runExpression (Unsigned a) = a
-runExpression (LossyConvert e) = fromIntegral $ runExpression e
-runExpression (e :+: e') = runExpression e + runExpression (convert e')
-runExpression (e :&: e') = runExpression e .&. runExpression (convert e')
-runExpression (e :<: e') = runExpression e < runExpression e'
+runExpression :: Expr Word32 -> Word32
+runExpression (FromImm a) = a
+runExpression (FromInt i) = fromIntegral i
+runExpression (FromUInt i) = i
+runExpression (BAnd e1 e2) = (runExpression e1) .&. (runExpression e2)
+runExpression (AddU e1 e2) = (runExpression e1) + (runExpression e2)
+runExpression (AddS e1 e2) = fromIntegral $
+    (fromIntegral (runExpression e1) :: Int32) + (fromIntegral (runExpression e2))
+runExpression (Slt e1 e2) = if
+    (fromIntegral (runExpression e1) :: Int32) < (fromIntegral (runExpression e2))
+        then 1
+        else 0
 
-runInstructionM :: forall r effs . LastMember IO effs => (forall a . Expr a -> a) -> ArchState -> Eff (Instruction Word32 ': effs) r -> Eff effs r
+runInstructionM :: forall r effs . LastMember IO effs => (Expr Word32 -> Word32) -> ArchState -> Eff (Instruction Word32 ': effs) r -> Eff effs r
 runInstructionM evalE (regFile, mem) = interpretM $ \case
     (ReadRegister idx) -> fromIntegral <$> REG.readRegister regFile idx
     (WriteRegister idx reg) -> REG.writeRegister regFile idx (fromIntegral $ evalE reg)
