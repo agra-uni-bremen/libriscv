@@ -22,11 +22,11 @@ import qualified Machine.Standard.Register as REG
 import qualified Machine.Standard.Memory as MEM
 
 -- Architectural state of the executor.
-type ArchState = (REG.RegisterFile, MEM.Memory)
+type ArchState = (REG.RegisterFile Register, MEM.Memory)
 
 mkArchState :: Address -> Word32 -> IO ArchState
 mkArchState memStart memSize = do
-    reg <- REG.mkRegFile
+    reg <- REG.mkRegFile 0
     mem <- MEM.mkMemory memStart memSize
     pure (reg, mem)
 

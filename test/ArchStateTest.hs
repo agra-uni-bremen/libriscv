@@ -3,27 +3,31 @@ module ArchStateTest where
 import Test.Tasty
 import Test.Tasty.HUnit
 
+import Data.Word
 import Common.Types (RegIdx(..))
 import Machine.Standard.Memory
 import Machine.Standard.Register
 
 import qualified Data.ByteString.Lazy as BSL
 
+mkReg :: IO (RegisterFile Word32)
+mkReg = mkRegFile 0
+
 registerTests = testGroup "RegisterFile Tests"
   [ testCase "Read and write general-puropose register" $ do
-      r <- mkRegFile
+      r <- mkReg
       writeRegister r A1 23
       regVal <- readRegister r A1
       assertEqual "" 23 regVal
 
   , testCase "Write zero register" $ do
-      r <- mkRegFile
+      r <- mkReg
       writeRegister r Zero 42
       regVal <- readRegister r Zero
       assertEqual "" 0 regVal
 
   , testCase "Read and write program counter" $ do
-      r <- mkRegFile
+      r <- mkReg
       initVal <- readPC r
       assertEqual "PC is zero initially" 0 initVal
 
