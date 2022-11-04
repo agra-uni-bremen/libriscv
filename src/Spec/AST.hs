@@ -69,7 +69,7 @@ buildInstruction' pc BLT{..} = do
     r2 <- readRegister @v rs2
     -- TODO: Alignment handling
     let cond = (FromImm r1) `Slt` (FromImm r2)
-    whenMword (liftE cond >>= pure . convert) $
+    whenMword (convert <$> liftE cond) $
         writePC @v $ (FromImm pc) `AddS` (FromInt imm)
     buildInstruction @v
 buildInstruction' pc JAL{..} = do
