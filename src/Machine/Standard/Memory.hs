@@ -1,6 +1,8 @@
 {-# LANGUAGE TupleSections #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 module Machine.Standard.Memory where
 
+import Control.Monad
 import Common.Types
 import Common.Utils ( fstWordLe, getBytes )
 import Data.Int ()
@@ -25,6 +27,11 @@ toMemAddr (startAddr, _) addr = addr - startAddr
 memSize :: Memory -> IO Word32
 memSize = fmap ((+1) . snd) .  getBounds . snd
 
+-- Converts a list of bytes to a Word32 in MSB.
+bytesToWord :: [Word8] -> Word32
+bytesToWord bytes = foldl (\x (byte,idx) -> (fromIntegral byte `shift` (idx * 8)) .|. x)
+    0 (zip bytes $ reverse [0..(length bytes) - 1])
+
 ------------------------------------------------------------------------
 
 loadByte :: Memory -> Address -> IO Word8
@@ -32,17 +39,8 @@ loadByte = readArray . snd
 
 loadWord :: Memory -> Address -> IO Word32
 loadWord mem addr = do
-    -- TODO: Refactor, by reading bytes as a list and transforming it.
-    b0 <- readWord addr 3
-    b1 <- readWord addr 2
-    b2 <- readWord addr 1
-    b3 <- readWord addr 0
-
-    pure $ b0 .|. (b1 `shift` 8) .|. (b2 `shift` 16) .|. (b3 `shift` 24)
-
-    where
-        readWord :: Address -> Word32 -> IO Word32
-        readWord addr off = fromIntegral <$> loadByte mem (toMemAddr mem addr + off)
+    bytes <- mapM (\off -> loadByte mem $ toMemAddr mem (addr + off)) [0..3]
+    pure $ bytesToWord bytes
 
 -- Store a byte at the given address in memory.
 storeByte :: Memory -> Address -> Word8 -> IO ()
