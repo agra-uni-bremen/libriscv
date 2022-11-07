@@ -50,6 +50,16 @@ memoryTests = testGroup "Memory Tests"
       storeByte m 0x4 0xab
       loadByte m 0x04 >>= assertEqual "" 0xab
 
+  , testCase "StoreWord in between" $ do
+      m <- mkMemory 0x0 12
+      storeWord m 0 0xffffffff
+      storeWord m 4 0xffffffff
+      storeWord m 8 0xffffffff
+      storeWord m 0x2 0x12345678
+      loadWord m 0 >>= assertEqual "1st word" 0xffff1234
+      loadWord m 4 >>= assertEqual "2nd word" 0x5678ffff
+      loadWord m 8 >>= assertEqual "3rd word" 0xffffffff
+
   , testCase "Store and load word" $ do
       m <- mkMemory 0x0 256
       storeWord m 8 0xdeadbeef
