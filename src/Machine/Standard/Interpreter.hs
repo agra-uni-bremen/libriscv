@@ -1,4 +1,5 @@
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -18,6 +19,7 @@ import Spec.AST
 import Control.Monad
 import Control.Monad.Freer
 import Control.Monad.Freer.TH
+import Numeric (showHex)
 
 import qualified Machine.Standard.Register as REG
 import qualified Machine.Standard.Memory as MEM
@@ -33,7 +35,7 @@ mkArchState memStart memSize = do
 
 dumpState :: ArchState -> IO ()
 dumpState (r, m) =
-    REG.dumpRegs r >>= putStr
+    REG.dumpRegs (showHex . fromIntegral @Int32 @Word32) r >>= putStr
 
 instance ByteAddrsMem ArchState where
     storeByteString (_, mem) = MEM.storeByteString mem

@@ -2,7 +2,6 @@
 module Machine.Standard.Register where
 
 import Common.Types
-import Numeric ( showHex )
 import Data.Ix ( Ix )
 import Data.Word ( Word32 )
 import Data.Int ( Int32 )
@@ -21,8 +20,8 @@ mkRegFile :: a -> IO (RegisterFile a)
 mkRegFile defValue = RegisterFile <$> newIORef 0 <*> newArray (minBound, maxBound) defValue
 
 -- Dump all register values.
-dumpRegs :: (Integral a) => RegisterFile a -> IO String
-dumpRegs = fmap (foldr (\(a, v) s -> show a ++ "\t= 0x" ++ showHex (fromIntegral v :: Word32) "\n" ++ s) ""
+dumpRegs :: (a -> ShowS) -> RegisterFile a -> IO String
+dumpRegs sh = fmap (foldr (\(a, v) s -> show a ++ "\t= 0x" ++ ((sh v) "\n") ++ s) ""
         . zip [(minBound :: RegIdx)..maxBound]) . getElems . regs
 
 ------------------------------------------------------------------------
