@@ -1,7 +1,6 @@
 module Common.Utils
 (
-    getBytes
-    , fstWordLe
+    fstWordLe
     , whenMword
 )
 where
@@ -10,12 +9,6 @@ import Data.Word ( Word8, Word32 )
 import Data.Bits ( Bits((.|.), shiftR, (.&.), shift) )
 import qualified Data.ByteString.Lazy as BSL
 import Control.Monad (when)
-
--- Split a 32-bit word into four octets.
-getBytes :: Word32 -> [Word8]
-getBytes w = map (\off -> fromIntegral $ shiftR w off .&. 0xff) offs
-    where
-        offs = reverse $ take 4 $ iterate (+8) 0
 
 -- Read the first 32-bit word in little endian from a bytestring.
 fstWordLe :: BSL.ByteString -> Word32
