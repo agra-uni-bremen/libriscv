@@ -50,12 +50,12 @@ storeByte mem@(_, array) addr = writeArray array $ toMemAddr mem addr
 storeWord :: Memory -> Address -> Word32 -> IO ()
 storeWord mem addr =
     mapM_ (\(off, val) -> storeByte mem (addr + off) val)
-        . zip [(0 :: Address)..4] . getBytes
+        . zip [0..] . getBytes
 
 -- Write a ByteString to memory in little endian byteorder.
 storeByteString :: Memory -> Address -> BSL.ByteString -> IO ()
 storeByteString mem addr bs =
     mapM_ (\(off, val) -> storeWord mem (addr + off) $ fstWordLe val)
-        $ zip [0,4..(fromIntegral $ BSL.length bs)] lst
+        $ zip [0..] lst
     where
         lst = takeWhile (not . BSL.null) $ iterate (BSL.drop 4) bs
