@@ -26,3 +26,4 @@ square:
 
 end:
 	add zero, zero, zero
+	.word 0xffffffff
