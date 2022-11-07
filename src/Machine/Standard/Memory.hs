@@ -38,9 +38,8 @@ loadByte :: Memory -> Address -> IO Word8
 loadByte = readArray . snd
 
 loadWord :: Memory -> Address -> IO Word32
-loadWord mem addr = do
-    bytes <- mapM (\off -> loadByte mem $ toMemAddr mem (addr + off)) [0..3]
-    pure $ bytesToWord bytes
+loadWord mem addr = bytesToWord <$>
+    mapM (\off -> loadByte mem $ toMemAddr mem (addr + off)) [0..3]
 
 -- Store a byte at the given address in memory.
 storeByte :: Memory -> Address -> Word8 -> IO ()
