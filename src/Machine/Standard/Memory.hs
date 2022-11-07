@@ -54,11 +54,11 @@ memSize = fmap ((+1) . snd) .  getBounds . snd
 ------------------------------------------------------------------------
 
 loadByte :: Memory a -> Address -> IO a
-loadByte = readArray . snd
+loadByte mem@(_, array) = readArray array . toMemAddr mem
 
 loadWord :: Storable b a => Memory a -> Address -> IO b
 loadWord mem addr = toWord <$>
-    mapM (\off -> loadByte mem $ toMemAddr mem (addr + off)) [0..3]
+    mapM (\off -> loadByte mem $ addr + off) [0..3]
 
 -- Store a byte at the given address in memory.
 storeByte :: Memory a -> Address -> a -> IO ()
