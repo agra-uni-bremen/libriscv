@@ -74,4 +74,7 @@ storeWord mem addr =
 storeByteString :: (Conversion Word8 a) => Memory a -> Address -> BSL.ByteString -> IO ()
 storeByteString mem addr bs =
     mapM_ (\(off, val) -> storeByte mem (addr + off) (convert val))
-        $ zip [0..] (reverse $ BSL.unpack bs)
+        $ zip [0..] $ concat lsb
+    where
+        lst = takeWhile (not . null) $ iterate (drop 4) (BSL.unpack bs) -- Group bytes as words
+        lsb = map (reverse . take 4) lst                                -- Perform byteswap on words

@@ -74,4 +74,12 @@ memoryTests = testGroup "Memory Tests"
 
       storeByteString m 0x0 bs
       (loadWord m 0x0 :: IO Word32) >>= assertEqual "" 0xefbeadde
+
+  , testCase "Write ByteString with multiple bytes" $ do
+      m <- mkMemory 0x0 8 :: IO (Memory Word8)
+      let bs = BSL.pack [0xde, 0xad, 0xbe, 0xef, 0x12, 0x23, 0x34, 0xff]
+
+      storeByteString m 0x0 bs
+      (loadWord m 0x0 :: IO Word32) >>= assertEqual "" 0xefbeadde
+      (loadWord m 0x4 :: IO Word32) >>= assertEqual "" 0xff342312
   ]
