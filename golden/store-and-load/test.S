@@ -13,3 +13,6 @@ _start:
 	sw a0, MEMORY_OFFSET(t0)
 
 	lw a0, MEMORY_OFFSET(t0)
+
+	# Invalid instruction to cause exit
+	.word 0xffffffff
