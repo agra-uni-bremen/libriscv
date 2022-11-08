@@ -55,6 +55,10 @@ runExpression (Slt e1 e2) = if
     (fromIntegral (runExpression e1) :: Int32) < (fromIntegral (runExpression e2))
         then 1
         else 0
+runExpression (SltU e1 e2) = if
+    (runExpression e1) < (runExpression e2)
+        then 1
+        else 0
 
 runInstructionM :: forall r effs . LastMember IO effs => (Expr Word32 -> Word32) -> ArchState -> Eff (Instruction Word32 ': effs) r -> Eff effs r
 runInstructionM evalE (regFile, mem) = interpretM $ \case

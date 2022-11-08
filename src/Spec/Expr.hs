@@ -22,7 +22,8 @@ data Expr a =
     BAnd (Expr a) (Expr a) |
     AddU (Expr a) (Expr a) |
     AddS (Expr a) (Expr a) |
-    Slt (Expr a) (Expr a)
+    Slt  (Expr a) (Expr a) |
+    SltU (Expr a) (Expr a)
 
 addSImm :: a -> a -> Expr a
 addSImm a b = (FromImm a) `AddS` (FromImm b)

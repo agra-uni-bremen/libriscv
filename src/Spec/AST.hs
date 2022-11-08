@@ -58,6 +58,11 @@ buildInstruction' _ SLTI{..} = do
     let cond = (FromImm r1) `Slt` (FromInt imm)
     writeRegister @v rd $ convert cond
     buildInstruction @v
+buildInstruction' _ SLTIU{..} = do
+    r1 <- readRegister @v rs1
+    let cond = (FromImm r1) `SltU` (FromInt imm)
+    writeRegister @v rd $ convert cond
+    buildInstruction @v
 buildInstruction' _ LW{..} = do
     r1 <- readRegister @v rs1
     -- TODO: Alignment handling
