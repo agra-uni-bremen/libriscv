@@ -1,6 +1,6 @@
 # libriscv
 
-An extensible implementation of the RISC-V ISA for rapid prototyping of hardware verification and security techniques.
+An extensible implementation of the RISC-V ISA for rapid prototyping of software verification techniques and hardware security mechanisms.
 
 # Status
 
