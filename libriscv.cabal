@@ -1,5 +1,5 @@
 cabal-version:      2.4
-name:               riscv-tiny
+name:               libriscv
 version:            0.1.0.0
 
 -- A short (one-line) description of the package.
@@ -57,7 +57,7 @@ executable riscv-tiny
     hs-source-dirs:       app
     build-depends:
         base                    >= 4.15.0.0
-        , riscv-tiny            >= 0.1.0.0
+        , libriscv              >= 0.1.0.0
         , freer-simple         ^>= 1.2.1.2
         , optparse-applicative  >= 0.16.1 && <0.17
 
@@ -78,4 +78,4 @@ test-suite test
       , tasty        ^>= 1.4.2.3
       , tasty-hunit  ^>= 0.10.0.3
       , bytestring   ^>= 0.11.3.1
-      , riscv-tiny    >= 0.1.0.0
+      , libriscv    >= 0.1.0.0

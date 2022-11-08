@@ -1,11 +1,11 @@
-# riscv-tiny
+# libriscv
 
-A simulator for the RISC-V ISA which implements a subset of RV32I in Haskell.
+An extensible implementation of the RISC-V ISA for rapid prototyping of hardware verification and security techniques.
 
 # Status
 
-This is just a partial toy implementation of the RISC-V ISA to improve my rusty Haskell knowledge.
-The implementation supports a subset of RV32I, the roadmap includes the following instructions:
+The implementation presently supports a subset of RV32I.
+The following instructions are supported at the moment, more instructions will be added later:
 
 * [x] ADD
 * [x] ADDI
@@ -21,8 +21,8 @@ The implementation supports a subset of RV32I, the roadmap includes the followin
 
 This RISC-V simulator can be installed using [Cabal][cabal web] with the following commands:
 
-	$ git clone https://github.com/nmeum/riscv-tiny
-	$ cd riscv-tiny
+	$ git clone https://github.com/nmeum/libriscv
+	$ cd libriscv
 	$ cabal install
 
 This should install the `riscv-tiny` executable to `~/.cabal/bin`.
