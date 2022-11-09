@@ -75,6 +75,7 @@ test-suite test
       ArchStateTest
     build-depends:
         base          >= 4.15.0.0
+      , array        ^>= 0.5.4.0
       , tasty        ^>= 1.4.2.3
       , tasty-hunit  ^>= 0.10.0.3
       , bytestring   ^>= 0.11.3.1

@@ -4,13 +4,14 @@ import Test.Tasty
 import Test.Tasty.HUnit
 
 import Data.Word
+import Data.Array.IO (IOUArray)
 import Common.Types (RegIdx(..))
 import Machine.Standard.Memory
 import Machine.Standard.Register
 
 import qualified Data.ByteString.Lazy as BSL
 
-mkReg :: IO (RegisterFile Word32)
+mkReg :: IO (RegisterFile IOUArray Word32)
 mkReg = mkRegFile 0
 
 registerTests = testGroup "RegisterFile Tests"
@@ -42,16 +43,16 @@ registerTests = testGroup "RegisterFile Tests"
 
 memoryTests = testGroup "Memory Tests"
   [ testCase "Create memory and extract its size" $ do
-      m <- mkMemory 0x0 512
+      m <- mkMemory 0x0 512 :: IO (Memory IOUArray Word8)
       memSize m >>= assertEqual "" 512
 
   , testCase "Store and load byte" $ do
-      m <- mkMemory 0x0 512
+      m <- mkMemory 0x0 512 :: IO (Memory IOUArray Word8)
       storeByte m 0x4 0xab
       loadByte m 0x04 >>= assertEqual "" 0xab
 
   , testCase "StoreWord in between" $ do
-      m <- mkMemory 0x0 12 :: IO (Memory Word8)
+      m <- mkMemory 0x0 12 :: IO (Memory IOUArray Word8)
       storeWord m 0 (0xffffffff :: Word32)
       storeWord m 4 (0xffffffff :: Word32)
       storeWord m 8 (0xffffffff :: Word32)
@@ -61,7 +62,7 @@ memoryTests = testGroup "Memory Tests"
       (loadWord m 8 :: IO Word32) >>= assertEqual "3rd word" 0xffffffff
 
   , testCase "Store and load word" $ do
-      m <- mkMemory 0x0 256 :: IO (Memory Word8)
+      m <- mkMemory 0x0 256 :: IO (Memory IOUArray Word8)
       storeWord m 8 (0xdeadbeef :: Word32)
       (loadWord m 8 :: IO Word32) >>= assertEqual "Load entire word" 0xdeadbeef
       loadByte m 8  >>= assertEqual "Load 1st byte"    0xde
@@ -69,14 +70,14 @@ memoryTests = testGroup "Memory Tests"
       loadByte m 11 >>= assertEqual "Load 4th byte"    0xef
 
   , testCase "Write ByteString in little endian byteorder" $ do
-      m <- mkMemory 0x0 32 :: IO (Memory Word8)
+      m <- mkMemory 0x0 32 :: IO (Memory IOUArray Word8)
       let bs = BSL.pack [0xde, 0xad, 0xbe, 0xef]
 
       storeByteString m 0x0 bs
       (loadWord m 0x0 :: IO Word32) >>= assertEqual "" 0xefbeadde
 
   , testCase "Write ByteString with multiple bytes" $ do
-      m <- mkMemory 0x0 8 :: IO (Memory Word8)
+      m <- mkMemory 0x0 8 :: IO (Memory IOUArray Word8)
       let bs = BSL.pack [0xde, 0xad, 0xbe, 0xef, 0x12, 0x23, 0x34, 0xff]
 
       storeByteString m 0x0 bs
