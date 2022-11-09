@@ -59,6 +59,9 @@ buildInstruction'' _ SLTIU{..} = do
     r1 <- readRegister @v rs1
     let cond = (FromImm r1) `SltU` (FromInt imm)
     writeRegister @v rd $ convert cond
+buildInstruction'' _ ANDI{..} = do
+    r1 <- readRegister @v rs1
+    writeRegister @v rd $ r1 `andInt` imm
 buildInstruction'' _ LW{..} = do
     r1 <- readRegister @v rs1
     -- TODO: Alignment handling
