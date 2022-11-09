@@ -13,6 +13,7 @@ import Conversion
 import Data.Bits
 import Data.Int
 import Data.Word
+import Data.Array.IO (IOUArray)
 import Common.Types
 import Spec.Expr
 import Spec.AST
@@ -25,7 +26,7 @@ import qualified Machine.Standard.Register as REG
 import qualified Machine.Standard.Memory as MEM
 
 -- Architectural state of the executor.
-type ArchState = (REG.RegisterFile Register, MEM.Memory Word8)
+type ArchState = (REG.RegisterFile IOUArray Register, MEM.Memory Word8)
 
 mkArchState :: Address -> Word32 -> IO ArchState
 mkArchState memStart memSize = do
