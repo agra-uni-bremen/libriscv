@@ -71,6 +71,9 @@ buildInstruction'' _ XORI{..} = do
 buildInstruction'' _ SLLI{..} = do
     r1 <- readRegister @v rs1
     writeRegister @v rd $ r1 `lshlInt` shamt
+buildInstruction'' _ SRLI{..} = do
+    r1 <- readRegister @v rs1
+    writeRegister @v rd $ r1 `lshrInt` shamt
 buildInstruction'' _ LW{..} = do
     r1 <- readRegister @v rs1
     -- TODO: Alignment handling

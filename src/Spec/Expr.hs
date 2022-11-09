@@ -26,7 +26,8 @@ data Expr a =
     And  (Expr a) (Expr a) |
     Or   (Expr a) (Expr a) |
     Xor  (Expr a) (Expr a) |
-    LShl (Expr a) (Expr a)
+    LShl (Expr a) (Expr a) |
+    LShr (Expr a) (Expr a)
 
 addSImm :: a -> a -> Expr a
 addSImm a b = (FromImm a) `AddS` (FromImm b)
@@ -45,3 +46,6 @@ xorInt a b = (FromImm a) `Xor` (FromInt b)
 
 lshlInt :: a -> Word32 -> Expr a
 lshlInt a b = (FromImm a) `LShl` (FromUInt b)
+
+lshrInt :: a -> Word32 -> Expr a
+lshrInt a b = (FromImm a) `LShr` (FromUInt b)
