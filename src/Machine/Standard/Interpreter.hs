@@ -63,6 +63,7 @@ runExpression (Or e1 e2) = (runExpression e1) .|. (runExpression e2)
 runExpression (Xor e1 e2) = (runExpression e1) `xor` (runExpression e2)
 runExpression (LShl e1 e2) = (runExpression e1) `unsafeShiftL` fromIntegral (fromIntegral (runExpression e2) :: Word8)
 runExpression (LShr e1 e2) = (runExpression e1) `unsafeShiftR` fromIntegral (fromIntegral (runExpression e2) :: Word8)
+runExpression (AShr e1 e2) = fromIntegral $ (fromIntegral (runExpression e1) :: Int32) `unsafeShiftR` fromIntegral (fromIntegral (runExpression e2) :: Word8)
 
 runInstructionM :: forall r effs . LastMember IO effs => (Expr Word32 -> Word32) -> ArchState -> Eff (Instruction Word32 ': effs) r -> Eff effs r
 runInstructionM evalE (regFile, mem) = interpretM $ \case
