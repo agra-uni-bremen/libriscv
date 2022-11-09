@@ -27,6 +27,8 @@ func formatFields(fields []Field) string {
 			t = "RegIdx"
 		case Immediate:
 			t = "Immediate"
+		case ShiftImmediate:
+			t = "Word32"
 		}
 
 		recField := fmt.Sprintf("%s :: %s", field.RecordName, t)

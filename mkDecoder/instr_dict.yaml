@@ -243,6 +243,16 @@ sll:
   - rd
   - rs1
   - rs2
+slli:
+  encoding: 0000000----------001-----0010011
+  extension:
+  - rv32_i
+  mask: '0xfe00707f'
+  match: '0x1013'
+  variable_fields:
+  - rd
+  - rs1
+  - shamtw
 slt:
   encoding: 0000000----------010-----0110011
   extension:
@@ -293,6 +303,16 @@ sra:
   - rd
   - rs1
   - rs2
+srai:
+  encoding: 0100000----------101-----0010011
+  extension:
+  - rv32_i
+  mask: '0xfe00707f'
+  match: '0x40005013'
+  variable_fields:
+  - rd
+  - rs1
+  - shamtw
 srl:
   encoding: 0000000----------101-----0110011
   extension:
@@ -303,6 +323,16 @@ srl:
   - rd
   - rs1
   - rs2
+srli:
+  encoding: 0000000----------101-----0010011
+  extension:
+  - rv32_i
+  mask: '0xfe00707f'
+  match: '0x5013'
+  variable_fields:
+  - rd
+  - rs1
+  - shamtw
 sub:
   encoding: 0100000----------000-----0110011
   extension:

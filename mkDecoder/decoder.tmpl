@@ -61,6 +61,9 @@ immJ i = fromTwoscomp 21 $
      .|. (instrField 20 20 i `shift` 11)
      .|. (instrField 21 30 i `shift` 1)
 
+mkShamt :: Word32 -> Word32
+mkShamt = instrField 20 25 . fromIntegral . immI
+
 mkRs1 :: Word32 -> RegIdx
 mkRs1 = toEnum . fromIntegral . instrField 15 19
 
