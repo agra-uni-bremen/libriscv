@@ -92,7 +92,7 @@ buildInstruction'' pc JAL{..} = do
 buildInstruction'' pc JALR{..} = do
     nextInstr <- readPC
     r1 <- readRegister @v rs1
-    writePC @v $ (r1 `addSInt` imm) `BAnd` (FromUInt 0xfffffffe)
+    writePC @v $ (r1 `addSInt` imm) `And` (FromUInt 0xfffffffe)
     writeRegister @v rd $ FromImm nextInstr
 buildInstruction'' _ LUI{..} = do
     writeRegister @v rd $ FromInt imm

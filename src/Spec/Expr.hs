@@ -19,7 +19,6 @@ data Expr a =
     FromImm a |
     FromInt Int32 |
     FromUInt Word32 |
-    BAnd (Expr a) (Expr a) |
     AddU (Expr a) (Expr a) |
     AddS (Expr a) (Expr a) |
     Slt  (Expr a) (Expr a) |

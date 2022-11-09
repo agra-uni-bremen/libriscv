@@ -47,7 +47,6 @@ runExpression :: Expr Word32 -> Word32
 runExpression (FromImm a) = a
 runExpression (FromInt i) = fromIntegral i
 runExpression (FromUInt i) = i
-runExpression (BAnd e1 e2) = (runExpression e1) .&. (runExpression e2)
 runExpression (AddU e1 e2) = (runExpression e1) + (runExpression e2)
 runExpression (AddS e1 e2) = fromIntegral $
     (fromIntegral (runExpression e1) :: Int32) + (fromIntegral (runExpression e2))
