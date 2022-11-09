@@ -62,6 +62,9 @@ buildInstruction'' _ SLTIU{..} = do
 buildInstruction'' _ ANDI{..} = do
     r1 <- readRegister @v rs1
     writeRegister @v rd $ r1 `andInt` imm
+buildInstruction'' _ ORI{..} = do
+    r1 <- readRegister @v rs1
+    writeRegister @v rd $ r1 `orInt` imm
 buildInstruction'' _ LW{..} = do
     r1 <- readRegister @v rs1
     -- TODO: Alignment handling
