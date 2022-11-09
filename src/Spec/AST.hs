@@ -65,6 +65,9 @@ buildInstruction'' _ ANDI{..} = do
 buildInstruction'' _ ORI{..} = do
     r1 <- readRegister @v rs1
     writeRegister @v rd $ r1 `orInt` imm
+buildInstruction'' _ XORI{..} = do
+    r1 <- readRegister @v rs1
+    writeRegister @v rd $ r1 `xorInt` imm
 buildInstruction'' _ LW{..} = do
     r1 <- readRegister @v rs1
     -- TODO: Alignment handling
