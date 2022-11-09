@@ -78,4 +78,4 @@ storeByteString mem addr bs =
     where
         -- Swap byteorder of words in list of bytes.
         bytesToLSB [] = []
-        bytesToLSB (a:b:c:d:xs) = [d,c,b,a] ++ bytesToLSB xs
+        bytesToLSB (a:b:c:d:xs) = d:c:b:a : bytesToLSB xs
