@@ -25,7 +25,8 @@ data Expr a =
     SltU (Expr a) (Expr a) |
     And  (Expr a) (Expr a) |
     Or   (Expr a) (Expr a) |
-    Xor  (Expr a) (Expr a)
+    Xor  (Expr a) (Expr a) |
+    LShl (Expr a) (Expr a)
 
 addSImm :: a -> a -> Expr a
 addSImm a b = (FromImm a) `AddS` (FromImm b)
@@ -41,3 +42,6 @@ orInt a b = (FromImm a) `Or` (FromInt b)
 
 xorInt :: a -> Int32 -> Expr a
 xorInt a b = (FromImm a) `Xor` (FromInt b)
+
+lshlInt :: a -> Word32 -> Expr a
+lshlInt a b = (FromImm a) `LShl` (FromUInt b)
