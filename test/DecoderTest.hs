@@ -28,4 +28,10 @@ decoderTests = testGroup "Decoder Tests"
 
   , testCase "Decode BLT instruction" $
       assertEqual "" BLT { rs1=A0, rs2=A1, imm=4 } $ decode 0x00b54263
+
+  , testCase "Decode SLLI instruction" $
+      assertEqual "" SLLI { rd=A1, rs1=T0, shamt=1} $ decode 0x00129593
+
+  , testCase "Decode SLLI instruction" $
+      assertEqual "" SRLI { rd=A3, rs1=T0, shamt=31} $ decode 0x01f2d693
   ]
