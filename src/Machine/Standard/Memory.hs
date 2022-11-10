@@ -9,28 +9,35 @@ import Common.Types
 import Common.Utils ( fstWordLe )
 import Data.Int ()
 import Data.Bits ( Bits((.|.), (.&.), shift, shiftR) )
-import Data.Word ( Word8, Word32 )
+import Data.Word ( Word8, Word16, Word32 )
 import Data.Array.IO
     ( readArray, writeArray, MArray(getBounds, newArray_) )
 import qualified Data.ByteString.Lazy as BSL
 
-class Storable wordType byteType where
-    toWord  :: [byteType] -> wordType
-    toBytes :: wordType   -> [byteType]
-    -- XXX: Also need to account for halfs (16-bit) later
+class HalfStorage halfType byteType where
+    toHalf :: [byteType] -> halfType
+    halfToBytes :: halfType -> [byteType]
 
-instance Storable Word32 Word8 where
-    toWord  = bytesToWord
-    toBytes = wordToBytes
+class WordStorage wordType byteType where
+    toWord :: [byteType] -> wordType
+    wordToBytes :: wordType -> [byteType]
+
+instance WordStorage Word32 Word8 where
+    toWord  = mkWord
+    wordToBytes = mkBytes
+
+instance HalfStorage Word16 Word8 where
+    toHalf = fromIntegral . mkWord
+    halfToBytes = mkBytes . fromIntegral
 
 -- Converts a list of bytes to a Word32 in MSB.
-bytesToWord :: [Word8] -> Word32
-bytesToWord bytes = foldl (\x (byte,idx) -> (fromIntegral byte `shift` (idx * 8)) .|. x)
+mkWord :: [Word8] -> Word32
+mkWord bytes = foldl (\x (byte,idx) -> (fromIntegral byte `shift` (idx * 8)) .|. x)
     0 (zip bytes $ reverse [0..(length bytes) - 1])
 
 -- Split a 32-bit word into four octets.
-wordToBytes :: Word32 -> [Word8]
-wordToBytes w = map (\off -> fromIntegral $ shiftR w off .&. 0xff) offs
+mkBytes :: Word32 -> [Word8]
+mkBytes w = map (\off -> fromIntegral $ shiftR w off .&. 0xff) offs
     where
         offs = reverse $ take 4 $ iterate (+8) 0
 
@@ -56,19 +63,29 @@ memSize = fmap ((+1) . snd) .  getBounds . snd
 loadByte :: MArray t a IO => Memory t a -> Address -> IO a
 loadByte mem@(_, array) = readArray array . toMemAddr mem
 
-loadWord :: (MArray t a IO, Storable b a) => Memory t a -> Address -> IO b
-loadWord mem addr = toWord <$>
-    mapM (\off -> loadByte mem $ addr + off) [0..3]
+load :: (MArray t a IO) => ([a] -> b) -> Word32 -> Memory t a -> Address -> IO b
+load proc bytesize mem addr = proc <$>
+    mapM (\off -> loadByte mem $ addr + off) [0..(bytesize - 1)]
 
--- Store a byte at the given address in memory.
+loadHalf :: (MArray t a IO, HalfStorage b a) => Memory t a -> Address -> IO b
+loadHalf = load toHalf 2
+
+loadWord :: (MArray t a IO, WordStorage b a) => Memory t a -> Address -> IO b
+loadWord = load toWord 4
+
 storeByte :: MArray t a IO => Memory t a -> Address -> a -> IO ()
 storeByte mem@(_, array) addr = writeArray array $ toMemAddr mem addr
 
--- Store a word at the given address in memory.
-storeWord :: (MArray t a IO, Storable b a) => Memory t a -> Address -> b -> IO ()
-storeWord mem addr =
+store :: (MArray t a IO) => (b -> [a]) -> Memory t a -> Address -> b -> IO ()
+store proc mem addr =
     mapM_ (\(off, val) -> storeByte mem (addr + off) val)
-        . zip [0..] . toBytes
+        . zip [0..] . proc
+
+storeHalf :: (MArray t a IO, HalfStorage b a) => Memory t a -> Address -> b -> IO ()
+storeHalf = store halfToBytes
+
+storeWord :: (MArray t a IO, WordStorage b a) => Memory t a -> Address -> b -> IO ()
+storeWord = store wordToBytes
 
 -- Write a ByteString to memory in little endian byteorder.
 storeByteString :: (MArray t a IO, Conversion Word8 a) => Memory t a -> Address -> BSL.ByteString -> IO ()
