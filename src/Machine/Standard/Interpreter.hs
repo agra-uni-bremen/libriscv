@@ -43,6 +43,10 @@ instance ByteAddrsMem ArchState where
 
 ------------------------------------------------------------------------
 
+boolToWord :: Bool -> Word32
+boolToWord True  = 1
+boolToWord False = 0
+
 runExpression :: Expr Word32 -> Word32
 runExpression (FromImm a) = a
 runExpression (FromInt i) = fromIntegral i
@@ -50,16 +54,18 @@ runExpression (FromUInt i) = i
 runExpression (AddU e1 e2) = (runExpression e1) + (runExpression e2)
 runExpression (AddS e1 e2) = fromIntegral $
     (fromIntegral (runExpression e1) :: Int32) + (fromIntegral (runExpression e2))
-runExpression (Sub e1 e2) =  fromIntegral $
+runExpression (Sub e1 e2) = fromIntegral $
     (fromIntegral (runExpression e1) :: Int32) - (fromIntegral (runExpression e2))
-runExpression (Slt e1 e2) = if
+runExpression (Eq e1 e2) = boolToWord $
+    (fromIntegral (runExpression e1) :: Int32) == (fromIntegral (runExpression e2))
+runExpression (Neq e1 e2) = boolToWord $
+    (fromIntegral (runExpression e1) :: Int32) /= (fromIntegral (runExpression e2))
+runExpression (Slt e1 e2) = boolToWord $
     (fromIntegral (runExpression e1) :: Int32) < (fromIntegral (runExpression e2))
-        then 1
-        else 0
-runExpression (SltU e1 e2) = if
-    (runExpression e1) < (runExpression e2)
-        then 1
-        else 0
+runExpression (Sge e1 e2) = boolToWord $
+    (fromIntegral (runExpression e1) :: Int32) >= (fromIntegral (runExpression e2))
+runExpression (Ult e1 e2) = boolToWord $ (runExpression e1) < (runExpression e2)
+runExpression (Uge e1 e2) = boolToWord $ (runExpression e1) >= (runExpression e2)
 runExpression (And e1 e2) = (runExpression e1) .&. (runExpression e2)
 runExpression (Or e1 e2) = (runExpression e1) .|. (runExpression e2)
 runExpression (Xor e1 e2) = (runExpression e1) `xor` (runExpression e2)

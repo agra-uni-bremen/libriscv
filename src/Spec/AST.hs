@@ -53,7 +53,7 @@ buildInstruction'' _ SLTI{..} = do
     writeRegister @v rd $ convert cond
 buildInstruction'' _ SLTIU{..} = do
     r1 <- readRegister @v rs1
-    let cond = (FromImm r1) `SltU` (FromInt imm)
+    let cond = (FromImm r1) `Ult` (FromInt imm)
     writeRegister @v rd $ convert cond
 buildInstruction'' _ ANDI{..} = do
     r1 <- readRegister @v rs1
@@ -89,7 +89,7 @@ buildInstruction'' _ SLT{..} = do
 buildInstruction'' _ SLTU{..} = do
     r1 <- readRegister @v rs1
     r2 <- readRegister @v rs2
-    let cond = (FromImm r1) `SltU` (FromImm r2)
+    let cond = (FromImm r1) `Ult` (FromImm r2)
     writeRegister @v rd $ convert cond
 buildInstruction'' _ AND{..} = do
     r1 <- readRegister @v rs1
@@ -134,10 +134,20 @@ buildInstruction'' _ LW{..} = do
     -- TODO: Alignment handling
     word <- loadWord @v $ r1 `addSInt` imm
     writeRegister @v rd (FromImm word)
-buildInstruction'' _ SW{..} = do
+buildInstruction'' pc BEQ{..} = do
     r1 <- readRegister @v rs1
     r2 <- readRegister @v rs2
-    storeWord @v (r1 `addSInt` imm) $ FromImm r2
+    -- TODO: Alignment handling
+    let cond = (FromImm r1) `Eq` (FromImm r2)
+    whenMword (convert <$> liftE cond) $
+        writePC @v $ (FromImm pc) `AddS` (FromInt imm)
+buildInstruction'' pc BNE{..} = do
+    r1 <- readRegister @v rs1
+    r2 <- readRegister @v rs2
+    -- TODO: Alignment handling
+    let cond = (FromImm r1) `Neq` (FromImm r2)
+    whenMword (convert <$> liftE cond) $
+        writePC @v $ (FromImm pc) `AddS` (FromInt imm)
 buildInstruction'' pc BLT{..} = do
     r1 <- readRegister @v rs1
     r2 <- readRegister @v rs2
@@ -145,6 +155,31 @@ buildInstruction'' pc BLT{..} = do
     let cond = (FromImm r1) `Slt` (FromImm r2)
     whenMword (convert <$> liftE cond) $
         writePC @v $ (FromImm pc) `AddS` (FromInt imm)
+buildInstruction'' pc BLTU{..} = do
+    r1 <- readRegister @v rs1
+    r2 <- readRegister @v rs2
+    -- TODO: Alignment handling
+    let cond = (FromImm r1) `Ult` (FromImm r2)
+    whenMword (convert <$> liftE cond) $
+        writePC @v $ (FromImm pc) `AddS` (FromInt imm)
+buildInstruction'' pc BGE{..} = do
+    r1 <- readRegister @v rs1
+    r2 <- readRegister @v rs2
+    -- TODO: Alignment handling
+    let cond = (FromImm r1) `Sge` (FromImm r2)
+    whenMword (convert <$> liftE cond) $
+        writePC @v $ (FromImm pc) `AddS` (FromInt imm)
+buildInstruction'' pc BGEU{..} = do
+    r1 <- readRegister @v rs1
+    r2 <- readRegister @v rs2
+    -- TODO: Alignment handling
+    let cond = (FromImm r1) `Uge` (FromImm r2)
+    whenMword (convert <$> liftE cond) $
+        writePC @v $ (FromImm pc) `AddS` (FromInt imm)
+buildInstruction'' _ SW{..} = do
+    r1 <- readRegister @v rs1
+    r2 <- readRegister @v rs2
+    storeWord @v (r1 `addSInt` imm) $ FromImm r2
 
 buildInstruction' :: forall v r. (Conversion v Word32, Member (Instruction v) r, Member LogInstructionFetch r) => v -> InstructionType -> Eff r ()
 buildInstruction' _ InvalidInstruction = pure () -- XXX: ignore for now

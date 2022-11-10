@@ -22,8 +22,12 @@ data Expr a =
     AddU (Expr a) (Expr a) |
     AddS (Expr a) (Expr a) |
     Sub  (Expr a) (Expr a) |
+    Eq   (Expr a) (Expr a) |
+    Neq  (Expr a) (Expr a) | -- XXX: Support Not instead?
     Slt  (Expr a) (Expr a) |
-    SltU (Expr a) (Expr a) |
+    Sge  (Expr a) (Expr a) |
+    Ult  (Expr a) (Expr a) |
+    Uge  (Expr a) (Expr a) |
     And  (Expr a) (Expr a) |
     Or   (Expr a) (Expr a) |
     Xor  (Expr a) (Expr a) |
