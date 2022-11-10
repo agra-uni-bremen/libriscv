@@ -113,6 +113,27 @@ bne:
   - rs1
   - rs2
   - bimm12lo
+ebreak:
+  encoding: '00000000000100000000000001110011'
+  extension:
+  - rv_i
+  mask: '0xffffffff'
+  match: '0x100073'
+  variable_fields: []
+ecall:
+  encoding: '00000000000000000000000001110011'
+  extension:
+  - rv_i
+  mask: '0xffffffff'
+  match: '0x73'
+  variable_fields: []
+fence:
+  encoding: '-----------------000-----0001111'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0xf'
+  variable_fields: []
 jal:
   encoding: '-------------------------1101111'
   extension:

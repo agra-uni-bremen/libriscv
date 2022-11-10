@@ -24,6 +24,9 @@ data InstructionType =
   BLT { rs1 :: RegIdx, rs2 :: RegIdx, imm :: Immediate } |
   BLTU { rs1 :: RegIdx, rs2 :: RegIdx, imm :: Immediate } |
   BNE { rs1 :: RegIdx, rs2 :: RegIdx, imm :: Immediate } |
+  EBREAK |
+  ECALL |
+  FENCE |
   JAL { rd :: RegIdx, imm :: Immediate } |
   JALR { rd :: RegIdx, rs1 :: RegIdx, imm :: Immediate } |
   LB { rd :: RegIdx, rs1 :: RegIdx, imm :: Immediate } |
@@ -136,6 +139,12 @@ bltu_mask = 0x707f
 bltu_match = 0x6063
 bne_mask = 0x707f
 bne_match = 0x1063
+ebreak_mask = 0xffffffff
+ebreak_match = 0x100073
+ecall_mask = 0xffffffff
+ecall_match = 0x73
+fence_mask = 0x707f
+fence_match = 0xf
 jal_mask = 0x7f
 jal_match = 0x6f
 jalr_mask = 0x707f
@@ -204,6 +213,9 @@ decode instrWord
   | instrWord .&. blt_mask == blt_match = BLT { rs1=mkRs1 instrWord, rs2=mkRs2 instrWord, imm=immB instrWord }
   | instrWord .&. bltu_mask == bltu_match = BLTU { rs1=mkRs1 instrWord, rs2=mkRs2 instrWord, imm=immB instrWord }
   | instrWord .&. bne_mask == bne_match = BNE { rs1=mkRs1 instrWord, rs2=mkRs2 instrWord, imm=immB instrWord }
+  | instrWord .&. ebreak_mask == ebreak_match = EBREAK {  }
+  | instrWord .&. ecall_mask == ecall_match = ECALL {  }
+  | instrWord .&. fence_mask == fence_match = FENCE {  }
   | instrWord .&. jal_mask == jal_match = JAL { rd=mkRd instrWord, imm=immJ instrWord }
   | instrWord .&. jalr_mask == jalr_match = JALR { rd=mkRd instrWord, rs1=mkRs1 instrWord, imm=immI instrWord }
   | instrWord .&. lb_mask == lb_match = LB { rd=mkRd instrWord, rs1=mkRs1 instrWord, imm=immI instrWord }

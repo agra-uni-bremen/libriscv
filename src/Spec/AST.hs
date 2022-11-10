@@ -35,6 +35,8 @@ data Instruction v r where
     StoreWord :: Expr v -> Expr v -> Instruction v ()
     WritePC :: Expr v -> Instruction v ()
     ReadPC :: Instruction v v
+    Ecall :: v -> Instruction v ()
+    Ebreak :: v -> Instruction v ()
     LiftE :: Expr v -> Instruction v v
 
 makeEffect ''Instruction
@@ -202,6 +204,9 @@ buildInstruction'' pc BGEU{..} = do
     let cond = (FromImm r1) `Uge` (FromImm r2)
     whenMword (convert <$> liftE cond) $
         writePC @v $ (FromImm pc) `AddS` (FromInt imm)
+buildInstruction'' _ FENCE = pure () -- XXX: ignore for now
+buildInstruction'' pc ECALL = ecall @v pc
+buildInstruction'' pc EBREAK = ebreak @v pc
 
 buildInstruction' :: forall v r. (Conversion v Word32, Member (Instruction v) r, Member LogInstructionFetch r) => v -> InstructionType -> Eff r ()
 buildInstruction' _ InvalidInstruction = pure () -- XXX: ignore for now
