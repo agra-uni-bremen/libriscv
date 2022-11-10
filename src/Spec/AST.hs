@@ -44,10 +44,6 @@ makeEffect ''Instruction
 -- See: https://github.com/lexi-lambda/freer-simple/issues/7
 
 buildInstruction'' :: forall v r. (Conversion v Word32, Member (Instruction v) r, Member LogInstructionFetch r) => v -> InstructionType -> Eff r ()
-buildInstruction'' _ ADD{..} = do
-    r1 <- readRegister @v rs1
-    r2 <- readRegister @v rs2
-    writeRegister @v rd $ r1 `addSImm` r2
 buildInstruction'' _ ADDI{..} = do
     r1 <- readRegister @v rs1
     writeRegister @v rd $ r1 `addSInt` imm
@@ -77,6 +73,24 @@ buildInstruction'' _ SRLI{..} = do
 buildInstruction'' _ SRAI{..} = do
     r1 <- readRegister @v rs1
     writeRegister @v rd $ r1 `ashrInt` shamt
+buildInstruction'' _ LUI{..} = do
+    writeRegister @v rd $ FromInt imm
+buildInstruction'' pc AUIPC{..} = do
+    writeRegister @v rd $ pc `addSInt` imm
+buildInstruction'' _ ADD{..} = do
+    r1 <- readRegister @v rs1
+    r2 <- readRegister @v rs2
+    writeRegister @v rd $ r1 `addSImm` r2
+buildInstruction'' pc JAL{..} = do
+    nextInstr <- readPC
+    -- TODO: Alignment handling
+    writePC @v $ pc `addSInt` imm
+    writeRegister @v rd (FromImm nextInstr)
+buildInstruction'' pc JALR{..} = do
+    nextInstr <- readPC
+    r1 <- readRegister @v rs1
+    writePC @v $ (r1 `addSInt` imm) `And` (FromUInt 0xfffffffe)
+    writeRegister @v rd $ FromImm nextInstr
 buildInstruction'' _ LW{..} = do
     r1 <- readRegister @v rs1
     -- TODO: Alignment handling
@@ -93,20 +107,6 @@ buildInstruction'' pc BLT{..} = do
     let cond = (FromImm r1) `Slt` (FromImm r2)
     whenMword (convert <$> liftE cond) $
         writePC @v $ (FromImm pc) `AddS` (FromInt imm)
-buildInstruction'' pc JAL{..} = do
-    nextInstr <- readPC
-    -- TODO: Alignment handling
-    writePC @v $ pc `addSInt` imm
-    writeRegister @v rd (FromImm nextInstr)
-buildInstruction'' pc JALR{..} = do
-    nextInstr <- readPC
-    r1 <- readRegister @v rs1
-    writePC @v $ (r1 `addSInt` imm) `And` (FromUInt 0xfffffffe)
-    writeRegister @v rd $ FromImm nextInstr
-buildInstruction'' _ LUI{..} = do
-    writeRegister @v rd $ FromInt imm
-buildInstruction'' pc AUIPC{..} = do
-    writeRegister @v rd $ pc `addSInt` imm
 
 buildInstruction' :: forall v r. (Conversion v Word32, Member (Instruction v) r, Member LogInstructionFetch r) => v -> InstructionType -> Eff r ()
 buildInstruction' _ InvalidInstruction = pure () -- XXX: ignore for now
