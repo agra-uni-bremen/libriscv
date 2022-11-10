@@ -21,6 +21,7 @@ data Expr a =
     FromUInt Word32 |
     AddU (Expr a) (Expr a) |
     AddS (Expr a) (Expr a) |
+    Sub  (Expr a) (Expr a) |
     Slt  (Expr a) (Expr a) |
     SltU (Expr a) (Expr a) |
     And  (Expr a) (Expr a) |
@@ -39,17 +40,35 @@ addSInt a b = (FromImm a) `AddS` (FromInt b)
 andInt :: a -> Int32 -> Expr a
 andInt a b = (FromImm a) `And` (FromInt b)
 
+andImm :: a -> a -> Expr a
+andImm a b = (FromImm a) `And` (FromImm b)
+
 orInt :: a -> Int32 -> Expr a
 orInt a b = (FromImm a) `Or` (FromInt b)
+
+orImm :: a -> a -> Expr a
+orImm a b = (FromImm a) `Or` (FromImm b)
 
 xorInt :: a -> Int32 -> Expr a
 xorInt a b = (FromImm a) `Xor` (FromInt b)
 
+xorImm :: a -> a -> Expr a
+xorImm a b = (FromImm a) `Xor` (FromImm b)
+
 lshlInt :: a -> Word32 -> Expr a
 lshlInt a b = (FromImm a) `LShl` (FromUInt b)
+
+lshlImm :: a -> a -> Expr a
+lshlImm a b = (FromImm a) `LShl` (FromImm b)
 
 lshrInt :: a -> Word32 -> Expr a
 lshrInt a b = (FromImm a) `LShr` (FromUInt b)
 
 ashrInt :: a -> Word32 -> Expr a
 ashrInt a b = (FromImm a) `AShr` (FromUInt b)
+
+------------------------------------------------------------------------
+
+-- Extract shamt value from an expression (lower 5 bits).
+regShamt :: Expr a -> Expr a
+regShamt a = a `And` (FromUInt 0x1f)

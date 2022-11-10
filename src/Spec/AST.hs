@@ -81,6 +81,44 @@ buildInstruction'' _ ADD{..} = do
     r1 <- readRegister @v rs1
     r2 <- readRegister @v rs2
     writeRegister @v rd $ r1 `addSImm` r2
+buildInstruction'' _ SLT{..} = do
+    r1 <- readRegister @v rs1
+    r2 <- readRegister @v rs2
+    let cond = (FromImm r1) `Slt` (FromImm r2)
+    writeRegister @v rd $ convert cond
+buildInstruction'' _ SLTU{..} = do
+    r1 <- readRegister @v rs1
+    r2 <- readRegister @v rs2
+    let cond = (FromImm r1) `SltU` (FromImm r2)
+    writeRegister @v rd $ convert cond
+buildInstruction'' _ AND{..} = do
+    r1 <- readRegister @v rs1
+    r2 <- readRegister @v rs2
+    writeRegister @v rd $ r1 `andImm` r2
+buildInstruction'' _ OR{..} = do
+    r1 <- readRegister @v rs1
+    r2 <- readRegister @v rs2
+    writeRegister @v rd $ r1 `orImm` r2
+buildInstruction'' _ XOR{..} = do
+    r1 <- readRegister @v rs1
+    r2 <- readRegister @v rs2
+    writeRegister @v rd $ r1 `xorImm` r2
+buildInstruction'' _ SLL{..} = do
+    r1 <- readRegister @v rs1
+    r2 <- readRegister @v rs2
+    writeRegister @v rd $ (FromImm r1) `LShl` (regShamt $ FromImm r2)
+buildInstruction'' _ SRL{..} = do
+    r1 <- readRegister @v rs1
+    r2 <- readRegister @v rs2
+    writeRegister @v rd $ (FromImm r1) `LShr` (regShamt $ FromImm r2)
+buildInstruction'' _ SUB{..} = do
+    r1 <- readRegister @v rs1
+    r2 <- readRegister @v rs2
+    writeRegister @v rd $ (FromImm r1) `Sub` (FromImm r2)
+buildInstruction'' _ SRA{..} = do
+    r1 <- readRegister @v rs1
+    r2 <- readRegister @v rs2
+    writeRegister @v rd $ (FromImm r1) `AShr` (regShamt $ FromImm r2)
 buildInstruction'' pc JAL{..} = do
     nextInstr <- readPC
     -- TODO: Alignment handling
