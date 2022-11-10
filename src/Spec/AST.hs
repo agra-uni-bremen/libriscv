@@ -27,7 +27,11 @@ import Conversion
 data Instruction v r where
     ReadRegister :: RegIdx -> Instruction v v
     WriteRegister :: RegIdx -> Expr v -> Instruction v ()
+    LoadByte :: Expr v -> Instruction v v
+    LoadHalf :: Expr v -> Instruction v v
     LoadWord :: Expr v -> Instruction v v
+    StoreByte :: Expr v -> Expr v -> Instruction v ()
+    StoreHalf :: Expr v -> Expr v -> Instruction v ()
     StoreWord :: Expr v -> Expr v -> Instruction v ()
     WritePC :: Expr v -> Instruction v ()
     ReadPC :: Instruction v v
@@ -129,11 +133,33 @@ buildInstruction'' pc JALR{..} = do
     r1 <- readRegister @v rs1
     writePC @v $ (r1 `addSInt` imm) `And` (FromUInt 0xfffffffe)
     writeRegister @v rd $ FromImm nextInstr
+buildInstruction'' _ LB{..} = do
+    r1 <- readRegister @v rs1
+    -- TODO: Alignment handling
+    word <- loadByte @v $ r1 `addSInt` imm
+    writeRegister @v rd (FromImm word)
+buildInstruction'' _ LH{..} = do
+    r1 <- readRegister @v rs1
+    -- TODO: Alignment handling
+    word <- loadHalf @v $ r1 `addSInt` imm
+    writeRegister @v rd (FromImm word)
 buildInstruction'' _ LW{..} = do
     r1 <- readRegister @v rs1
     -- TODO: Alignment handling
     word <- loadWord @v $ r1 `addSInt` imm
     writeRegister @v rd (FromImm word)
+buildInstruction'' _ SB{..} = do
+    r1 <- readRegister @v rs1
+    r2 <- readRegister @v rs2
+    storeByte @v (r1 `addSInt` imm) $ FromImm r2
+buildInstruction'' _ SH{..} = do
+    r1 <- readRegister @v rs1
+    r2 <- readRegister @v rs2
+    storeHalf @v (r1 `addSInt` imm) $ FromImm r2
+buildInstruction'' _ SW{..} = do
+    r1 <- readRegister @v rs1
+    r2 <- readRegister @v rs2
+    storeWord @v (r1 `addSInt` imm) $ FromImm r2
 buildInstruction'' pc BEQ{..} = do
     r1 <- readRegister @v rs1
     r2 <- readRegister @v rs2
@@ -176,10 +202,6 @@ buildInstruction'' pc BGEU{..} = do
     let cond = (FromImm r1) `Uge` (FromImm r2)
     whenMword (convert <$> liftE cond) $
         writePC @v $ (FromImm pc) `AddS` (FromInt imm)
-buildInstruction'' _ SW{..} = do
-    r1 <- readRegister @v rs1
-    r2 <- readRegister @v rs2
-    storeWord @v (r1 `addSInt` imm) $ FromImm r2
 
 buildInstruction' :: forall v r. (Conversion v Word32, Member (Instruction v) r, Member LogInstructionFetch r) => v -> InstructionType -> Eff r ()
 buildInstruction' _ InvalidInstruction = pure () -- XXX: ignore for now

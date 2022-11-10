@@ -77,7 +77,9 @@ runInstructionM :: forall r effs . LastMember IO effs => (Expr Word32 -> Word32)
 runInstructionM evalE (regFile, mem) = interpretM $ \case
     (ReadRegister idx) -> fromIntegral <$> REG.readRegister regFile idx
     (WriteRegister idx reg) -> REG.writeRegister regFile idx (fromIntegral $ evalE reg)
+    (LoadByte addr) -> fromIntegral <$> MEM.loadByte mem (evalE addr)
     (LoadWord addr) -> MEM.loadWord mem (evalE addr)
+    (StoreByte addr w) -> MEM.storeByte mem (evalE addr) (fromIntegral $ evalE w)
     (StoreWord addr w) -> MEM.storeWord mem (evalE addr) (evalE w)
     (WritePC w) -> REG.writePC regFile (evalE w)
     ReadPC -> REG.readPC regFile
