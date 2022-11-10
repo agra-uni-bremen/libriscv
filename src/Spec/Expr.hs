@@ -23,7 +23,6 @@ data Expr a =
     AddS (Expr a) (Expr a) |
     Sub  (Expr a) (Expr a) |
     Eq   (Expr a) (Expr a) |
-    Neq  (Expr a) (Expr a) | -- XXX: Support Not instead?
     Slt  (Expr a) (Expr a) |
     Sge  (Expr a) (Expr a) |
     Ult  (Expr a) (Expr a) |

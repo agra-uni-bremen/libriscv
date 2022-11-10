@@ -58,8 +58,6 @@ runExpression (Sub e1 e2) = fromIntegral $
     (fromIntegral (runExpression e1) :: Int32) - (fromIntegral (runExpression e2))
 runExpression (Eq e1 e2) = boolToWord $
     (fromIntegral (runExpression e1) :: Int32) == (fromIntegral (runExpression e2))
-runExpression (Neq e1 e2) = boolToWord $
-    (fromIntegral (runExpression e1) :: Int32) /= (fromIntegral (runExpression e2))
 runExpression (Slt e1 e2) = boolToWord $
     (fromIntegral (runExpression e1) :: Int32) < (fromIntegral (runExpression e2))
 runExpression (Sge e1 e2) = boolToWord $

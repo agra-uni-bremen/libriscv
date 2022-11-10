@@ -20,7 +20,7 @@ import Control.Monad.Freer.TH
 
 import Spec.Expr
 import Data.Int
-import Common.Utils (whenMword)
+import Common.Utils (whenMword,unlessMword)
 import Effects.Logging.InstructionFetch
 import Conversion
 
@@ -171,8 +171,8 @@ buildInstruction'' pc BNE{..} = do
     r1 <- readRegister @v rs1
     r2 <- readRegister @v rs2
     -- TODO: Alignment handling
-    let cond = (FromImm r1) `Neq` (FromImm r2)
-    whenMword (convert <$> liftE cond) $
+    let cond = (FromImm r1) `Eq` (FromImm r2)
+    unlessMword (convert <$> liftE cond) $
         writePC @v $ (FromImm pc) `AddS` (FromInt imm)
 buildInstruction'' pc BLT{..} = do
     r1 <- readRegister @v rs1
