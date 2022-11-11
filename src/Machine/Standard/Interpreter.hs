@@ -51,6 +51,8 @@ runExpression :: Expr Word32 -> Word32
 runExpression (FromImm a) = a
 runExpression (FromInt i) = fromIntegral i
 runExpression (FromUInt i) = i
+runExpression (SExtByte e) = fromIntegral $ fromIntegral @Word8 @Int8 (fromIntegral @Word32 @Word8 (runExpression e))
+runExpression (SExtHalf e) = fromIntegral $ fromIntegral @Word16 @Int16 (fromIntegral @Word32 @Word16 (runExpression e))
 runExpression (AddU e1 e2) = (runExpression e1) + (runExpression e2)
 runExpression (AddS e1 e2) = fromIntegral $
     (fromIntegral (runExpression e1) :: Int32) + (fromIntegral (runExpression e2))

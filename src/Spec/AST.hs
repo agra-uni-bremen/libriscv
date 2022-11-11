@@ -138,13 +138,13 @@ buildInstruction'' pc JALR{..} = do
 buildInstruction'' _ LB{..} = do
     r1 <- readRegister rs1
     -- TODO: Alignment handling
-    word <- loadByte @v $ r1 `addSInt` imm
-    writeRegister @v rd (FromImm word)
+    byte <- loadByte @v $ r1 `addSInt` imm
+    writeRegister @v rd (SExtByte $ FromImm byte)
 buildInstruction'' _ LH{..} = do
     r1 <- readRegister rs1
     -- TODO: Alignment handling
-    word <- loadHalf $ r1 `addSInt` imm
-    writeRegister @v rd (FromImm word)
+    half <- loadHalf $ r1 `addSInt` imm
+    writeRegister @v rd (SExtHalf $ FromImm half)
 buildInstruction'' _ LW{..} = do
     r1 <- readRegister rs1
     -- TODO: Alignment handling

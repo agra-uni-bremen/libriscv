@@ -19,6 +19,8 @@ data Expr a =
     FromImm a |
     FromInt Int32 |
     FromUInt Word32 |
+    SExtByte (Expr a) |
+    SExtHalf (Expr a) |
     AddU (Expr a) (Expr a) |
     AddS (Expr a) (Expr a) |
     Sub  (Expr a) (Expr a) |
