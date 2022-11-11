@@ -51,158 +51,158 @@ makeEffect ''Instruction
 
 buildInstruction'' :: forall v r. (Conversion v Word32, Member (Instruction v) r, Member LogInstructionFetch r) => v -> InstructionType -> Eff r ()
 buildInstruction'' _ ADDI{..} = do
-    r1 <- readRegister @v rs1
+    r1 <- readRegister rs1
     writeRegister @v rd $ r1 `addSInt` imm
 buildInstruction'' _ SLTI{..} = do
-    r1 <- readRegister @v rs1
-    let cond = (FromImm r1) `Slt` (FromInt imm)
+    r1 <- readRegister rs1
+    let cond = (FromImm r1) `Slt` (FromInt imm) :: Expr v
     writeRegister @v rd $ convert cond
 buildInstruction'' _ SLTIU{..} = do
-    r1 <- readRegister @v rs1
-    let cond = (FromImm r1) `Ult` (FromInt imm)
+    r1 <- readRegister rs1
+    let cond = (FromImm r1) `Ult` (FromInt imm) :: Expr v
     writeRegister @v rd $ convert cond
 buildInstruction'' _ ANDI{..} = do
-    r1 <- readRegister @v rs1
+    r1 <- readRegister rs1
     writeRegister @v rd $ r1 `andInt` imm
 buildInstruction'' _ ORI{..} = do
-    r1 <- readRegister @v rs1
+    r1 <- readRegister rs1
     writeRegister @v rd $ r1 `orInt` imm
 buildInstruction'' _ XORI{..} = do
-    r1 <- readRegister @v rs1
+    r1 <- readRegister rs1
     writeRegister @v rd $ r1 `xorInt` imm
 buildInstruction'' _ SLLI{..} = do
-    r1 <- readRegister @v rs1
+    r1 <- readRegister rs1
     writeRegister @v rd $ r1 `lshlInt` shamt
 buildInstruction'' _ SRLI{..} = do
-    r1 <- readRegister @v rs1
+    r1 <- readRegister rs1
     writeRegister @v rd $ r1 `lshrInt` shamt
 buildInstruction'' _ SRAI{..} = do
-    r1 <- readRegister @v rs1
+    r1 <- readRegister rs1
     writeRegister @v rd $ r1 `ashrInt` shamt
 buildInstruction'' _ LUI{..} = do
     writeRegister @v rd $ FromInt imm
 buildInstruction'' pc AUIPC{..} = do
     writeRegister @v rd $ pc `addSInt` imm
 buildInstruction'' _ ADD{..} = do
-    r1 <- readRegister @v rs1
-    r2 <- readRegister @v rs2
+    r1 <- readRegister rs1
+    r2 <- readRegister rs2
     writeRegister @v rd $ r1 `addSImm` r2
 buildInstruction'' _ SLT{..} = do
-    r1 <- readRegister @v rs1
-    r2 <- readRegister @v rs2
-    let cond = (FromImm r1) `Slt` (FromImm r2)
+    r1 <- readRegister rs1
+    r2 <- readRegister rs2
+    let cond = (FromImm r1) `Slt` (FromImm r2) :: Expr v
     writeRegister @v rd $ convert cond
 buildInstruction'' _ SLTU{..} = do
-    r1 <- readRegister @v rs1
-    r2 <- readRegister @v rs2
-    let cond = (FromImm r1) `Ult` (FromImm r2)
+    r1 <- readRegister rs1
+    r2 <- readRegister rs2
+    let cond = (FromImm r1) `Ult` (FromImm r2) :: Expr v
     writeRegister @v rd $ convert cond
 buildInstruction'' _ AND{..} = do
-    r1 <- readRegister @v rs1
-    r2 <- readRegister @v rs2
+    r1 <- readRegister rs1
+    r2 <- readRegister rs2
     writeRegister @v rd $ r1 `andImm` r2
 buildInstruction'' _ OR{..} = do
-    r1 <- readRegister @v rs1
-    r2 <- readRegister @v rs2
+    r1 <- readRegister rs1
+    r2 <- readRegister rs2
     writeRegister @v rd $ r1 `orImm` r2
 buildInstruction'' _ XOR{..} = do
-    r1 <- readRegister @v rs1
-    r2 <- readRegister @v rs2
+    r1 <- readRegister rs1
+    r2 <- readRegister rs2
     writeRegister @v rd $ r1 `xorImm` r2
 buildInstruction'' _ SLL{..} = do
-    r1 <- readRegister @v rs1
-    r2 <- readRegister @v rs2
+    r1 <- readRegister rs1
+    r2 <- readRegister rs2
     writeRegister @v rd $ (FromImm r1) `LShl` (regShamt $ FromImm r2)
 buildInstruction'' _ SRL{..} = do
-    r1 <- readRegister @v rs1
-    r2 <- readRegister @v rs2
+    r1 <- readRegister rs1
+    r2 <- readRegister rs2
     writeRegister @v rd $ (FromImm r1) `LShr` (regShamt $ FromImm r2)
 buildInstruction'' _ SUB{..} = do
-    r1 <- readRegister @v rs1
-    r2 <- readRegister @v rs2
+    r1 <- readRegister rs1
+    r2 <- readRegister rs2
     writeRegister @v rd $ (FromImm r1) `Sub` (FromImm r2)
 buildInstruction'' _ SRA{..} = do
-    r1 <- readRegister @v rs1
-    r2 <- readRegister @v rs2
+    r1 <- readRegister rs1
+    r2 <- readRegister rs2
     writeRegister @v rd $ (FromImm r1) `AShr` (regShamt $ FromImm r2)
 buildInstruction'' pc JAL{..} = do
     nextInstr <- readPC
-    -- TODO: Alignment handling
+    -- TODO: Alignment 
     writePC @v $ pc `addSInt` imm
     writeRegister @v rd (FromImm nextInstr)
 buildInstruction'' pc JALR{..} = do
     nextInstr <- readPC
-    r1 <- readRegister @v rs1
+    r1 <- readRegister rs1
     writePC @v $ (r1 `addSInt` imm) `And` (FromUInt 0xfffffffe)
     writeRegister @v rd $ FromImm nextInstr
 buildInstruction'' _ LB{..} = do
-    r1 <- readRegister @v rs1
+    r1 <- readRegister rs1
     -- TODO: Alignment handling
     word <- loadByte @v $ r1 `addSInt` imm
     writeRegister @v rd (FromImm word)
 buildInstruction'' _ LH{..} = do
-    r1 <- readRegister @v rs1
+    r1 <- readRegister rs1
     -- TODO: Alignment handling
-    word <- loadHalf @v $ r1 `addSInt` imm
+    word <- loadHalf $ r1 `addSInt` imm
     writeRegister @v rd (FromImm word)
 buildInstruction'' _ LW{..} = do
-    r1 <- readRegister @v rs1
+    r1 <- readRegister rs1
     -- TODO: Alignment handling
-    word <- loadWord @v $ r1 `addSInt` imm
+    word <- loadWord $ r1 `addSInt` imm
     writeRegister @v rd (FromImm word)
 buildInstruction'' _ SB{..} = do
-    r1 <- readRegister @v rs1
-    r2 <- readRegister @v rs2
+    r1 <- readRegister rs1
+    r2 <- readRegister rs2
     storeByte @v (r1 `addSInt` imm) $ FromImm r2
 buildInstruction'' _ SH{..} = do
-    r1 <- readRegister @v rs1
-    r2 <- readRegister @v rs2
+    r1 <- readRegister rs1
+    r2 <- readRegister rs2
     storeHalf @v (r1 `addSInt` imm) $ FromImm r2
 buildInstruction'' _ SW{..} = do
-    r1 <- readRegister @v rs1
-    r2 <- readRegister @v rs2
+    r1 <- readRegister rs1
+    r2 <- readRegister rs2
     storeWord @v (r1 `addSInt` imm) $ FromImm r2
 buildInstruction'' pc BEQ{..} = do
-    r1 <- readRegister @v rs1
-    r2 <- readRegister @v rs2
+    r1 <- readRegister rs1
+    r2 <- readRegister rs2
     -- TODO: Alignment handling
     let cond = (FromImm r1) `Eq` (FromImm r2)
-    whenMword (convert <$> liftE cond) $
+    whenMword (convert @v <$> liftE cond) $
         writePC @v $ (FromImm pc) `AddS` (FromInt imm)
 buildInstruction'' pc BNE{..} = do
-    r1 <- readRegister @v rs1
-    r2 <- readRegister @v rs2
+    r1 <- readRegister rs1
+    r2 <- readRegister rs2
     -- TODO: Alignment handling
     let cond = (FromImm r1) `Eq` (FromImm r2)
-    unlessMword (convert <$> liftE cond) $
+    unlessMword (convert @v <$> liftE cond) $
         writePC @v $ (FromImm pc) `AddS` (FromInt imm)
 buildInstruction'' pc BLT{..} = do
-    r1 <- readRegister @v rs1
-    r2 <- readRegister @v rs2
+    r1 <- readRegister rs1
+    r2 <- readRegister rs2
     -- TODO: Alignment handling
     let cond = (FromImm r1) `Slt` (FromImm r2)
-    whenMword (convert <$> liftE cond) $
+    whenMword (convert @v <$> liftE cond) $
         writePC @v $ (FromImm pc) `AddS` (FromInt imm)
 buildInstruction'' pc BLTU{..} = do
-    r1 <- readRegister @v rs1
-    r2 <- readRegister @v rs2
+    r1 <- readRegister rs1
+    r2 <- readRegister rs2
     -- TODO: Alignment handling
     let cond = (FromImm r1) `Ult` (FromImm r2)
-    whenMword (convert <$> liftE cond) $
+    whenMword (convert @v <$> liftE cond) $
         writePC @v $ (FromImm pc) `AddS` (FromInt imm)
 buildInstruction'' pc BGE{..} = do
-    r1 <- readRegister @v rs1
-    r2 <- readRegister @v rs2
+    r1 <- readRegister rs1
+    r2 <- readRegister rs2
     -- TODO: Alignment handling
     let cond = (FromImm r1) `Sge` (FromImm r2)
-    whenMword (convert <$> liftE cond) $
+    whenMword (convert @v <$> liftE cond) $
         writePC @v $ (FromImm pc) `AddS` (FromInt imm)
 buildInstruction'' pc BGEU{..} = do
-    r1 <- readRegister @v rs1
-    r2 <- readRegister @v rs2
+    r1 <- readRegister rs1
+    r2 <- readRegister rs2
     -- TODO: Alignment handling
     let cond = (FromImm r1) `Uge` (FromImm r2)
-    whenMword (convert <$> liftE cond) $
+    whenMword (convert @v <$> liftE cond) $
         writePC @v $ (FromImm pc) `AddS` (FromInt imm)
 buildInstruction'' _ FENCE = pure () -- XXX: ignore for now
 buildInstruction'' pc ECALL = ecall @v pc
