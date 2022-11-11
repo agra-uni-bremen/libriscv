@@ -91,8 +91,4 @@ storeWord = store wordToBytes
 storeByteString :: (MArray t a IO, Conversion Word8 a) => Memory t a -> Address -> BSL.ByteString -> IO ()
 storeByteString mem addr bs =
     mapM_ (\(off, val) -> storeByte mem (addr + off) (convert val))
-        $ zip [0..] $ bytesToLSB (BSL.unpack bs)
-    where
-        -- Swap byteorder of words in list of bytes.
-        bytesToLSB [] = []
-        bytesToLSB (a:b:c:d:xs) = d:c:b:a : bytesToLSB xs
+        $ zip [0..] $ BSL.unpack bs
