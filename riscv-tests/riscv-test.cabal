@@ -1,0 +1,16 @@
+cabal-version:      2.4
+name:               riscv-test
+version:            0.1.0.0
+
+-- The license under which the package is released.
+license:            GPL-3.0-or-later
+author:             Sören Tempel
+maintainer:         soeren@soeren-tempel.net
+
+executable riscv-test
+    main-is:              Main.hs
+    build-depends:
+        base                    >= 4.15.0.0
+        , libriscv              >= 0.1.0.0
+        , freer-simple         ^>= 1.2.1.2
+        , optparse-applicative  >= 0.16.1 && <0.17

@@ -57,19 +57,17 @@ Example usage:
 
 ## Tests
 
-There are currently some minor unit tests.
+A small unit test suite is available which can be invoked using:
 
 	$ cabal test
 
-Furthermore, some minimal integration tests are available in `./golden`.
-These tests require `riscv-tiny` in `$PATH` and the following software:
+Furthermore, a version of [riscv-tests][riscv-tests github] is included
+in this repository for performing minimal compliance tests. These tests
+require a [riscv-gnu-toolchain][riscv-gnu-toolchain github] as well as
+[GNU Make][make web]. If these dependencies are installed, run the tests
+using:
 
-* [GNU Make][make web]
-* [Clang][clang web] with rv32i support
-
-If these dependencies are installed, run the golden tests using:
-
-	$ ./golden/run.sh
+	$ ./riscv-tests/run.sh
 
 ## Related Work
 
@@ -103,4 +101,5 @@ with this program. If not, see <https://www.gnu.org/licenses/>.
 
 [cabal web]: https://www.haskell.org/cabal/
 [make web]: https://www.gnu.org/software/make
-[clang web]: https://clang.llvm.org/
+[riscv-tests github]: https://github.com/riscv-software-src/riscv-tests
+[riscv-gnu-toolchain github]: https://github.com/riscv-collab/riscv-gnu-toolchain

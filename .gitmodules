@@ -1,0 +1,3 @@
+[submodule "golden/riscv-tests"]
+	path = riscv-tests/src
+	url = https://github.com/riscv/riscv-tests
