@@ -9,6 +9,7 @@ type FieldType int8
 const (
 	Register FieldType = iota
 	Immediate
+	ShiftImmediate
 )
 
 type Field struct {
@@ -22,6 +23,8 @@ func fieldType(field string) FieldType {
 	switch field {
 	case "rs1", "rs2", "rd":
 		return Register
+	case "shamtw":
+		return ShiftImmediate
 	case "imm12", "imm20", "imm12lo", "bimm12lo", "jimm20":
 		return Immediate
 	default:
@@ -35,6 +38,8 @@ func toRecord(field string, t FieldType) string {
 		return field
 	case Immediate:
 		return "imm"
+	case ShiftImmediate:
+		return "shamt"
 	}
 
 	panic("unreachable")
@@ -48,6 +53,8 @@ func getParser(field string) string {
 		return "mkRs2"
 	case "rd":
 		return "mkRd"
+	case "shamtw":
+		return "mkShamt"
 	case "imm12":
 		return "immI"
 	case "imm20":

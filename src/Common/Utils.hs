@@ -2,13 +2,14 @@ module Common.Utils
 (
     fstWordLe
     , whenMword
+    , unlessMword
 )
 where
 
 import Data.Word ( Word8, Word32 )
 import Data.Bits ( Bits((.|.), shiftR, (.&.), shift) )
 import qualified Data.ByteString.Lazy as BSL
-import Control.Monad (when)
+import Control.Monad (when,unless)
 
 -- Read the first 32-bit word in little endian from a bytestring.
 fstWordLe :: BSL.ByteString -> Word32
@@ -23,3 +24,6 @@ wordPred = (==) 1
 
 whenMword :: Monad m => m Word32 -> m () -> m()
 whenMword mb act = mb >>= (pure . wordPred) >>= flip when act
+
+unlessMword :: Monad m => m Word32 -> m () -> m()
+unlessMword mb act = mb >>= (pure . wordPred) >>= flip unless act
