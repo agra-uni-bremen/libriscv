@@ -231,7 +231,7 @@ buildInstruction = do
     -- fetch & decode instruction at current PC
     pc <- readPC @v
     instrWord <- loadWord $ FromImm pc
-    let inst = decode $ byteSwap32 $ convert instrWord
+    let inst = decode $ convert instrWord
 
     logFetched (convert pc) inst
 

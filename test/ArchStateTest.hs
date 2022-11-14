@@ -57,30 +57,30 @@ memoryTests = testGroup "Memory Tests"
       storeWord m 4 (0xffffffff :: Word32)
       storeWord m 8 (0xffffffff :: Word32)
       storeWord m 0x2 (0x12345678 :: Word32)
-      (loadWord m 0 :: IO Word32) >>= assertEqual "1st word" 0xffff1234
-      (loadWord m 4 :: IO Word32) >>= assertEqual "2nd word" 0x5678ffff
+      (loadWord m 0 :: IO Word32) >>= assertEqual "1st word" 0x5678ffff
+      (loadWord m 4 :: IO Word32) >>= assertEqual "2nd word" 0xffff1234
       (loadWord m 8 :: IO Word32) >>= assertEqual "3rd word" 0xffffffff
 
   , testCase "Store and load word" $ do
       m <- mkMemory 0x0 256 :: IO (Memory IOUArray Word8)
       storeWord m 8 (0xdeadbeef :: Word32)
       (loadWord m 8 :: IO Word32) >>= assertEqual "Load entire word" 0xdeadbeef
-      loadByte m 8  >>= assertEqual "Load 1st byte"    0xde
-      loadByte m 9  >>= assertEqual "Load 2nd byte"    0xad
-      loadByte m 11 >>= assertEqual "Load 4th byte"    0xef
+      loadByte m 8  >>= assertEqual "Load 1st byte"    0xef
+      loadByte m 9  >>= assertEqual "Load 2nd byte"    0xbe
+      loadByte m 11 >>= assertEqual "Load 4th byte"    0xde
 
   , testCase "Write ByteString in little endian byteorder" $ do
       m <- mkMemory 0x0 32 :: IO (Memory IOUArray Word8)
       let bs = BSL.pack [0xde, 0xad, 0xbe, 0xef]
 
       storeByteString m 0x0 bs
-      (loadWord m 0x0 :: IO Word32) >>= assertEqual "" 0xdeadbeef
+      (loadWord m 0x0 :: IO Word32) >>= assertEqual "" 0xefbeadde
 
   , testCase "Write ByteString with multiple bytes" $ do
       m <- mkMemory 0x0 8 :: IO (Memory IOUArray Word8)
       let bs = BSL.pack [0xde, 0xad, 0xbe, 0xef, 0x12, 0x23, 0x34, 0xff]
 
       storeByteString m 0x0 bs
-      (loadWord m 0x0 :: IO Word32) >>= assertEqual "" 0xdeadbeef
-      (loadWord m 0x4 :: IO Word32) >>= assertEqual "" 0x122334ff
+      (loadWord m 0x0 :: IO Word32) >>= assertEqual "" 0xefbeadde
+      (loadWord m 0x4 :: IO Word32) >>= assertEqual "" 0xff342312
   ]
