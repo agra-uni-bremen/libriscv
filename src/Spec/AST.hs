@@ -140,11 +140,21 @@ buildInstruction'' _ LB{..} = do
     -- TODO: Alignment handling
     byte <- loadByte @v $ r1 `addSInt` imm
     writeRegister @v rd (SExtByte $ FromImm byte)
+buildInstruction'' _ LBU{..} = do
+    r1 <- readRegister rs1
+    -- TODO: Alignment handling
+    byte <- loadByte @v $ r1 `addSInt` imm
+    writeRegister @v rd (ZExtByte $ FromImm byte)
 buildInstruction'' _ LH{..} = do
     r1 <- readRegister rs1
     -- TODO: Alignment handling
     half <- loadHalf $ r1 `addSInt` imm
     writeRegister @v rd (SExtHalf $ FromImm half)
+buildInstruction'' _ LHU{..} = do
+    r1 <- readRegister rs1
+    -- TODO: Alignment handling
+    half <- loadHalf $ r1 `addSInt` imm
+    writeRegister @v rd (ZExtHalf $ FromImm half)
 buildInstruction'' _ LW{..} = do
     r1 <- readRegister rs1
     -- TODO: Alignment handling
