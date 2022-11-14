@@ -11,7 +11,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 module Spec.AST where
 
-import Data.Bits
+import Data.Bits hiding (Xor, And)
 import Common.Types
 import Decoder
 import Data.Word

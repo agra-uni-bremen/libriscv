@@ -10,7 +10,7 @@
 module Machine.Standard.Interpreter where
 
 import Conversion
-import Data.Bits
+import Data.Bits hiding (Xor, And)
 import Data.Int
 import Data.Word
 import Data.Array.IO (IOUArray)
@@ -55,24 +55,24 @@ runExpression (ZExtByte a) = runExpression a
 runExpression (ZExtHalf a) = runExpression a
 runExpression (SExtByte e) = fromIntegral $ fromIntegral @Word8 @Int8 (fromIntegral @Word32 @Word8 (runExpression e))
 runExpression (SExtHalf e) = fromIntegral $ fromIntegral @Word16 @Int16 (fromIntegral @Word32 @Word16 (runExpression e))
-runExpression (AddU e1 e2) = (runExpression e1) + (runExpression e2)
+runExpression (AddU e1 e2) = runExpression e1 + runExpression e2
 runExpression (AddS e1 e2) = fromIntegral $
-    (fromIntegral (runExpression e1) :: Int32) + (fromIntegral (runExpression e2))
+    (fromIntegral (runExpression e1) :: Int32) + fromIntegral (runExpression e2)
 runExpression (Sub e1 e2) = fromIntegral $
-    (fromIntegral (runExpression e1) :: Int32) - (fromIntegral (runExpression e2))
+    (fromIntegral (runExpression e1) :: Int32) - fromIntegral (runExpression e2)
 runExpression (Eq e1 e2) = boolToWord $
-    (fromIntegral (runExpression e1) :: Int32) == (fromIntegral (runExpression e2))
+    (fromIntegral (runExpression e1) :: Int32) == fromIntegral (runExpression e2)
 runExpression (Slt e1 e2) = boolToWord $
-    (fromIntegral (runExpression e1) :: Int32) < (fromIntegral (runExpression e2))
+    (fromIntegral (runExpression e1) :: Int32) < fromIntegral (runExpression e2)
 runExpression (Sge e1 e2) = boolToWord $
-    (fromIntegral (runExpression e1) :: Int32) >= (fromIntegral (runExpression e2))
-runExpression (Ult e1 e2) = boolToWord $ (runExpression e1) < (runExpression e2)
-runExpression (Uge e1 e2) = boolToWord $ (runExpression e1) >= (runExpression e2)
-runExpression (And e1 e2) = (runExpression e1) .&. (runExpression e2)
-runExpression (Or e1 e2) = (runExpression e1) .|. (runExpression e2)
-runExpression (Xor e1 e2) = (runExpression e1) `xor` (runExpression e2)
-runExpression (LShl e1 e2) = (runExpression e1) `unsafeShiftL` fromIntegral (fromIntegral (runExpression e2) :: Word8)
-runExpression (LShr e1 e2) = (runExpression e1) `unsafeShiftR` fromIntegral (fromIntegral (runExpression e2) :: Word8)
+    (fromIntegral (runExpression e1) :: Int32) >= fromIntegral (runExpression e2)
+runExpression (Ult e1 e2) = boolToWord $ runExpression e1 < runExpression e2
+runExpression (Uge e1 e2) = boolToWord $ runExpression e1 >= runExpression e2
+runExpression (And e1 e2) = runExpression e1 .&. runExpression e2
+runExpression (Or e1 e2) = runExpression e1 .|. runExpression e2
+runExpression (Xor e1 e2) = runExpression e1 `xor` runExpression e2
+runExpression (LShl e1 e2) = runExpression e1 `unsafeShiftL` fromIntegral (fromIntegral (runExpression e2) :: Word8)
+runExpression (LShr e1 e2) = runExpression e1 `unsafeShiftR` fromIntegral (fromIntegral (runExpression e2) :: Word8)
 runExpression (AShr e1 e2) = fromIntegral $ (fromIntegral (runExpression e1) :: Int32) `unsafeShiftR` fromIntegral (fromIntegral (runExpression e2) :: Word8)
 
 runInstructionM :: forall r effs . LastMember IO effs => (Expr Word32 -> Word32) -> ArchState -> Eff (Instruction Word32 ': effs) r -> Eff effs r

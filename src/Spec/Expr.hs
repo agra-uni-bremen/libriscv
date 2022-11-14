@@ -1,6 +1,6 @@
 module Spec.Expr where
 
-import Data.Bits
+import Data.Bits hiding (Xor, And)
 import Data.Int
 import Data.Word
 import Control.Monad (when)
