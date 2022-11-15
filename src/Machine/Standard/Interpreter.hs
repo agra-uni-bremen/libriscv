@@ -20,10 +20,14 @@ import Spec.AST
 import Control.Monad
 import Control.Monad.Freer
 import Control.Monad.Freer.TH
+import System.Exit
 import Numeric (showHex)
 
 import qualified Machine.Standard.Register as REG
 import qualified Machine.Standard.Memory as MEM
+import Spec.Instruction
+import Common.Utils (extends)
+import Control.Monad.Freer.Reader (Reader, ask)
 
 -- Architectural state of the executor.
 type ArchState = (REG.RegisterFile IOUArray Register, MEM.Memory IOUArray Word8)
@@ -75,12 +79,20 @@ runExpression (LShl e1 e2) = runExpression e1 `unsafeShiftL` fromIntegral (fromI
 runExpression (LShr e1 e2) = runExpression e1 `unsafeShiftR` fromIntegral (fromIntegral (runExpression e2) :: Word8)
 runExpression (AShr e1 e2) = fromIntegral $ (fromIntegral (runExpression e1) :: Int32) `unsafeShiftR` fromIntegral (fromIntegral (runExpression e2) :: Word8)
 
-runInstructionM :: forall r effs . LastMember IO effs => (Expr Word32 -> Word32) -> ArchState -> Eff (Instruction Word32 ': effs) r -> Eff effs r
-runInstructionM evalE (regFile, mem) = interpretM $ \case
+type DefaultEnv = (Expr Word32 -> Word32, ArchState)
+
+runInstruction :: forall r effs env . (Member (Reader env) effs , LastMember IO effs) => 
+    (env -> Instruction Word32 ~> IO) -> Eff (Instruction Word32 ': effs) r -> Eff effs r
+runInstruction f eff = 
+    ask >>= \env -> interpretM (f env) eff
+ 
+
+defaultBehavior :: DefaultEnv -> Instruction Word32 ~> IO
+defaultBehavior (evalE , (regFile, mem)) = \case
     (ReadRegister idx) -> fromIntegral <$> REG.readRegister regFile idx
     (WriteRegister idx reg) -> REG.writeRegister regFile idx (fromIntegral $ evalE reg)
     (LoadByte addr) -> fromIntegral <$> MEM.loadByte mem (evalE addr)
-    (LoadHalf addr) -> fromIntegral <$> (MEM.loadHalf mem (evalE addr) :: IO (Word16))
+    (LoadHalf addr) -> fromIntegral <$> (MEM.loadHalf mem (evalE addr) :: IO Word16)
     (LoadWord addr) -> MEM.loadWord mem (evalE addr)
     (StoreByte addr w) -> MEM.storeByte mem (evalE addr) (fromIntegral $ evalE w)
     (StoreHalf addr w) -> MEM.storeHalf mem (evalE addr) (fromIntegral (evalE w) :: Word16)

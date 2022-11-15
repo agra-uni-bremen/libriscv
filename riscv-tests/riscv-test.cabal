@@ -13,4 +13,5 @@ executable riscv-test
         base                    >= 4.15.0.0
         , libriscv              >= 0.1.0.0
         , freer-simple         ^>= 1.2.1.2
+        , transformers         ^>= 0.5.6.2
         , optparse-applicative  >= 0.16.1 && <0.17

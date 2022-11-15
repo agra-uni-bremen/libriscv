@@ -4,6 +4,7 @@ import System.Environment ()
 import Options.Applicative
 import Control.Monad (when)
 import Control.Monad.Freer
+import Control.Monad.Freer.Reader
 
 import Loader
 import Spec.AST
@@ -21,9 +22,9 @@ main' (BasicArgs memAddr memSize trace putReg fp) = do
 
     let interpreter =
             if trace then
-                runInstructionM runExpression state . runLogInstructionFetchM
+                runReader (runExpression, state) . runInstruction defaultBehavior . runLogInstructionFetchM
             else
-                runInstructionM runExpression state . runNoLogging
+                runReader (runExpression, state) . runInstruction defaultBehavior . runNoLogging
     runM $ interpreter $ buildAST entry initalSP
 
     when putReg $

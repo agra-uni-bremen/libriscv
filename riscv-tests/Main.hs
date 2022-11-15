@@ -12,46 +12,40 @@ import Data.Word
 import System.Environment ()
 import System.Exit
 import Options.Applicative
-import Control.Monad (when)
+import Control.Monad (when, mzero)
 import Control.Monad.Freer
+import Control.Monad.Freer.Reader (runReader)
 
 import Loader
 import Spec.AST
 import Spec.Expr
+import Spec.Instruction
 import CmdLine
 import Effects.Logging.InstructionFetch
 import Machine.Standard.Interpreter
 import Common.Types
+import Common.Utils
+import Control.Monad.Trans.Maybe
+import Control.Monad.Trans.Class ( MonadTrans(lift) ) 
 
 import qualified Machine.Standard.Register as REG
 import qualified Machine.Standard.Memory as MEM
 
-runTestInstructionM :: forall r effs . LastMember IO effs => (Expr Word32 -> Word32) -> ArchState -> Eff (Instruction Word32 ': effs) r -> Eff effs r
-runTestInstructionM evalE (regFile, mem) = interpretM $ \case
-    (ReadRegister idx) -> fromIntegral <$> REG.readRegister regFile idx
-    (WriteRegister idx reg) -> REG.writeRegister regFile idx (fromIntegral $ evalE reg)
-    (LoadByte addr) -> fromIntegral <$> MEM.loadByte mem (evalE addr)
-    (LoadHalf addr) -> fromIntegral <$> (MEM.loadHalf mem (evalE addr) :: IO (Word16))
-    (LoadWord addr) -> MEM.loadWord mem (evalE addr)
-    (StoreByte addr w) -> MEM.storeByte mem (evalE addr) (fromIntegral $ evalE w)
-    (StoreHalf addr w) -> MEM.storeHalf mem (evalE addr) (fromIntegral (evalE w) :: Word16)
-    (StoreWord addr w) -> MEM.storeWord mem (evalE addr) (evalE w)
-    (WritePC w) -> REG.writePC regFile (evalE w)
-    ReadPC -> REG.readPC regFile
-    (Ecall pc) -> do
-        sys <- REG.readRegister regFile A7
-        arg <- REG.readRegister regFile A0
 
-        when (sys /= 93) $
-            fail "unknown syscall"
+testSpecificEcallBehavior :: DefaultEnv -> Instruction Word32 ~> MaybeT IO
+testSpecificEcallBehavior (evalE, (regFile, mem)) = \case
+        Ecall pc -> do
+            sys <- lift $ REG.readRegister regFile A7
+            arg <- lift $ REG.readRegister regFile A0
 
-        if arg == 0
-            then (putStrLn "All tests passed!") >> exitWith (ExitFailure 42)
-            else (putStrLn $ "Test" ++ show arg ++ " failed!") >> exitWith (ExitFailure 1)
-    (Ebreak pc) -> putStrLn $ "ebreak at 0x" ++ showHex pc ""
-    LiftE e -> pure $ evalE e
+            when (sys /= 93) $
+                fail "unknown syscall"
 
-------------------------------------------------------------------------
+            lift $ if arg == 0
+                then putStrLn "All tests passed!" >> exitWith (ExitFailure 42) 
+                else putStrLn ("Test" ++ show arg ++ " failed!") >> exitWith (ExitFailure 1)
+        _ -> mzero
+
 
 main' :: BasicArgs -> IO ()
 main' (BasicArgs memAddr memSize trace putReg fp) = do
@@ -63,9 +57,9 @@ main' (BasicArgs memAddr memSize trace putReg fp) = do
 
     let interpreter =
             if trace then
-                runTestInstructionM runExpression state . runLogInstructionFetchM
+                runReader (runExpression, state) . runInstruction (testSpecificEcallBehavior `extends` defaultBehavior) . runLogInstructionFetchM 
             else
-                runTestInstructionM runExpression state . runNoLogging
+                runReader (runExpression, state) . runInstruction (testSpecificEcallBehavior `extends` defaultBehavior) . runNoLogging
     runM $ interpreter $ buildAST entry initalSP
 
     when putReg $

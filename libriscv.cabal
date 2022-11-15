@@ -34,6 +34,7 @@ library
                    , Machine.Standard.Interpreter
                    , Spec.AST
                    , Spec.Expr
+                   , Spec.Instruction
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -47,6 +48,7 @@ library
         , melf                 ^>= 1.1.0
         , freer-simple         ^>= 1.2.1.2
         , conversion           ^>= 1.2.1
+        , transformers         ^>= 0.5.6.2
         , optparse-applicative  >= 0.16.1 && <0.17
 
     hs-source-dirs:   src
