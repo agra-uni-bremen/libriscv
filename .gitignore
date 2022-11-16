@@ -2,3 +2,5 @@ dist-newstyle
 golden/**/test
 golden/**/*.o
 mkDecoder/mkDecoder
+stack.yaml.lock
+.stack-work/*

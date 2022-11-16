@@ -1,0 +1,7 @@
+resolver: lts-19.33
+packages:
+- .
+extra-deps: 
+- conversion-1.2.1@sha256:8db4210950736e54be5cd7f7076c19e05d06fb48673eb23638093246a1e7199e,2155
+- melf-1.1.0@sha256:4da174d843a7b9277eb75c0b280c75628e4a43865fa0f5ecc9403b4fd8e53835,5199
+
