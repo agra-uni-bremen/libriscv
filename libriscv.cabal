@@ -40,10 +40,10 @@ library
     build-depends:
         base                   >= 4.15.0.0
         , array                ^>= 0.5.4.0
-        , filepath             ^>= 1.4.100.0
+        , filepath             ^>= 1.4.2.1
         , singletons           ^>= 3.0.1
-        , bytestring           ^>= 0.11.3.1
-        , exceptions           ^>= 0.10.5
+        , bytestring           ^>= 0.10.12
+        , exceptions           ^>= 0.10.4
         , melf                 ^>= 1.1.0
         , freer-simple         ^>= 1.2.1.2
         , conversion           ^>= 1.2.1
@@ -78,5 +78,5 @@ test-suite test
       , array        ^>= 0.5.4.0
       , tasty        ^>= 1.4.2.3
       , tasty-hunit  ^>= 0.10.0.3
-      , bytestring   ^>= 0.11.3.1
+      , bytestring   ^>= 0.10.12
       , libriscv    >= 0.1.0.0
