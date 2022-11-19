@@ -20,10 +20,19 @@ jobs:
       with:
         ghc-version: '9.2.4'
         cabal-version: '3.6.2.0'
-    - name: Setup riscv gnu/gcc toolchain
-      uses: gregdavill/setup-riscv-gnu-toolchain@v1.0
+    - name: setup-docker
+    - uses: docker-practice/actions-setup-docker@master
+    - run: |
+        set -x
+        docker version
     - name: pull submodules
       run: git submodule update --init --recursive
+    - name: create docker-script
+      run: |
+        echo '#!/bin/sh' >> $HOME/.local/bin/riscv32-unknown-elf-gcc
+        echo 'docker run --rm --entrypoint riscv32-unknown-elf-gcc --volume $PWD:/hostdir coderitter/pulp-riscv-gnu-toolchain "$@"' >> $HOME/.local/bin/riscv32-unknown-elf-gcc
+        chmod +x $HOME/.local/bin/riscv32-unknown-elf-gcc
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
     - name: Cache
       uses: actions/cache@v3
       env:
