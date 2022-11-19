@@ -26,6 +26,7 @@ jobs:
       run: git submodule update --init --recursive
     - name: create docker-script
       run: |
+        mkdir -p $HOME/.local/bin
         echo '#!/bin/sh' >> $HOME/.local/bin/riscv32-unknown-elf-gcc
         echo 'docker run --rm --entrypoint riscv32-unknown-elf-gcc --volume $PWD:/hostdir coderitter/pulp-riscv-gnu-toolchain "$@"' >> $HOME/.local/bin/riscv32-unknown-elf-gcc
         chmod +x $HOME/.local/bin/riscv32-unknown-elf-gcc
