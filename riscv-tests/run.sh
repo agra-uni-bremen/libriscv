@@ -1,6 +1,10 @@
 #!/bin/sh
 set -e
 
+banner() {
+	printf "##\n# %s\n##\n\n" "${1}"
+}
+
 cd "$(dirname "$0")"
 
 # Compiler configuration for riscv-32
@@ -15,11 +19,15 @@ mem_size=$((1024 * 1024 * 1024))
 # Compile the tests
 ##
 
-make --quiet -C src/isa XLEN=${XLEN} rv32ui
+banner "Build tests"
+make -C src/isa XLEN=${XLEN} rv32ui
+echo
 
 ##
 # Run the tests
 ##
+
+banner "Run tests"
 
 exit=0
 for file in src/isa/rv32ui-p-*; do
