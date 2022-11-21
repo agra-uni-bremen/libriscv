@@ -1,55 +1,32 @@
 name: Haskell CI
 
-on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
-
-permissions:
-  contents: read
+on: [push, pull_request]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
-    steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-haskell@v1
-      with:
-        ghc-version: '9.2.4'
-        cabal-version: '3.6.2.0'
-    - name: setup-docker
-      uses: docker-practice/actions-setup-docker@master
-    - name: pull submodules
-      run: git submodule update --init --recursive
-    - name: create docker-script
-      run: |
-        mkdir -p $HOME/.local/bin
-        echo '#!/bin/sh' >> $HOME/.local/bin/riscv32-unknown-elf-gcc
-        echo 'docker run --rm --entrypoint riscv32-unknown-elf-gcc --volume $PWD:/hostdir coderitter/pulp-riscv-gnu-toolchain "$@"' >> $HOME/.local/bin/riscv32-unknown-elf-gcc
-        chmod +x $HOME/.local/bin/riscv32-unknown-elf-gcc
-        echo "$HOME/.local/bin" >> $GITHUB_PATH
-    - name: Cache
-      uses: actions/cache@v3
-      env:
-        cache-name: cache-cabal
-      with:
-        path: ~/.cabal
-        key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/*.cabal') }}-${{ hashFiles('**/cabal.project') }}
-        restore-keys: |
-          ${{ runner.os }}-build-${{ env.cache-name }}-
-          ${{ runner.os }}-build-
-          ${{ runner.os }}-
+    container:
+      image: "alpine"
 
-    - name: Install dependencies
-      run: |
-        cabal update
-        cabal build --only-dependencies
-    - name: Build
-      run: cabal build
-    - name: install
-      run: cabal install
-    - name: Run tests
-      run: ./riscv-tests/run.sh
+    steps:
+      - name: prep alpine
+        run: |
+          apk add build-base newlib-riscv-none-elf ghc cabal wget libffi-dev git
+      - name: checkout
+        uses: actions/checkout@v3
+      - name: checkout submodules
+        run: git submodule update --init --recursive
+      - name: install Haskell dependencies
+        run: |
+          cabal update
+          cabal build --only-dependencies
+      - name: build and install riscv-tiny
+        run: |
+          cabal install
+      - name: build riscv-tests executor
+        run: |
+          cd riscv-tests
+          cabal build
+      - name: compile and run riscv-tests
+        run: env RISCV_PREFIX=riscv-none-elf- ./riscv-tests/run.sh
