@@ -26,14 +26,16 @@ import Machine.Standard.Interpreter
 import Common.Types
 import Common.Utils
 import Control.Monad.Trans.Maybe
-import Control.Monad.Trans.Class ( MonadTrans(lift) ) 
+import Control.Monad.Trans.Class ( MonadTrans(lift) )
 
 import qualified Machine.Standard.Register as REG
 import qualified Machine.Standard.Memory as MEM
 
-
-testSpecificEcallBehavior :: DefaultEnv -> Instruction Word32 ~> MaybeT IO
-testSpecificEcallBehavior (evalE, (regFile, mem)) = \case
+-- The riscv-tests repository uses a special ecall to communicate test
+-- failures to the execution environment. This function implements the
+-- ECALL instruction accordingly.
+ecallHandler :: DefaultEnv -> Instruction Word32 ~> MaybeT IO
+ecallHandler (evalE, (regFile, mem)) = \case
         Ecall pc -> do
             sys <- lift $ REG.readRegister regFile A7
             arg <- lift $ REG.readRegister regFile A0
@@ -42,7 +44,7 @@ testSpecificEcallBehavior (evalE, (regFile, mem)) = \case
                 fail "unknown syscall"
 
             lift $ if arg == 0
-                then putStrLn "All tests passed!" >> exitWith (ExitFailure 42) 
+                then putStrLn "All tests passed!" >> exitWith (ExitFailure 42)
                 else putStrLn ("Test" ++ show arg ++ " failed!") >> exitWith (ExitFailure 1)
         _ -> mzero
 
@@ -57,9 +59,9 @@ main' (BasicArgs memAddr memSize trace putReg fp) = do
 
     let interpreter =
             if trace then
-                runReader (runExpression, state) . runInstruction (testSpecificEcallBehavior `extends` defaultBehavior) . runLogInstructionFetchM 
+                runReader (runExpression, state) . runInstruction (ecallHandler `extends` defaultBehavior) . runLogInstructionFetchM
             else
-                runReader (runExpression, state) . runInstruction (testSpecificEcallBehavior `extends` defaultBehavior) . runNoLogging
+                runReader (runExpression, state) . runInstruction (ecallHandler `extends` defaultBehavior) . runNoLogging
     runM $ interpreter $ buildAST entry initalSP
 
     when putReg $
