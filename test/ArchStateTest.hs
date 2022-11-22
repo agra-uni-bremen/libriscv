@@ -51,6 +51,10 @@ memoryTests = testGroup "Memory Tests"
       storeByte m 0x4 0xab
       loadByte m 0x04 >>= assertEqual "" 0xab
 
+  , testCase "Read uninitialized memory" $ do
+      m <- mkMemory 0x0 256 :: IO (Memory IOUArray Word8)
+      (loadWord m 128 :: IO Word32) >>= assertEqual "Load previously uninitialized word" 0
+
   , testCase "StoreWord in between" $ do
       m <- mkMemory 0x0 12 :: IO (Memory IOUArray Word8)
       storeWord m 0 (0xffffffff :: Word32)
