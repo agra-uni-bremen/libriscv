@@ -81,11 +81,10 @@ runExpression (AShr e1 e2) = fromIntegral $ (fromIntegral (runExpression e1) :: 
 
 type DefaultEnv = (Expr Word32 -> Word32, ArchState)
 
-runInstruction :: forall r effs env . (Member (Reader env) effs , LastMember IO effs) => 
-    (env -> Instruction Word32 ~> IO) -> Eff (Instruction Word32 ': effs) r -> Eff effs r
-runInstruction f eff = 
+runInstruction :: forall r effs env mem. (Member (Reader env) effs , LastMember IO effs) => 
+    (env -> Instruction mem ~> IO) -> Eff (Instruction mem ': effs) r -> Eff effs r
+runInstruction f eff =
     ask >>= \env -> interpretM (f env) eff
- 
 
 defaultBehavior :: DefaultEnv -> Instruction Word32 ~> IO
 defaultBehavior (evalE , (regFile, mem)) = \case
