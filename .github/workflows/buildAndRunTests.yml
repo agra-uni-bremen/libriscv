@@ -20,10 +20,12 @@ jobs:
       - name: install Haskell dependencies
         run: |
           cabal update
-          cabal build --only-dependencies
+          cabal build --only-dependencies --enable-tests
       - name: build and install riscv-tiny
-        run: |
-          cabal install
+        run: cabal install
+
+      - name: run unit tests
+        run: cabal test
       - name: build riscv-tests executor
         run: |
           cd riscv-tests
