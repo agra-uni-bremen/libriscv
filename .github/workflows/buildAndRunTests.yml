@@ -41,6 +41,11 @@ jobs:
       - name: build and install riscv-tiny
         run: cabal install --overwrite-policy=always
 
+      - name: build riscv-ift example
+        run: |
+          cd example
+          cabal build
+
       - name: run unit tests
         run: cabal test
       - name: build riscv-tests executor
