@@ -22,6 +22,7 @@ import Control.Monad.Freer
 import Conversion
 import Numeric (showHex)
 
+import qualified Machine.Standard.Interpreter as STD
 import qualified Machine.Standard.Register as REG
 import qualified Machine.Standard.Memory as MEM
 
@@ -75,87 +76,44 @@ instance ByteAddrsMem ArchState where
 
 ------------------------------------------------------------------------
 
-boolToWord :: Bool -> Word32
-boolToWord True  = 1
-boolToWord False = 0
+-- Execute a binary operation with tainted values.
+binOp :: Expr (Tainted Word32) -> Expr (Tainted Word32) -> (Expr Word32 -> Expr Word32 -> Expr Word32) -> Tainted Word32
+binOp e1 e2 op = MkTainted (t1 || t2) $
+        STD.runExpression ((FromImm v1) `op` (FromImm v2))
+    where
+        (MkTainted t1 v1) = runExpression e1
+        (MkTainted t2 v2) = runExpression e2
+
+-- Execute a unary operation with tainted values.
+unOp :: Expr (Tainted Word32) -> (Expr Word32 -> Expr Word32) -> Tainted Word32
+unOp e1 op = MkTainted taint $ STD.runExpression (op $ FromImm value)
+    where
+        (MkTainted taint value) = runExpression e1
 
 runExpression :: Expr (Tainted Word32) -> (Tainted Word32)
-runExpression (FromImm t) = t
-runExpression (FromInt i) = MkTainted False $ fromIntegral i
+runExpression (FromImm t)  = t
+runExpression (FromInt i)  = MkTainted False $ fromIntegral i
 runExpression (FromUInt i) = MkTainted False i
-runExpression (ZExtByte a) = runExpression a
-runExpression (ZExtHalf a) = runExpression a
-runExpression (SExtByte e) = MkTainted t1 $ fromIntegral @Int8 @Word32 $ fromIntegral @Word8 @Int8 (fromIntegral @Word32 @Word8 v1)
-    where
-        (MkTainted t1 v1) = runExpression e
-runExpression (SExtHalf e) = MkTainted t1 $ fromIntegral $ fromIntegral @Word16 @Int16 (fromIntegral @Word32 @Word16 v1)
-    where
-        (MkTainted t1 v1) = runExpression e
-runExpression (AddU e1 e2) =
-        MkTainted (t1 || t2) (v1 + v2)
-    where
-        (MkTainted t1 v1) = runExpression e1
-        (MkTainted t2 v2) = runExpression e2
-runExpression (AddS e1 e2) =
-        MkTainted (t1 || t2) $ fromIntegral ((fromIntegral v1 :: Int32) + (fromIntegral v2))
-    where
-        (MkTainted t1 v1) = runExpression e1
-        (MkTainted t2 v2) = runExpression e2
-runExpression (Sub e1 e2) = MkTainted (t1 || t2) $ fromIntegral $
-        (fromIntegral v1 :: Int32) - fromIntegral v2
-    where
-        (MkTainted t1 v1) = runExpression e1
-        (MkTainted t2 v2) = runExpression e2
-runExpression (Eq e1 e2) = MkTainted (t1 || t2) $ boolToWord $
-        (fromIntegral v1 :: Int32) == fromIntegral v2
-    where
-        (MkTainted t1 v1) = runExpression e1
-        (MkTainted t2 v2) = runExpression e2
-runExpression (Slt e1 e2) = MkTainted (t1 || t2) $ boolToWord $
-        (fromIntegral v1 :: Int32) < (fromIntegral v2)
-    where
-        (MkTainted t1 v1) = runExpression e1
-        (MkTainted t2 v2) = runExpression e2
-runExpression (Sge e1 e2) = MkTainted (t1 || t2) $ boolToWord $
-        (fromIntegral v1 :: Int32) >= (fromIntegral v2)
-    where
-        (MkTainted t1 v1) = runExpression e1
-        (MkTainted t2 v2) = runExpression e2
-runExpression (Ult e1 e2) = MkTainted (t1 || t2) $ boolToWord $ v1 < v2
-    where
-        (MkTainted t1 v1) = runExpression e1
-        (MkTainted t2 v2) = runExpression e2
-runExpression (Uge e1 e2) = MkTainted (t1 || t2) $ boolToWord $ v1 >= v2
-    where
-        (MkTainted t1 v1) = runExpression e1
-        (MkTainted t2 v2) = runExpression e2
-runExpression (And e1 e2) =
-        MkTainted (t1 || t2) (v1 .&. v2)
-    where
-        (MkTainted t1 v1) = runExpression e1
-        (MkTainted t2 v2) = runExpression e2
-runExpression (Or e1 e2) =
-        MkTainted (t1 || t2) (v1 .|. v2)
-    where
-        (MkTainted t1 v1) = runExpression e1
-        (MkTainted t2 v2) = runExpression e2
-runExpression (Xor e1 e2) =
-        MkTainted (t1 || t2) (v1 `xor` v2)
-    where
-        (MkTainted t1 v1) = runExpression e1
-        (MkTainted t2 v2) = runExpression e2
-runExpression (LShl e1 e2) = MkTainted (t1 || t2) $ v1 `unsafeShiftL` fromIntegral (fromIntegral v1 :: Word8)
-    where
-        (MkTainted t1 v1) = runExpression e1
-        (MkTainted t2 v2) = runExpression e2
-runExpression (LShr e1 e2) = MkTainted (t1 || t2) $ v1 `unsafeShiftR` fromIntegral (fromIntegral v2 :: Word8)
-    where
-        (MkTainted t1 v1) = runExpression e1
-        (MkTainted t2 v2) = runExpression e2
-runExpression (AShr e1 e2) = MkTainted (t1 || t2) $ fromIntegral $ (fromIntegral v1 :: Int32) `unsafeShiftR` fromIntegral (fromIntegral v2 :: Word8)
-    where
-        (MkTainted t1 v1) = runExpression e1
-        (MkTainted t2 v2) = runExpression e2
+runExpression (ZExtByte e) = unOp e ZExtByte
+runExpression (ZExtHalf e) = unOp e ZExtHalf
+runExpression (SExtByte e) = unOp e SExtByte
+runExpression (SExtHalf e) = unOp e SExtHalf
+runExpression (AddS e1 e2) = binOp e1 e2 AddS
+runExpression (AddU e1 e2) = binOp e1 e2 AddU
+runExpression (Sub e1 e2)  = binOp e1 e2 Sub
+runExpression (Eq e1 e2)   = binOp e1 e2 Eq
+runExpression (Slt e1 e2)  = binOp e1 e2 Slt
+runExpression (Sge e1 e2)  = binOp e1 e2 Sge
+runExpression (Ult e1 e2)  = binOp e1 e2 Ult
+runExpression (Uge e1 e2)  = binOp e1 e2 Uge
+runExpression (And e1 e2)  = binOp e1 e2 And
+runExpression (Or e1 e2)   = binOp e1 e2 Or
+runExpression (Xor e1 e2)  = binOp e1 e2 Xor
+runExpression (LShl e1 e2) = binOp e1 e2 LShl
+runExpression (LShr e1 e2) = binOp e1 e2 LShr
+runExpression (AShr e1 e2) = binOp e1 e2 AShr
+
+------------------------------------------------------------------------
 
 type IftEnv = (Expr (Tainted Word32) -> (Tainted Word32), ArchState)
 
