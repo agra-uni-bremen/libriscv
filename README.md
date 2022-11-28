@@ -4,18 +4,10 @@ An extensible implementation of the RISC-V ISA for rapid prototyping of software
 
 # Status
 
-The implementation presently supports a subset of RV32I.
-The following instructions are supported at the moment, more instructions will be added later:
-
-* [x] ADD
-* [x] ADDI
-* [x] LW
-* [x] SW
-* [x] JAL
-* [x] JALR
-* [x] BLT
-* [x] LUI
-* [x] AUIPC
+Currently, the RV32 base instruction set (i.e. `rv32i`) is implemented
+and passes the `riscv-tests`.  In terms of extensibility, both the
+interpretation of arithmetic expression and abstractions for
+architectural state (registers, memory, …) can be replaced presently.
 
 ## Installation
 
@@ -27,33 +19,14 @@ This RISC-V simulator can be installed using [Cabal][cabal web] with the followi
 
 This should install the `riscv-tiny` executable to `~/.cabal/bin`.
 
-## Usage:
+## Usage
 
-The `riscv-tiny` executable runs 32-bit RISC-V software until the first invalid instruction.
-There are also various command-line options for dumping the register file afterwards and tracing instructions.
-Refer to the `--help` output for details.
-
-Example usage:
-
-	$ cat example.S
-	.globl _start
-	.myword:
-		.word 0xffffffff
-	_start:
-		lw t0, .myword
-		addi a0, a0, 1
-	$ riscv-none-elf-gcc -o example example.S -march=rv32i -mabi=ilp32 -nostdlib
-	$ riscv-tiny --trace --registers example | head
-	10078: Auipc T0 0
-	1007c: Lw (-4) T0 T0
-	10080: Addi 24 T0 T0
-	10084: InvalidInstruction
-	Zero    = 0
-	RA      = 0
-	SP      = 0
-	GP      = 0
-	TP      = 0
-	T0      = 23
+The libriscv cabal package provides an executable (`riscv-tiny`) for
+executing rv32i machine code via standard concrete interpretation. Refer
+to the `--help` output for more information on this interpreter.
+Regarding the provided library, see the Haskell example code provided in
+`example/`. The example application provided there demonstrates how
+information flow tracking (IFT) can be implemented on top of libriscv.
 
 ## Tests
 
