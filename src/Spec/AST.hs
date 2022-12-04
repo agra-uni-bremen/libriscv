@@ -32,7 +32,7 @@ import Spec.Instruction
 --
 -- See: https://github.com/lexi-lambda/freer-simple/issues/7
 
-buildInstruction'' :: forall v r. (Conversion v Word32, Member (Instruction v) r, Member LogInstructionFetch r) => v -> InstructionType -> Eff r ()
+buildInstruction'' :: forall v r. (Conversion v Word32, Member (Instruction v) r) => v -> InstructionType -> Eff r ()
 buildInstruction'' _ ADDI{..} = do
     r1 <- readRegister rs1
     writeRegister @v rd $ r1 `addSInt` imm
