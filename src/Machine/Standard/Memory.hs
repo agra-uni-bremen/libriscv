@@ -6,7 +6,6 @@ module Machine.Standard.Memory where
 import Conversion
 import Control.Monad
 import Common.Types
-import Common.Utils ( fstWordLe )
 import Data.Int ()
 import Data.Bits ( Bits((.|.), (.&.), shift, shiftR) )
 import Data.Word ( Word8, Word16, Word32 )

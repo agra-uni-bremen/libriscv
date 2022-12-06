@@ -11,17 +11,11 @@ import Spec.Instruction (Instruction)
 import Control.Monad.Freer (type (~>))
 import Control.Monad.Trans.Maybe (MaybeT (runMaybeT))
 
--- Read the first 32-bit word in little endian from a bytestring.
-fstWordLe :: BSL.ByteString -> Word32
-fstWordLe b = fromIntegral (BSL.index b 0)
-    .|. (fromIntegral (BSL.index b 1) `shift` 8)
-    .|. (fromIntegral (BSL.index b 2) `shift` 16)
-    .|. (fromIntegral (BSL.index b 3) `shift` 24)
-
-
+-- Like Control.Monad.when but interprets given Word32 as a bool.
 whenMword :: Monad m => m Word32 -> m () -> m ()
 whenMword mb act = mb >>= flip when act . (==1)
 
+-- Like Control.Monad.unless but interprets given Word32 as a bool.
 unlessMword :: Monad m => m Word32 -> m () -> m ()
 unlessMword mb act = mb >>= flip unless act . (==1)
 
