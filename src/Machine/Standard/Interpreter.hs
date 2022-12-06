@@ -26,7 +26,7 @@ import Numeric (showHex)
 import qualified Machine.Standard.Register as REG
 import qualified Machine.Standard.Memory as MEM
 import Spec.Instruction
-import Common.Utils (extends)
+import Common.Utils (extends, boolToWord)
 import Control.Monad.Freer.Reader (Reader, ask)
 
 -- Architectural state of the executor.
@@ -46,10 +46,6 @@ instance ByteAddrsMem ArchState where
     storeByteString (_, mem) = MEM.storeByteString mem
 
 ------------------------------------------------------------------------
-
-boolToWord :: Bool -> Word32
-boolToWord True  = 1
-boolToWord False = 0
 
 runExpression :: Expr Word32 -> Word32
 runExpression (FromImm a) = a
