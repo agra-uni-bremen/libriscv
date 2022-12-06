@@ -4,7 +4,6 @@
 module Machine.Standard.Memory where
 
 import Conversion
-import Control.Monad
 import Common.Types
 import Data.Int ()
 import Data.Bits ( Bits((.|.), (.&.), shift, shiftR) )

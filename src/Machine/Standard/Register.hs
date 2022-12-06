@@ -2,11 +2,9 @@
 module Machine.Standard.Register where
 
 import Common.Types
-import Data.Ix ( Ix )
 import Data.Word ( Word32 )
-import Data.Int ( Int32 )
 import Data.Array.IO
-    ( Ix, getElems, readArray, writeArray, MArray(newArray) )
+    ( getElems, readArray, writeArray, MArray(newArray) )
 import Data.IORef ( IORef, newIORef, readIORef, writeIORef )
 import Control.Monad (unless)
 

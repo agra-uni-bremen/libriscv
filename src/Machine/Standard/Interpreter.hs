@@ -9,24 +9,19 @@
 {-# LANGUAGE TypeFamilies #-}
 module Machine.Standard.Interpreter where
 
-import Conversion
 import Data.Bits hiding (Xor, And)
 import Data.Int
 import Data.Word
 import Data.Array.IO (IOUArray)
 import Common.Types
 import Spec.Expr
-import Spec.AST
-import Control.Monad
 import Control.Monad.Freer
-import Control.Monad.Freer.TH
-import System.Exit
 import Numeric (showHex)
 
 import qualified Machine.Standard.Register as REG
 import qualified Machine.Standard.Memory as MEM
 import Spec.Instruction
-import Common.Utils (extends, boolToWord)
+import Common.Utils (boolToWord)
 import Control.Monad.Freer.Reader (Reader, ask)
 
 -- Architectural state of the executor.
@@ -39,7 +34,7 @@ mkArchState memStart memSize = do
     pure (reg, mem)
 
 dumpState :: ArchState -> IO ()
-dumpState (r, m) =
+dumpState (r, _) =
     REG.dumpRegs (showHex . fromIntegral @Int32 @Word32) r >>= putStr
 
 instance ByteAddrsMem ArchState where

@@ -10,15 +10,12 @@
 {-# LANGUAGE RecordWildCards #-}
 module Spec.AST where
 
-import Data.Bits hiding (Xor, And)
 import Common.Types
 import Decoder
 import Data.Word
 import Control.Monad.Freer
-import Control.Monad.Freer.TH
 
 import Spec.Expr
-import Data.Int
 import Common.Utils (whenMword,unlessMword)
 import Effects.Logging.InstructionFetch
 import Conversion
@@ -113,7 +110,7 @@ buildInstruction'' pc JAL{..} = do
     -- TODO: Alignment 
     writePC @v $ pc `addSInt` imm
     writeRegister @v rd (FromImm nextInstr)
-buildInstruction'' pc JALR{..} = do
+buildInstruction'' _ JALR{..} = do
     nextInstr <- readPC
     r1 <- readRegister rs1
     writePC @v $ (r1 `addSInt` imm) `And` (FromUInt 0xfffffffe)

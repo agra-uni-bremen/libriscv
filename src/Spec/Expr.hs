@@ -1,19 +1,7 @@
 module Spec.Expr where
 
-import Data.Bits hiding (Xor, And)
 import Data.Int
 import Data.Word
-import Control.Monad (when)
-import Control.Monad.Freer 
-import Control.Monad.Freer.TH
-
-import Common.Types
-import Effects.Logging.InstructionFetch
-import Data.Function ((&))
-import Decoder (Immediate)
-import Control.Monad.Freer.Error
-import Control.Monad.Freer.State
-import Conversion
 
 data Expr a =
     FromImm a |

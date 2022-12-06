@@ -4,7 +4,6 @@
 
 module Decoder where
 
-import Data.Ix
 import Data.Int
 import Data.Word
 import Data.Bits

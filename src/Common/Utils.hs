@@ -3,11 +3,8 @@
 {-# LANGUAGE RankNTypes #-}
 module Common.Utils where
 
-import Data.Word ( Word8, Word32 )
-import Data.Bits ( Bits((.|.), shiftR, (.&.), shift) )
-import qualified Data.ByteString.Lazy as BSL
+import Data.Word ( Word32 )
 import Control.Monad (when,unless)
-import Spec.Instruction (Instruction)
 import Control.Monad.Freer (type (~>))
 import Control.Monad.Trans.Maybe (MaybeT (runMaybeT))
 
