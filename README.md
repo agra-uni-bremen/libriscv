@@ -18,6 +18,7 @@ Apart from the formal model for `rv32i`, a minimal concrete interpreter is also 
     * Can also be SMT expressions for example (useful for symbolic execution)
 * Polymorphic implementations of byte-addressable memory and register file
 * Algebraic effects for instruction tracing etc
+* Monad transformers to extend existing interpreters
 
 ## Installation
 
