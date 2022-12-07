@@ -22,7 +22,7 @@ maintainer:         soeren@soeren-tempel.net
 -- extra-source-files: CHANGELOG.md
 
 common opts
-    ghc-options:    -Wunused-imports -Wunused-matches -Werror
+    ghc-options:    -Wincomplete-patterns -Wincomplete-uni-patterns -Wunused-imports -Wunused-matches -Werror
 
 library
     import:          opts

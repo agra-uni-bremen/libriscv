@@ -197,6 +197,7 @@ buildInstruction'' pc BGEU{..} = do
 buildInstruction'' _ FENCE = pure () -- XXX: ignore for now
 buildInstruction'' pc ECALL = ecall @v pc
 buildInstruction'' pc EBREAK = ebreak @v pc
+buildInstruction'' _ InvalidInstruction = error "InvalidInstruction"
 
 buildInstruction' :: forall v r. (Conversion v Word32, Member (Instruction v) r, Member LogInstructionFetch r) => v -> InstructionType -> Eff r ()
 buildInstruction' _ InvalidInstruction = pure () -- XXX: ignore for now

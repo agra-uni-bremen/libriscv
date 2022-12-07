@@ -21,7 +21,7 @@ import Data.Elf
             esAddr, epType, epAddMemSize, epData)
     )
 import Data.Elf.Headers
-    ( withElfClass, IsElfClass, SElfClass(SELFCLASS32) )
+    ( withElfClass, IsElfClass, SElfClass(SELFCLASS32, SELFCLASS64) )
 import Data.Elf.Constants 
 import Data.Elf.PrettyPrint (readFileLazy)
 import Data.Singletons ( SingI )
@@ -32,10 +32,11 @@ import System.FilePath ()
 -- Return the entry point from the ELF header.
 startAddr :: MonadCatch m => Elf -> m Word32
 startAddr (SELFCLASS32 :&: ElfList elfs) = ehEntry <$> elfFindHeader elfs
+startAddr (SELFCLASS64 :&: _) = error "64-bit executables not supported"
 
 -- Return all ELF segments with type PT_LOAD.
 loadableSegments :: forall a. (SingI a) => [ElfXX a] -> [ElfXX a]
-loadableSegments = filter f 
+loadableSegments = filter f
     where
         f ElfSegment{..} = epType == PT_LOAD
         f _ = False
@@ -53,6 +54,7 @@ copyData (_:xs) zeros mem = copyData xs zeros mem
 loadSegment :: (IsElfClass a, ByteAddrsMem m) => m -> ElfXX a -> IO ()
 loadSegment mem ElfSegment{..} =
     copyData epData (fromIntegral epAddMemSize) mem
+loadSegment _ _ = fail "can only load from ElfSegments"
 
 -- Load all loadable segments of an ELF file into memory.
 loadElf :: (ByteAddrsMem m) => m -> Elf -> IO Word32
