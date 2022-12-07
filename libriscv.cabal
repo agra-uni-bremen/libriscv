@@ -11,10 +11,10 @@ version:            0.1.0.0
 -- A URL where users can report bugs.
 -- bug-reports:
 
--- The license under which the package is released.
 license:            GPL-3.0-or-later
-author:             Sören Tempel
-maintainer:         soeren@soeren-tempel.net
+author:             Sören Tempel, Tobias Brandt, and Christoph Lüth
+maintainer:         Group of Computer Architecture <riscv@informatik.uni-bremen.de>
+copyright:          (c) 2022 University of Bremen
 
 -- A copyright notice.
 -- copyright:
