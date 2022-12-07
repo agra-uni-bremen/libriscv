@@ -13,8 +13,8 @@ Apart from the formal model for `rv32i`, a minimal concrete interpreter is also 
 ## Features
 
 * Abstract description of RISC-V instructions based on free monads
-* Custom expression language to perform arithmetic operations on arbitrary representations of RISC-V register/memory values
-    * Values must not be concrete fixed-width integers
+* Custom expression language to perform operations on arbitrary types
+    * Instruction operands must not be concrete fixed-width integers
     * Can also be SMT expressions for example (useful for symbolic execution)
 * Polymorphic implementations of byte-addressable memory and register file
 * Algebraic effects for instruction tracing etc
