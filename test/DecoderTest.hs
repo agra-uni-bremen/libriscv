@@ -4,7 +4,6 @@ import Test.Tasty
 import Test.Tasty.HUnit
 
 import Decoder
-import Machine.Standard.Register
 import Common.Types
 
 decoderTests = testGroup "Decoder Tests"
