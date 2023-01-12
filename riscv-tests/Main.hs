@@ -25,11 +25,11 @@ import LibRISCV.Spec.Expr
 import LibRISCV.Spec.Instruction
 import LibRISCV.CmdLine
 import LibRISCV.Effects.Logging.InstructionFetch
-import LibRISCV.Machine.Standard.Interpreter
+import LibRISCV.Machine.Interpreter
 import LibRISCV.Utils
 
-import qualified LibRISCV.Machine.Standard.Register as REG
-import qualified LibRISCV.Machine.Standard.Memory as MEM
+import qualified LibRISCV.Machine.Register as REG
+import qualified LibRISCV.Machine.Memory as MEM
 
 -- The riscv-tests repository uses a special ecall to communicate test
 -- failures to the execution environment. This function implements the

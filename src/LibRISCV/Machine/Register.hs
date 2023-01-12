@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
-module LibRISCV.Machine.Standard.Register where
+module LibRISCV.Machine.Register where
 
 import LibRISCV
 import Data.Word ( Word32 )

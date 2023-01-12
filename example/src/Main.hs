@@ -14,7 +14,7 @@ import LibRISCV.Spec.Expr
 import LibRISCV.Spec.Instruction
 import LibRISCV.CmdLine
 import LibRISCV.Effects.Logging.InstructionFetch
-import LibRISCV.Machine.Standard.Interpreter (runInstruction)
+import LibRISCV.Machine.Interpreter (runInstruction)
 
 import Interpreter
 

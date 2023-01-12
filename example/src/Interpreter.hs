@@ -23,9 +23,9 @@ import Control.Monad.Freer
 import Conversion
 import Numeric (showHex)
 
-import qualified LibRISCV.Machine.Standard.Interpreter as STD
-import qualified LibRISCV.Machine.Standard.Register as REG
-import qualified LibRISCV.Machine.Standard.Memory as MEM
+import qualified LibRISCV.Machine.Interpreter as STD
+import qualified LibRISCV.Machine.Register as REG
+import qualified LibRISCV.Machine.Memory as MEM
 
 data Tainted a = MkTainted Bool a
 

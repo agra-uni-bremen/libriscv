@@ -34,9 +34,9 @@ library
                    , LibRISCV.CmdLine
                    , LibRISCV.Utils
                    , LibRISCV.Effects.Logging.InstructionFetch
-                   , LibRISCV.Machine.Standard.Register
-                   , LibRISCV.Machine.Standard.Memory
-                   , LibRISCV.Machine.Standard.Interpreter
+                   , LibRISCV.Machine.Register
+                   , LibRISCV.Machine.Memory
+                   , LibRISCV.Machine.Interpreter
                    , LibRISCV.Spec.AST
                    , LibRISCV.Spec.Expr
                    , LibRISCV.Spec.Instruction

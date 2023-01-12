@@ -6,8 +6,8 @@ import Test.Tasty.HUnit
 import Data.Word
 import Data.Array.IO (IOUArray)
 import LibRISCV (RegIdx(..))
-import LibRISCV.Machine.Standard.Memory
-import LibRISCV.Machine.Standard.Register
+import LibRISCV.Machine.Memory
+import LibRISCV.Machine.Register
 
 import qualified Data.ByteString.Lazy as BSL
 

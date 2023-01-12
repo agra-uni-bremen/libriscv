@@ -1,7 +1,7 @@
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-module LibRISCV.Machine.Standard.Memory where
+module LibRISCV.Machine.Memory where
 
 import LibRISCV
 import Conversion

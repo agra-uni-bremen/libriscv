@@ -10,7 +10,7 @@ import LibRISCV.Loader
 import LibRISCV.Spec.AST
 import LibRISCV.CmdLine
 import LibRISCV.Effects.Logging.InstructionFetch
-import LibRISCV.Machine.Standard.Interpreter
+import LibRISCV.Machine.Interpreter
 
 main' :: BasicArgs -> IO ()
 main' (BasicArgs memAddr memSize trace putReg fp) = do

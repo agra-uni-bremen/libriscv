@@ -7,7 +7,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE TypeFamilies #-}
-module LibRISCV.Machine.Standard.Interpreter where
+module LibRISCV.Machine.Interpreter where
 
 import Data.Bits hiding (Xor, And)
 import Data.Int
@@ -18,8 +18,8 @@ import LibRISCV.Spec.Expr
 import Control.Monad.Freer
 import Numeric (showHex)
 
-import qualified LibRISCV.Machine.Standard.Register as REG
-import qualified LibRISCV.Machine.Standard.Memory as MEM
+import qualified LibRISCV.Machine.Register as REG
+import qualified LibRISCV.Machine.Memory as MEM
 import LibRISCV.Spec.Instruction
 import LibRISCV.Utils (boolToWord)
 import Control.Monad.Freer.Reader (Reader, ask)
