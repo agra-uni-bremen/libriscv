@@ -1,4 +1,4 @@
-module Spec.Expr where
+module LibRISCV.Spec.Expr where
 
 import Data.Int
 import Data.Word

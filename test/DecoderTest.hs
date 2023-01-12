@@ -3,8 +3,8 @@ module DecoderTest where
 import Test.Tasty
 import Test.Tasty.HUnit
 
-import Decoder
-import Common.Types
+import LibRISCV
+import LibRISCV.Decoder
 
 decoderTests = testGroup "Decoder Tests"
   [ testCase "Decode ADD instruction" $

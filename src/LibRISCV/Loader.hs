@@ -2,11 +2,11 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE RankNTypes #-}
 
-module Loader (loadExecutable) where
+module LibRISCV.Loader (loadExecutable) where
 
-import Common.Utils ()
-import Common.Types
-import Decoder ()
+import LibRISCV
+import LibRISCV.Utils ()
+import LibRISCV.Decoder ()
 import Control.Monad.Catch ( MonadCatch )
 import Data.Bits ()
 import Data.Int ( Int64 )

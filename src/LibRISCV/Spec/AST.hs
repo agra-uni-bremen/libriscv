@@ -8,18 +8,18 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE RecordWildCards #-}
-module Spec.AST where
+module LibRISCV.Spec.AST where
 
-import Common.Types
-import Decoder
+import LibRISCV
+import LibRISCV.Decoder
 import Data.Word
 import Control.Monad.Freer
 
-import Spec.Expr
-import Common.Utils (whenMword,unlessMword)
-import Effects.Logging.InstructionFetch
+import LibRISCV.Utils (whenMword,unlessMword)
+import LibRISCV.Effects.Logging.InstructionFetch
 import Conversion
-import Spec.Instruction
+import LibRISCV.Spec.Expr
+import LibRISCV.Spec.Instruction
 
 ------------------------------------------------------------------------
 

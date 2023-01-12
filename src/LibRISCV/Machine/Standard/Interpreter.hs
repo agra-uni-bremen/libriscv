@@ -7,21 +7,21 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE TypeFamilies #-}
-module Machine.Standard.Interpreter where
+module LibRISCV.Machine.Standard.Interpreter where
 
 import Data.Bits hiding (Xor, And)
 import Data.Int
 import Data.Word
 import Data.Array.IO (IOUArray)
-import Common.Types
-import Spec.Expr
+import LibRISCV
+import LibRISCV.Spec.Expr
 import Control.Monad.Freer
 import Numeric (showHex)
 
-import qualified Machine.Standard.Register as REG
-import qualified Machine.Standard.Memory as MEM
-import Spec.Instruction
-import Common.Utils (boolToWord)
+import qualified LibRISCV.Machine.Standard.Register as REG
+import qualified LibRISCV.Machine.Standard.Memory as MEM
+import LibRISCV.Spec.Instruction
+import LibRISCV.Utils (boolToWord)
 import Control.Monad.Freer.Reader (Reader, ask)
 
 -- Architectural state of the executor.

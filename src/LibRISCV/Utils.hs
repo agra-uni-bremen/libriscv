@@ -1,7 +1,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RankNTypes #-}
-module Common.Utils where
+module LibRISCV.Utils where
 
 import Data.Word ( Word32 )
 import Control.Monad (when,unless)

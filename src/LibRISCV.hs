@@ -1,4 +1,4 @@
-module Common.Types where
+module LibRISCV where
 
 import Data.Int
 import Data.Word

@@ -1,4 +1,4 @@
-module CmdLine where
+module LibRISCV.CmdLine where
 
 import Data.Word
 import Options.Applicative

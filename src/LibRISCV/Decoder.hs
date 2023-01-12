@@ -2,12 +2,12 @@
 -- !! THIS FILE IS AUTO-GENERATED !!
 --
 
-module Decoder where
+module LibRISCV.Decoder where
 
 import Data.Int
 import Data.Word
 import Data.Bits
-import Common.Types (RegIdx)
+import LibRISCV (RegIdx)
 
 type Immediate = Int32
 

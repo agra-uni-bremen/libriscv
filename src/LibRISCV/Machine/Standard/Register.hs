@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
-module Machine.Standard.Register where
+module LibRISCV.Machine.Standard.Register where
 
-import Common.Types
+import LibRISCV
 import Data.Word ( Word32 )
 import Data.Array.IO
     ( getElems, readArray, writeArray, MArray(newArray) )

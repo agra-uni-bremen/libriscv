@@ -1,10 +1,10 @@
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-module Machine.Standard.Memory where
+module LibRISCV.Machine.Standard.Memory where
 
+import LibRISCV
 import Conversion
-import Common.Types
 import Data.Int ()
 import Data.Bits ( Bits((.|.), (.&.), shift, shiftR) )
 import Data.Word ( Word8, Word16, Word32 )

@@ -6,10 +6,10 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE DataKinds #-}
-module Effects.Logging.InstructionFetch where
+module LibRISCV.Effects.Logging.InstructionFetch where
 
-import Common.Types (Address)
-import Decoder (InstructionType)
+import LibRISCV (Address)
+import LibRISCV.Decoder (InstructionType)
 import Numeric (showHex)
 import Control.Monad.Freer
 import Control.Monad.Freer.TH

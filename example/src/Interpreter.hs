@@ -15,16 +15,17 @@ import Data.Int
 import Data.Bits
 import Data.Word
 import Data.Array.IO (IOArray)
-import Common.Types
-import Spec.Expr
-import Spec.Instruction
+
+import LibRISCV
+import LibRISCV.Spec.Expr
+import LibRISCV.Spec.Instruction
 import Control.Monad.Freer
 import Conversion
 import Numeric (showHex)
 
-import qualified Machine.Standard.Interpreter as STD
-import qualified Machine.Standard.Register as REG
-import qualified Machine.Standard.Memory as MEM
+import qualified LibRISCV.Machine.Standard.Interpreter as STD
+import qualified LibRISCV.Machine.Standard.Register as REG
+import qualified LibRISCV.Machine.Standard.Memory as MEM
 
 data Tainted a = MkTainted Bool a
 

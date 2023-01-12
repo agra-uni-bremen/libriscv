@@ -15,21 +15,21 @@ import Options.Applicative
 import Control.Monad (when, mzero)
 import Control.Monad.Freer
 import Control.Monad.Freer.Reader (runReader)
-
-import Loader
-import Spec.AST
-import Spec.Expr
-import Spec.Instruction
-import CmdLine
-import Effects.Logging.InstructionFetch
-import Machine.Standard.Interpreter
-import Common.Types
-import Common.Utils
 import Control.Monad.Trans.Maybe
 import Control.Monad.Trans.Class ( MonadTrans(lift) )
 
-import qualified Machine.Standard.Register as REG
-import qualified Machine.Standard.Memory as MEM
+import LibRISCV
+import LibRISCV.Loader
+import LibRISCV.Spec.AST
+import LibRISCV.Spec.Expr
+import LibRISCV.Spec.Instruction
+import LibRISCV.CmdLine
+import LibRISCV.Effects.Logging.InstructionFetch
+import LibRISCV.Machine.Standard.Interpreter
+import LibRISCV.Utils
+
+import qualified LibRISCV.Machine.Standard.Register as REG
+import qualified LibRISCV.Machine.Standard.Memory as MEM
 
 -- The riscv-tests repository uses a special ecall to communicate test
 -- failures to the execution environment. This function implements the

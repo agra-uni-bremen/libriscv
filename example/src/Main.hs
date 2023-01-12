@@ -7,14 +7,15 @@ import Control.Monad (when)
 import Control.Monad.Freer
 import Control.Monad.Freer.Reader
 
-import Loader
-import Spec.AST
-import Spec.Expr
-import Spec.Instruction
-import CmdLine
-import Common.Types
-import Effects.Logging.InstructionFetch
-import Machine.Standard.Interpreter (runInstruction)
+import LibRISCV
+import LibRISCV.Loader
+import LibRISCV.Spec.AST
+import LibRISCV.Spec.Expr
+import LibRISCV.Spec.Instruction
+import LibRISCV.CmdLine
+import LibRISCV.Effects.Logging.InstructionFetch
+import LibRISCV.Machine.Standard.Interpreter (runInstruction)
+
 import Interpreter
 
 data TaintArgs = TaintArgs

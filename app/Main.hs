@@ -6,11 +6,11 @@ import Control.Monad (when)
 import Control.Monad.Freer
 import Control.Monad.Freer.Reader
 
-import Loader
-import Spec.AST
-import CmdLine
-import Effects.Logging.InstructionFetch
-import Machine.Standard.Interpreter
+import LibRISCV.Loader
+import LibRISCV.Spec.AST
+import LibRISCV.CmdLine
+import LibRISCV.Effects.Logging.InstructionFetch
+import LibRISCV.Machine.Standard.Interpreter
 
 main' :: BasicArgs -> IO ()
 main' (BasicArgs memAddr memSize trace putReg fp) = do

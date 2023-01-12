@@ -28,18 +28,18 @@ library
     import:          opts
 
     -- Modules included in this executable, other than Main.
-    exposed-modules: Decoder
-                   , Loader
-                   , CmdLine
-                   , Common.Types
-                   , Common.Utils
-                   , Effects.Logging.InstructionFetch
-                   , Machine.Standard.Register
-                   , Machine.Standard.Memory
-                   , Machine.Standard.Interpreter
-                   , Spec.AST
-                   , Spec.Expr
-                   , Spec.Instruction
+    exposed-modules: LibRISCV
+                   , LibRISCV.Decoder
+                   , LibRISCV.Loader
+                   , LibRISCV.CmdLine
+                   , LibRISCV.Utils
+                   , LibRISCV.Effects.Logging.InstructionFetch
+                   , LibRISCV.Machine.Standard.Register
+                   , LibRISCV.Machine.Standard.Memory
+                   , LibRISCV.Machine.Standard.Interpreter
+                   , LibRISCV.Spec.AST
+                   , LibRISCV.Spec.Expr
+                   , LibRISCV.Spec.Instruction
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

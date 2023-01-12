@@ -1,9 +1,10 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE FlexibleContexts #-}
-module Spec.Instruction where
-import Common.Types
-import Spec.Expr (Expr)
+module LibRISCV.Spec.Instruction where
+
+import LibRISCV
+import LibRISCV.Spec.Expr (Expr)
 import Control.Monad.Freer.TH
 
 data Instruction v r where
