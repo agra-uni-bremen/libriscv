@@ -53,7 +53,11 @@ memoryTests = testGroup "Memory Tests"
 
   , testCase "Read uninitialized memory" $ do
       m <- mkMemory 0x0 256 :: IO (Memory IOUArray Word8)
-      (loadWord m 128 :: IO Word32) >>= assertEqual "Load previously uninitialized word" 0
+
+      -- We don't really care what this evaluates to. This returns
+      -- undefined values which is fine as long as the memory doesn't
+      -- error on an uninitialized memory accesses.
+      (loadWord m 128 :: IO Word32) >> pure ()
 
   , testCase "StoreWord in between" $ do
       m <- mkMemory 0x0 12 :: IO (Memory IOUArray Word8)
