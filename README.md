@@ -18,7 +18,7 @@ Apart from the formal model for `rv32i`, a minimal concrete interpreter is also 
     * Can also be SMT expressions for example (useful for symbolic execution)
 * Polymorphic implementations of byte-addressable memory and register file
 * Algebraic effects for instruction tracing etc
-* Monad transformers to extend existing interpreters
+* RISC-V instruction decoder which is auto-generated from [riscv-opcodes][riscv-opcodes github]
 
 ## Installation
 
@@ -117,3 +117,4 @@ with this program. If not, see <https://www.gnu.org/licenses/>.
 [symex wp]: https://en.wikipedia.org/wiki/Symbolic_execution
 [hardbound paper]: https://doi.org/10.1145/1353535.1346295
 [dift paper]: https://doi.org/10.1145/1024393.1024404
+[riscv-opcodes]: https://github.com/riscv/riscv-opcodes
