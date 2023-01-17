@@ -8,6 +8,7 @@ import Control.Monad.Freer
 import Control.Monad.Freer.Reader
 
 import LibRISCV
+import LibRISCV.Utils (align)
 import LibRISCV.Loader
 import LibRISCV.Spec.AST
 import LibRISCV.Spec.Expr
@@ -35,7 +36,7 @@ main' (TaintArgs taintReg (BasicArgs memAddr memSize trace putReg fp)) = do
     entry <- loadExecutable fp state
 
     -- Let stack pointer start at end of memory by default.
-    let initalSP = fromIntegral $ memAddr + memSize
+    let initalSP = fromIntegral $ align (memAddr + memSize - 1)
 
     let interpreter =
             if trace then

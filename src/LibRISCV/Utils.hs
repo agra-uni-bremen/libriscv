@@ -3,6 +3,8 @@
 {-# LANGUAGE RankNTypes #-}
 module LibRISCV.Utils where
 
+import LibRISCV
+
 import Data.Word ( Word32 )
 import Control.Monad (when,unless)
 import Control.Monad.Freer (type (~>))
@@ -22,6 +24,10 @@ unlessMword :: Monad m => m Word32 -> m () -> m ()
 unlessMword mb act = mb >>= flip unless act . (==1)
 
 ------------------------------------------------------------------------
+
+-- Align an address on the next word boundary.
+align :: Address -> Address
+align addr = addr - addr `mod` 4
 
 extends :: Monad m => (e -> f w ~> MaybeT m) -> (e -> f w ~> m) -> (e -> f w ~> m)  
 extends ext def env inst = runMaybeT (ext env inst) >>= \case
