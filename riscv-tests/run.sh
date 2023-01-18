@@ -16,11 +16,16 @@ mem_start=2147483648 # 0x80000000
 mem_size=$((1024 * 1024 * 1024))
 
 ##
-# Compile the tests
+# Compilation
 ##
 
 banner "Build tests"
 make -C src/isa XLEN=${XLEN} rv32ui
+echo
+
+banner "Build interpreter"
+mkdir -p bin
+cabal install --overwrite-policy=always --installdir ./bin
 echo
 
 ##
@@ -41,8 +46,8 @@ for file in src/isa/rv32ui-p-*; do
 		continue
 	fi
 
-	ret=0; cabal run riscv-test -- -m "${mem_start}" -s "${mem_size}" "${file}" >/dev/null || ret=$?
-	if [ "${ret}" -ne 42 ]; then
+	ret=0; ./bin/riscv-test -m "${mem_start}" -s "${mem_size}" "${file}" || ret=$?
+	if [ "${ret}" -ne 0 ]; then
 		exit=1
 		printf "FAIL\n"
 		continue

@@ -3,3 +3,4 @@ example/example
 mkDecoder/mkDecoder
 stack.yaml.lock
 .stack-work/*
+riscv-tests/bin

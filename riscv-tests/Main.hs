@@ -9,8 +9,10 @@ module Main where
 
 import Numeric
 import Data.Word
+import Data.Int
 import System.Environment ()
 import System.Exit
+import System.IO (hPutStrLn, stderr)
 import Options.Applicative
 import Control.Monad (when, mzero)
 import Control.Monad.Freer
@@ -31,6 +33,10 @@ import LibRISCV.Utils
 import qualified LibRISCV.Machine.Register as REG
 import qualified LibRISCV.Machine.Memory as MEM
 
+-- Syscall number for the newlib exit syscall (used by riscv-tests).
+sys_exit :: Int32
+sys_exit = 93
+
 -- The riscv-tests repository uses a special ecall to communicate test
 -- failures to the execution environment. This function implements the
 -- ECALL instruction accordingly.
@@ -40,12 +46,12 @@ ecallHandler (evalE, (regFile, mem)) = \case
             sys <- lift $ REG.readRegister regFile A7
             arg <- lift $ REG.readRegister regFile A0
 
-            when (sys /= 93) $
+            when (sys /= sys_exit) $
                 fail "unknown syscall"
 
             lift $ if arg == 0
-                then putStrLn "All tests passed!" >> exitWith (ExitFailure 42)
-                else putStrLn ("Test" ++ show arg ++ " failed!") >> exitWith (ExitFailure 1)
+                then exitWith ExitSuccess
+                else hPutStrLn stderr "Software indicated error" >> exitWith (ExitFailure 128)
         _ -> mzero
 
 
