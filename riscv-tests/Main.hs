@@ -12,7 +12,6 @@ import Data.Word
 import Data.Int
 import System.Environment ()
 import System.Exit
-import System.IO (hPutStrLn, stderr)
 import Options.Applicative
 import Control.Monad (when, mzero)
 import Control.Monad.Freer
@@ -52,7 +51,7 @@ ecallHandler (evalE, (regFile, mem)) = \case
 
             lift $ if arg == 0
                 then exitWith ExitSuccess
-                else hPutStrLn stderr "Software indicated error" >> exitWith (ExitFailure 128)
+                else exitWith (ExitFailure $ fromIntegral arg)
         _ -> mzero
 
 
