@@ -21,6 +21,7 @@ import Control.Monad.Trans.Maybe
 import Control.Monad.Trans.Class ( MonadTrans(lift) )
 
 import LibRISCV
+import LibRISCV.Utils (align)
 import LibRISCV.Loader
 import LibRISCV.Spec.AST
 import LibRISCV.Spec.Expr
@@ -61,7 +62,7 @@ main' (BasicArgs memAddr memSize trace putReg fp) = do
     entry <- loadExecutable fp state
 
     -- Let stack pointer start at end of memory by default.
-    let initalSP = fromIntegral $ memAddr + memSize
+    let initalSP = fromIntegral $ align (memAddr + memSize - 1)
 
     let interpreter =
             if trace then
