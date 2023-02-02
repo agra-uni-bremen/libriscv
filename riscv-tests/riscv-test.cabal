@@ -9,6 +9,7 @@ copyright:          (c) 2022 University of Bremen
 
 executable riscv-test
     main-is:              Main.hs
+    default-language:     Haskell2010
     build-depends:
         base                    >= 4.15.0.0
         , libriscv              >= 0.1.0.0
