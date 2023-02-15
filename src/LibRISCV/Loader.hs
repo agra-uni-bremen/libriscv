@@ -1,4 +1,5 @@
 {-# LANGUAGE TypeFamilies #-}
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE RankNTypes #-}
 
@@ -15,7 +16,8 @@ import Data.Elf
     ( elfFindHeader,
       parseElf,
       Elf,
-      ElfList(ElfList),
+      ElfListXX(..),
+      ElfNodeType(..),
       ElfSectionData(ElfSectionData),
       ElfXX(ElfSection, ElfSegment, esData, ehEntry,
             esAddr, epType, epAddMemSize, epData)
@@ -31,34 +33,35 @@ import System.FilePath ()
 
 -- Return the entry point from the ELF header.
 startAddr :: MonadCatch m => Elf -> m Word32
-startAddr (SELFCLASS32 :&: ElfList elfs) = ehEntry <$> elfFindHeader elfs
+startAddr (SELFCLASS32 :&: elfs) = ehEntry <$> elfFindHeader elfs
 startAddr (SELFCLASS64 :&: _) = error "64-bit executables not supported"
 
--- Return all ELF segments with type PT_LOAD.
-loadableSegments :: forall a. (SingI a) => [ElfXX a] -> [ElfXX a]
-loadableSegments = filter f
-    where
-        f ElfSegment{..} = epType == PT_LOAD
-        f _ = False
+-- Filter all ELF segments with type PT_LOAD.
+loadableSegments :: forall a. (SingI a) => ElfListXX a -> [ElfXX 'Segment a]
+loadableSegments (ElfListCons v@(ElfSegment { .. }) l) =
+    if epType == PT_LOAD
+        then v : loadableSegments l
+        else loadableSegments l
+loadableSegments (ElfListCons _ l) = loadableSegments l
+loadableSegments ElfListNull = []
 
 -- Copy data from ElfSection to memory at the given absolute address.
-copyData :: (IsElfClass a, ByteAddrsMem m) => [ElfXX a] -> Int64 -> m -> IO ()
-copyData [] _ _ = pure ()
-copyData ((ElfSection{esData = ElfSectionData textData, ..}):xs) zeros mem = do
+copyData :: (IsElfClass a, ByteAddrsMem m) => ElfListXX a -> Int64 -> m -> IO ()
+copyData ElfListNull _ _ = pure ()
+copyData (ElfListCons (ElfSection{esData = ElfSectionData textData, ..}) xs) zeros mem = do
     storeByteString mem (fromIntegral esAddr)
         $ BSL.append textData (BSL.replicate zeros 0)
     copyData xs zeros mem
-copyData (_:xs) zeros mem = copyData xs zeros mem
+copyData (ElfListCons _ xs) zeros mem = copyData xs zeros mem
 
 -- Load an ElfSegment into memory at the given address.
-loadSegment :: (IsElfClass a, ByteAddrsMem m) => m -> ElfXX a -> IO ()
+loadSegment :: (IsElfClass a, ByteAddrsMem m) => m -> ElfXX 'Segment a -> IO ()
 loadSegment mem ElfSegment{..} =
     copyData epData (fromIntegral epAddMemSize) mem
-loadSegment _ _ = fail "can only load from ElfSegments"
 
 -- Load all loadable segments of an ELF file into memory.
 loadElf :: (ByteAddrsMem m) => m -> Elf -> IO Word32
-loadElf mem elf@(classS :&: ElfList elfs) = withElfClass classS $ do
+loadElf mem elf@(classS :&: elfs) = withElfClass classS $ do
     let loadable = loadableSegments elfs
     mapM_ (loadSegment mem) loadable
     startAddr elf
