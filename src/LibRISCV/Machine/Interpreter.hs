@@ -20,7 +20,7 @@ import Numeric (showHex)
 
 import qualified LibRISCV.Machine.Register as REG
 import qualified LibRISCV.Machine.Memory as MEM
-import LibRISCV.Spec.Instruction
+import LibRISCV.Spec.Operations
 import LibRISCV.Utils (boolToWord)
 import Control.Monad.Freer.Reader (Reader, ask)
 
@@ -73,11 +73,11 @@ runExpression (AShr e1 e2) = fromIntegral $ (fromIntegral (runExpression e1) :: 
 type DefaultEnv = (Expr Word32 -> Word32, ArchState)
 
 runInstruction :: forall r effs env mem. (Member (Reader env) effs , LastMember IO effs) => 
-    (env -> Instruction mem ~> IO) -> Eff (Instruction mem ': effs) r -> Eff effs r
+    (env -> Operations mem ~> IO) -> Eff (Operations mem ': effs) r -> Eff effs r
 runInstruction f eff =
     ask >>= \env -> interpretM (f env) eff
 
-defaultBehavior :: DefaultEnv -> Instruction Word32 ~> IO
+defaultBehavior :: DefaultEnv -> Operations Word32 ~> IO
 defaultBehavior (evalE , (regFile, mem)) = \case
     (ReadRegister idx) -> fromIntegral <$> REG.readRegister regFile idx
     (WriteRegister idx reg) -> REG.writeRegister regFile idx (fromIntegral $ evalE reg)

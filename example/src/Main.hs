@@ -12,7 +12,7 @@ import LibRISCV.Utils (align)
 import LibRISCV.Loader
 import LibRISCV.Spec.AST
 import LibRISCV.Spec.Expr
-import LibRISCV.Spec.Instruction
+import LibRISCV.Spec.Operations
 import LibRISCV.CmdLine
 import LibRISCV.Effects.Logging.InstructionFetch
 import LibRISCV.Machine.Interpreter (runInstruction)

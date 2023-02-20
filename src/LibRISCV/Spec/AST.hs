@@ -19,7 +19,7 @@ import LibRISCV.Utils (whenMword,unlessMword)
 import LibRISCV.Effects.Logging.InstructionFetch
 import Conversion
 import LibRISCV.Spec.Expr
-import LibRISCV.Spec.Instruction
+import LibRISCV.Spec.Operations
 
 ------------------------------------------------------------------------
 
@@ -29,7 +29,7 @@ import LibRISCV.Spec.Instruction
 --
 -- See: https://github.com/lexi-lambda/freer-simple/issues/7
 
-buildInstruction'' :: forall v r. (Conversion v Word32, Member (Instruction v) r) => v -> InstructionType -> Eff r ()
+buildInstruction'' :: forall v r. (Conversion v Word32, Member (Operations v) r) => v -> InstructionType -> Eff r ()
 buildInstruction'' _ ADDI{..} = do
     r1 <- readRegister rs1
     writeRegister @v rd $ r1 `addSInt` imm
@@ -199,7 +199,7 @@ buildInstruction'' pc ECALL = ecall @v pc
 buildInstruction'' pc EBREAK = ebreak @v pc
 buildInstruction'' _ InvalidInstruction = error "InvalidInstruction"
 
-buildInstruction' :: forall v r. (Conversion v Word32, Member (Instruction v) r, Member LogInstructionFetch r) => v -> InstructionType -> Eff r ()
+buildInstruction' :: forall v r. (Conversion v Word32, Member (Operations v) r, Member LogInstructionFetch r) => v -> InstructionType -> Eff r ()
 buildInstruction' _ InvalidInstruction = pure () -- XXX: ignore for now
 buildInstruction' pc inst = do
     buildInstruction'' @v pc inst
@@ -207,7 +207,7 @@ buildInstruction' pc inst = do
 
 ------------------------------------------------------------------------
 
-buildInstruction :: forall v r . (Conversion v Word32, Member (Instruction v) r, Member LogInstructionFetch r) => Eff r ()
+buildInstruction :: forall v r . (Conversion v Word32, Member (Operations v) r, Member LogInstructionFetch r) => Eff r ()
 buildInstruction = do
     -- fetch & decode instruction at current PC
     pc <- readPC @v
@@ -222,5 +222,5 @@ buildInstruction = do
 
     buildInstruction' pc inst
 
-buildAST :: forall v r . (Conversion v Word32, Member (Instruction v) r, Member LogInstructionFetch r) => v -> v -> Eff r ()
+buildAST :: forall v r . (Conversion v Word32, Member (Operations v) r, Member LogInstructionFetch r) => v -> v -> Eff r ()
 buildAST entry sp = writePC @v (FromImm entry) >> writeRegister @v SP (FromImm sp) >> buildInstruction @v

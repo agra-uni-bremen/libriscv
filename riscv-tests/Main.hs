@@ -24,7 +24,7 @@ import LibRISCV.Utils (align)
 import LibRISCV.Loader
 import LibRISCV.Spec.AST
 import LibRISCV.Spec.Expr
-import LibRISCV.Spec.Instruction
+import LibRISCV.Spec.Operations
 import LibRISCV.CmdLine
 import LibRISCV.Effects.Logging.InstructionFetch
 import LibRISCV.Machine.Interpreter
@@ -40,7 +40,7 @@ sys_exit = 93
 -- The riscv-tests repository uses a special ecall to communicate test
 -- failures to the execution environment. This function implements the
 -- ECALL instruction accordingly.
-ecallHandler :: DefaultEnv -> Instruction Word32 ~> MaybeT IO
+ecallHandler :: DefaultEnv -> Operations Word32 ~> MaybeT IO
 ecallHandler (evalE, (regFile, mem)) = \case
         Ecall pc -> do
             sys <- lift $ REG.readRegister regFile A7

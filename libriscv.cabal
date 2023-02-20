@@ -39,7 +39,7 @@ library
                    , LibRISCV.Machine.Interpreter
                    , LibRISCV.Spec.AST
                    , LibRISCV.Spec.Expr
-                   , LibRISCV.Spec.Instruction
+                   , LibRISCV.Spec.Operations
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

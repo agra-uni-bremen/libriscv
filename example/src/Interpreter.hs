@@ -18,7 +18,7 @@ import Data.Array.IO (IOArray)
 
 import LibRISCV
 import LibRISCV.Spec.Expr
-import LibRISCV.Spec.Instruction
+import LibRISCV.Spec.Operations
 import Control.Monad.Freer
 import Conversion
 import Numeric (showHex)
@@ -118,7 +118,7 @@ runExpression (AShr e1 e2) = binOp e1 e2 AShr
 
 type IftEnv = (Expr (Tainted Word32) -> (Tainted Word32), ArchState)
 
-iftBehavior :: IftEnv -> Instruction (Tainted Word32) ~> IO
+iftBehavior :: IftEnv -> Operations (Tainted Word32) ~> IO
 iftBehavior (evalE , (regFile, mem)) = \case
     (ReadRegister idx) -> REG.readRegister regFile idx
     (WriteRegister idx reg) -> REG.writeRegister regFile idx (evalE reg)
