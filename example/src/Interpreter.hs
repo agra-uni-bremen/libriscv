@@ -12,7 +12,7 @@
 module Interpreter where
 
 import Data.Int
-import Data.Bits
+import Data.Bits hiding (Xor, And)
 import Data.Word
 import Data.Array.IO (IOArray)
 
@@ -80,7 +80,7 @@ instance ByteAddrsMem ArchState where
 -- Execute a binary operation with tainted values.
 binOp :: Expr (Tainted Word32) -> Expr (Tainted Word32) -> (Expr Word32 -> Expr Word32 -> Expr Word32) -> Tainted Word32
 binOp e1 e2 op = MkTainted (t1 || t2) $
-        STD.runExpression ((FromImm v1) `op` (FromImm v2))
+        STD.runExpression (FromImm v1 `op` FromImm v2)
     where
         (MkTainted t1 v1) = runExpression e1
         (MkTainted t2 v2) = runExpression e2
@@ -91,9 +91,8 @@ unOp e1 op = MkTainted taint $ STD.runExpression (op $ FromImm value)
     where
         (MkTainted taint value) = runExpression e1
 
-runExpression :: Expr (Tainted Word32) -> (Tainted Word32)
+runExpression :: Expr (Tainted Word32) -> Tainted Word32
 runExpression (FromImm t)  = t
-runExpression (FromInt i)  = MkTainted False $ fromIntegral i
 runExpression (FromUInt i) = MkTainted False i
 runExpression (ZExtByte e) = unOp e ZExtByte
 runExpression (ZExtHalf e) = unOp e ZExtHalf
@@ -115,20 +114,30 @@ runExpression (AShr e1 e2) = binOp e1 e2 AShr
 
 ------------------------------------------------------------------------
 
-type IftEnv = (Expr (Tainted Word32) -> (Tainted Word32), ArchState)
+type IftEnv = (Expr (Tainted Word32) -> Tainted Word32, ArchState)
 
 iftBehavior :: IftEnv -> Operations (Tainted Word32) ~> IO
 iftBehavior (evalE , (regFile, mem)) = \case
-    (ReadRegister idx) -> REG.readRegister regFile idx
-    (WriteRegister idx reg) -> REG.writeRegister regFile idx (evalE reg)
-    (LoadByte addr) -> fmap fromIntegral <$> MEM.loadByte mem (convert $ evalE addr)
-    (LoadHalf addr) -> fmap fromIntegral <$> (MEM.loadHalf mem (convert $ evalE addr) :: IO (Tainted Word16))
-    (LoadWord addr) -> MEM.loadWord mem (convert $ evalE addr)
-    (StoreByte addr w) -> MEM.storeByte mem (convert $ evalE addr) (fmap fromIntegral $ evalE w)
-    (StoreHalf addr w) -> MEM.storeHalf mem (convert $ evalE addr) (fmap (fromIntegral @Word32 @Word16) $ evalE w)
-    (StoreWord addr w) -> MEM.storeWord mem (convert $ evalE addr) (evalE w)
-    (WritePC w) -> REG.writePC regFile (convert $ evalE w) -- TODO
+    DecodeRS1 _ -> undefined
+    DecodeRS2 _ -> undefined
+    DecodeRD _ -> undefined
+    DecodeImmB _ -> undefined
+    DecodeImmS _ -> undefined
+    DecodeImmU _ -> undefined
+    DecodeImmI _ -> undefined
+    DecodeImmJ _ -> undefined
+    DecodeShamt _ -> undefined
+
+    ReadRegister idx -> REG.readRegister regFile (toEnum $ fromIntegral (convert (evalE $ FromImm idx) :: Word32))
+    WriteRegister idx reg -> REG.writeRegister regFile (toEnum $ fromIntegral (convert (evalE $ FromImm idx) :: Word32)) (evalE reg)
+    LoadByte addr -> fmap fromIntegral <$> MEM.loadByte mem (convert $ evalE addr)
+    LoadHalf addr -> fmap fromIntegral <$> (MEM.loadHalf mem (convert $ evalE addr) :: IO (Tainted Word16))
+    LoadWord addr -> MEM.loadWord mem (convert $ evalE addr)
+    StoreByte addr w -> MEM.storeByte mem (convert $ evalE addr) (fromIntegral <$> evalE w)
+    StoreHalf addr w -> MEM.storeHalf mem (convert $ evalE addr) (fromIntegral @Word32 @Word16 <$> evalE w)
+    StoreWord addr w -> MEM.storeWord mem (convert $ evalE addr) (evalE w)
+    WritePC w -> REG.writePC regFile (convert $ evalE w) -- TODO
     ReadPC -> MkTainted False <$> REG.readPC regFile       -- TODO
-    (Ecall _) -> putStrLn "ECALL"
-    (Ebreak _) -> putStrLn "EBREAK"
+    Ecall _ -> putStrLn "ECALL"
+    Ebreak _ -> putStrLn "EBREAK"
     LiftE e -> pure $ evalE e

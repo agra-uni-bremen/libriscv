@@ -23,6 +23,7 @@ import qualified LibRISCV.Machine.Memory as MEM
 import LibRISCV.Spec.Operations
 import LibRISCV.Utils (boolToWord)
 import Control.Monad.Freer.Reader (Reader, ask)
+import LibRISCV.Decoder.Instruction (mkRd, mkRs1, mkRs2, immI, immS, immU, immB, immJ, mkShamt)
 
 -- Architectural state of the executor.
 type ArchState = (REG.RegisterFile IOUArray Register, MEM.Memory IOUArray Word8)
@@ -44,7 +45,6 @@ instance ByteAddrsMem ArchState where
 
 runExpression :: Expr Word32 -> Word32
 runExpression (FromImm a) = a
-runExpression (FromInt i) = fromIntegral i
 runExpression (FromUInt i) = i
 runExpression (ZExtByte a) = runExpression a
 runExpression (ZExtHalf a) = runExpression a
@@ -77,16 +77,25 @@ runInstruction f eff =
 
 defaultBehavior :: DefaultEnv -> Operations Word32 ~> IO
 defaultBehavior (evalE , (regFile, mem)) = \case
-    (ReadRegister idx) -> fromIntegral <$> REG.readRegister regFile idx
-    (WriteRegister idx reg) -> REG.writeRegister regFile idx (fromIntegral $ evalE reg)
-    (LoadByte addr) -> fromIntegral <$> MEM.loadByte mem (evalE addr)
-    (LoadHalf addr) -> fromIntegral <$> (MEM.loadHalf mem (evalE addr) :: IO Word16)
-    (LoadWord addr) -> MEM.loadWord mem (evalE addr)
-    (StoreByte addr w) -> MEM.storeByte mem (evalE addr) (fromIntegral $ evalE w)
-    (StoreHalf addr w) -> MEM.storeHalf mem (evalE addr) (fromIntegral (evalE w) :: Word16)
-    (StoreWord addr w) -> MEM.storeWord mem (evalE addr) (evalE w)
-    (WritePC w) -> REG.writePC regFile (evalE w)
+    DecodeRD inst -> pure (mkRd inst)
+    DecodeRS1 inst -> pure (mkRs1 inst)
+    DecodeRS2 inst -> pure (mkRs2 inst)
+    DecodeImmI inst -> pure (immI inst)
+    DecodeImmS inst -> pure (immS inst)
+    DecodeImmB inst -> pure (immB inst)
+    DecodeImmU inst -> pure (immU inst)
+    DecodeImmJ inst -> pure (immJ inst)
+    DecodeShamt inst -> pure (mkShamt inst)
+    ReadRegister idx -> fromIntegral <$> REG.readRegister regFile (toEnum $ fromIntegral (evalE $ FromImm idx))
+    WriteRegister idx reg -> REG.writeRegister regFile (toEnum $ fromIntegral (evalE $ FromImm idx)) (fromIntegral $ evalE reg)
+    LoadByte addr -> fromIntegral <$> MEM.loadByte mem (evalE addr)
+    LoadHalf addr -> fromIntegral <$> (MEM.loadHalf mem (evalE addr) :: IO Word16)
+    LoadWord addr -> MEM.loadWord mem (evalE addr)
+    StoreByte addr w -> MEM.storeByte mem (evalE addr) (fromIntegral $ evalE w)
+    StoreHalf addr w -> MEM.storeHalf mem (evalE addr) (fromIntegral (evalE w) :: Word16)
+    StoreWord addr w -> MEM.storeWord mem (evalE addr) (evalE w)
+    WritePC w -> REG.writePC regFile (evalE w)
     ReadPC -> REG.readPC regFile
-    (Ecall pc) -> putStrLn $ "ecall at 0x" ++ showHex pc ""
-    (Ebreak pc) -> putStrLn $ "ebreak at 0x" ++ showHex pc ""
+    Ecall pc -> putStrLn $ "ecall at 0x" ++ showHex pc ""
+    Ebreak pc -> putStrLn $ "ebreak at 0x" ++ showHex pc ""
     LiftE e -> pure $ evalE e

@@ -7,7 +7,6 @@ module LibRISCV.Loader (loadExecutable) where
 
 import LibRISCV
 import LibRISCV.Utils ()
-import LibRISCV.Decoder ()
 import Control.Monad.Catch ( MonadCatch )
 import Data.Bits ()
 import Data.Int ( Int64 )

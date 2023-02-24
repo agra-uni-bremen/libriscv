@@ -3,34 +3,81 @@ module DecoderTest where
 import Test.Tasty
 import Test.Tasty.HUnit
 
+import Data.Int
+
 import LibRISCV
-import LibRISCV.Decoder
+import LibRISCV.Decoder.Opcode
+import LibRISCV.Decoder.Instruction
 
 decoderTests = testGroup "Decoder Tests"
-  [ testCase "Decode ADD instruction" $
-      assertEqual "" ADD { rd=A1, rs1=A2, rs2=A0 } $ decode 0x00a605b3
+  [ testCase "Decode ADD instruction" $ do
+      let inst = 0x00a605b3
 
-  , testCase "Decode ADDI instruction" $
-      assertEqual "" ADDI { rd=T0, rs1=T1, imm=42 } $ decode 0x02a30293
+      assertEqual "opcode" ADD $ decode inst
+      assertEqual "rd"  A1 $ (toEnum $ fromIntegral (mkRd inst))
+      assertEqual "rs1" A2 $ (toEnum $ fromIntegral (mkRs1 inst))
+      assertEqual "rs2" A0 $ (toEnum $ fromIntegral (mkRs2 inst))
 
-  , testCase "Decode LW instruction" $
-      assertEqual "" LW { rd=A0, rs1=A0, imm=(-4) } $ decode 0xffc52503
+  , testCase "Decode ADDI instruction" $ do
+      let inst = 0x02a30293
 
-  , testCase "Decode AUIPC instruction" $
-      assertEqual "" AUIPC { rd=T0, imm=0 } $ decode 0x00000297
+      assertEqual "opcode" ADDI $ decode inst
+      assertEqual "rd"   T0 $ (toEnum $ fromIntegral (mkRd inst))
+      assertEqual "rs1"  T1 $ (toEnum $ fromIntegral (mkRs1 inst))
+      assertEqual "immI" 42 $ (immI inst)
 
-  , testCase "Decode SW instruction" $
-      assertEqual "" SW { rs1=Zero, rs2=RA, imm=8 } $ decode 0x00102423
 
-  , testCase "Decode JAL instruction" $
-      assertEqual "" JAL { rd=Zero, imm=(-4) } $ decode 0xffdff06f
+  , testCase "Decode LW instruction" $ do
+      let inst = 0xffc52503
 
-  , testCase "Decode BLT instruction" $
-      assertEqual "" BLT { rs1=A0, rs2=A1, imm=4 } $ decode 0x00b54263
+      assertEqual "opcode" LW $ decode inst
+      assertEqual "rd"   A0   $ (toEnum $ fromIntegral (mkRd inst))
+      assertEqual "rs1"  A0   $ (toEnum $ fromIntegral (mkRs1 inst))
+      assertEqual "immI" (-4) $ (fromIntegral (immI inst) :: Int32)
 
-  , testCase "Decode SLLI instruction" $
-      assertEqual "" SLLI { rd=A1, rs1=T0, shamt=1} $ decode 0x00129593
+  , testCase "Decode AUIPC instruction" $ do
+      let inst = 0x00000297
 
-  , testCase "Decode SLLI instruction" $
-      assertEqual "" SRLI { rd=A3, rs1=T0, shamt=31} $ decode 0x01f2d693
+      assertEqual "opcode" AUIPC $ decode inst
+      assertEqual "rd"   T0 $ (toEnum $ fromIntegral (mkRd inst))
+      assertEqual "immU" 0  $ (immU inst)
+
+  , testCase "Decode SW instruction" $ do
+      let inst = 0x00102423
+
+      assertEqual "opcode" SW $ decode inst
+      assertEqual "rs1"  Zero $ (toEnum $ fromIntegral (mkRs1 inst))
+      assertEqual "rs2"  RA   $ (toEnum $ fromIntegral (mkRs2 inst))
+      assertEqual "immS" 8    $ immS inst
+
+  , testCase "Decode JAL instruction" $ do
+      let inst = 0xffdff06f
+
+      assertEqual "opcode" JAL $ decode inst
+      assertEqual "rd"   Zero $ (toEnum $ fromIntegral (mkRd inst))
+      assertEqual "immJ" (-4) $ (fromIntegral (immJ inst) :: Int32)
+
+  , testCase "Decode BLT instruction" $ do
+      let inst = 0x00b54263
+
+      assertEqual "opcode" BLT $ decode inst
+      assertEqual "rs1" A0 $ (toEnum $ fromIntegral (mkRs1 inst))
+      assertEqual "rs2" A1 $ (toEnum $ fromIntegral (mkRs2 inst))
+      assertEqual "immB" 4 $ immB inst
+
+  , testCase "Decode SLLI instruction" $ do
+      let inst = 0x00129593
+
+      assertEqual "opcode" SLLI $ decode inst
+      assertEqual "rd"    A1 $ (toEnum $ fromIntegral (mkRd inst))
+      assertEqual "rs1"   T0 $ (toEnum $ fromIntegral (mkRs1 inst))
+      assertEqual "shamt" 01 $ mkShamt inst
+
+  , testCase "Decode SLLI instruction" $ do
+      let inst = 0x01f2d693
+
+      assertEqual "opcode" SRLI $ decode inst
+      assertEqual "rd"    A3 $ (toEnum $ fromIntegral (mkRd inst))
+      assertEqual "rs1"   T0 $ (toEnum $ fromIntegral (mkRs1 inst))
+      assertEqual "shamt" 31 $ mkShamt inst
   ]

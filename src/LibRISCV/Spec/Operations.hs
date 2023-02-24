@@ -3,13 +3,22 @@
 {-# LANGUAGE FlexibleContexts #-}
 module LibRISCV.Spec.Operations where
 
-import LibRISCV
 import LibRISCV.Spec.Expr (Expr)
 import Control.Monad.Freer.TH
 
 data Operations v r where
-    ReadRegister :: RegIdx -> Operations v v
-    WriteRegister :: RegIdx -> Expr v -> Operations v ()
+    DecodeRS1 :: v -> Operations v v
+    DecodeRS2 :: v -> Operations v v
+    DecodeRD :: v -> Operations v v
+    DecodeImmI :: v -> Operations v v
+    DecodeImmS :: v -> Operations v v
+    DecodeImmB :: v -> Operations v v
+    DecodeImmU :: v -> Operations v v
+    DecodeImmJ :: v -> Operations v v
+    DecodeShamt :: v -> Operations v v
+
+    ReadRegister :: v -> Operations v v
+    WriteRegister :: v -> Expr v -> Operations v ()
     LoadByte :: Expr v -> Operations v v
     LoadHalf :: Expr v -> Operations v v
     LoadWord :: Expr v -> Operations v v

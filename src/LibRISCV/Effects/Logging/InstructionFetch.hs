@@ -9,7 +9,7 @@
 module LibRISCV.Effects.Logging.InstructionFetch where
 
 import LibRISCV (Address)
-import LibRISCV.Decoder (InstructionType)
+import LibRISCV.Decoder.Opcode (InstructionType)
 import Numeric (showHex)
 import Control.Monad.Freer
 import Control.Monad.Freer.TH

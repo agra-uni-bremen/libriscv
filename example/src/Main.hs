@@ -44,7 +44,7 @@ main' (TaintArgs taintReg (BasicArgs memAddr memSize trace putReg fp)) = do
             else
                 runReader (runExpression, state) . runInstruction iftBehavior . runNoLogging
     runM $ interpreter $ do
-        writeRegister taintReg (FromImm $ MkTainted True (0 :: Word32))
+        writeRegister (MkTainted False (fromIntegral $ fromEnum taintReg)) (FromImm $ MkTainted True (0 :: Word32))
         buildAST (MkTainted False (entry :: Word32)) (MkTainted False (initalSP :: Word32))
 
     when putReg $
