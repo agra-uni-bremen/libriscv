@@ -32,7 +32,7 @@ import LibRISCV.Spec.Operations
 buildInstruction'' :: forall v r. (Conversion v Word32, Member (Operations v) r) => v -> InstructionType -> Eff r ()
 buildInstruction'' _ ADDI{..} = do
     r1 <- readRegister rs1
-    writeRegister @v rd $ r1 `addSInt` imm
+    writeRegister @v rd $ r1 `addInt` imm
 buildInstruction'' _ SLTI{..} = do
     r1 <- readRegister rs1
     let cond = (FromImm r1) `Slt` (FromInt imm) :: Expr v
@@ -62,11 +62,11 @@ buildInstruction'' _ SRAI{..} = do
 buildInstruction'' _ LUI{..} = do
     writeRegister @v rd $ FromInt imm
 buildInstruction'' pc AUIPC{..} = do
-    writeRegister @v rd $ pc `addSInt` imm
+    writeRegister @v rd $ pc `addInt` imm
 buildInstruction'' _ ADD{..} = do
     r1 <- readRegister rs1
     r2 <- readRegister rs2
-    writeRegister @v rd $ r1 `addSImm` r2
+    writeRegister @v rd $ r1 `addImm` r2
 buildInstruction'' _ SLT{..} = do
     r1 <- readRegister rs1
     r2 <- readRegister rs2
@@ -108,92 +108,92 @@ buildInstruction'' _ SRA{..} = do
 buildInstruction'' pc JAL{..} = do
     nextInstr <- readPC
     -- TODO: Alignment 
-    writePC @v $ pc `addSInt` imm
+    writePC @v $ pc `addInt` imm
     writeRegister @v rd (FromImm nextInstr)
 buildInstruction'' _ JALR{..} = do
     nextInstr <- readPC
     r1 <- readRegister rs1
-    writePC @v $ (r1 `addSInt` imm) `And` (FromUInt 0xfffffffe)
+    writePC @v $ (r1 `addInt` imm) `And` (FromUInt 0xfffffffe)
     writeRegister @v rd $ FromImm nextInstr
 buildInstruction'' _ LB{..} = do
     r1 <- readRegister rs1
     -- TODO: Alignment handling
-    byte <- loadByte @v $ r1 `addSInt` imm
+    byte <- loadByte @v $ r1 `addInt` imm
     writeRegister @v rd (SExtByte $ FromImm byte)
 buildInstruction'' _ LBU{..} = do
     r1 <- readRegister rs1
     -- TODO: Alignment handling
-    byte <- loadByte @v $ r1 `addSInt` imm
+    byte <- loadByte @v $ r1 `addInt` imm
     writeRegister @v rd (ZExtByte $ FromImm byte)
 buildInstruction'' _ LH{..} = do
     r1 <- readRegister rs1
     -- TODO: Alignment handling
-    half <- loadHalf $ r1 `addSInt` imm
+    half <- loadHalf $ r1 `addInt` imm
     writeRegister @v rd (SExtHalf $ FromImm half)
 buildInstruction'' _ LHU{..} = do
     r1 <- readRegister rs1
     -- TODO: Alignment handling
-    half <- loadHalf $ r1 `addSInt` imm
+    half <- loadHalf $ r1 `addInt` imm
     writeRegister @v rd (ZExtHalf $ FromImm half)
 buildInstruction'' _ LW{..} = do
     r1 <- readRegister rs1
     -- TODO: Alignment handling
-    word <- loadWord $ r1 `addSInt` imm
+    word <- loadWord $ r1 `addInt` imm
     writeRegister @v rd (FromImm word)
 buildInstruction'' _ SB{..} = do
     r1 <- readRegister rs1
     r2 <- readRegister rs2
-    storeByte @v (r1 `addSInt` imm) $ FromImm r2
+    storeByte @v (r1 `addInt` imm) $ FromImm r2
 buildInstruction'' _ SH{..} = do
     r1 <- readRegister rs1
     r2 <- readRegister rs2
-    storeHalf @v (r1 `addSInt` imm) $ FromImm r2
+    storeHalf @v (r1 `addInt` imm) $ FromImm r2
 buildInstruction'' _ SW{..} = do
     r1 <- readRegister rs1
     r2 <- readRegister rs2
-    storeWord @v (r1 `addSInt` imm) $ FromImm r2
+    storeWord @v (r1 `addInt` imm) $ FromImm r2
 buildInstruction'' pc BEQ{..} = do
     r1 <- readRegister rs1
     r2 <- readRegister rs2
     -- TODO: Alignment handling
     let cond = (FromImm r1) `Eq` (FromImm r2)
     whenMword (convert @v <$> liftE cond) $
-        writePC @v $ (FromImm pc) `AddS` (FromInt imm)
+        writePC @v $ (FromImm pc) `Add` (FromInt imm)
 buildInstruction'' pc BNE{..} = do
     r1 <- readRegister rs1
     r2 <- readRegister rs2
     -- TODO: Alignment handling
     let cond = (FromImm r1) `Eq` (FromImm r2)
     unlessMword (convert @v <$> liftE cond) $
-        writePC @v $ (FromImm pc) `AddS` (FromInt imm)
+        writePC @v $ (FromImm pc) `Add` (FromInt imm)
 buildInstruction'' pc BLT{..} = do
     r1 <- readRegister rs1
     r2 <- readRegister rs2
     -- TODO: Alignment handling
     let cond = (FromImm r1) `Slt` (FromImm r2)
     whenMword (convert @v <$> liftE cond) $
-        writePC @v $ (FromImm pc) `AddS` (FromInt imm)
+        writePC @v $ (FromImm pc) `Add` (FromInt imm)
 buildInstruction'' pc BLTU{..} = do
     r1 <- readRegister rs1
     r2 <- readRegister rs2
     -- TODO: Alignment handling
     let cond = (FromImm r1) `Ult` (FromImm r2)
     whenMword (convert @v <$> liftE cond) $
-        writePC @v $ (FromImm pc) `AddS` (FromInt imm)
+        writePC @v $ (FromImm pc) `Add` (FromInt imm)
 buildInstruction'' pc BGE{..} = do
     r1 <- readRegister rs1
     r2 <- readRegister rs2
     -- TODO: Alignment handling
     let cond = (FromImm r1) `Sge` (FromImm r2)
     whenMword (convert @v <$> liftE cond) $
-        writePC @v $ (FromImm pc) `AddS` (FromInt imm)
+        writePC @v $ (FromImm pc) `Add` (FromInt imm)
 buildInstruction'' pc BGEU{..} = do
     r1 <- readRegister rs1
     r2 <- readRegister rs2
     -- TODO: Alignment handling
     let cond = (FromImm r1) `Uge` (FromImm r2)
     whenMword (convert @v <$> liftE cond) $
-        writePC @v $ (FromImm pc) `AddS` (FromInt imm)
+        writePC @v $ (FromImm pc) `Add` (FromInt imm)
 buildInstruction'' _ FENCE = pure () -- XXX: ignore for now
 buildInstruction'' pc ECALL = ecall @v pc
 buildInstruction'' pc EBREAK = ebreak @v pc
@@ -218,7 +218,7 @@ buildInstruction = do
 
     -- Increment PC before execute', allows setting PC to to
     -- different values in execute' for jumps and branches.
-    writePC $ (FromImm pc) `AddU` (FromInt 4)
+    writePC $ (FromImm pc) `Add` (FromInt 4)
 
     buildInstruction' pc inst
 

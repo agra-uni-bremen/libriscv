@@ -11,8 +11,7 @@ data Expr a =
     ZExtHalf (Expr a) |
     SExtByte (Expr a) |
     SExtHalf (Expr a) |
-    AddU (Expr a) (Expr a) |
-    AddS (Expr a) (Expr a) |
+    Add  (Expr a) (Expr a) |
     Sub  (Expr a) (Expr a) |
     Eq   (Expr a) (Expr a) |
     Slt  (Expr a) (Expr a) |
@@ -26,11 +25,11 @@ data Expr a =
     LShr (Expr a) (Expr a) |
     AShr (Expr a) (Expr a)
 
-addSImm :: a -> a -> Expr a
-addSImm a b = (FromImm a) `AddS` (FromImm b)
+addImm :: a -> a -> Expr a
+addImm a b = (FromImm a) `Add` (FromImm b)
 
-addSInt :: a -> Int32 -> Expr a
-addSInt a b = (FromImm a) `AddS` (FromInt b)
+addInt :: a -> Int32 -> Expr a
+addInt a b = (FromImm a) `Add` (FromInt b)
 
 andInt :: a -> Int32 -> Expr a
 andInt a b = (FromImm a) `And` (FromInt b)
