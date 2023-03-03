@@ -35,9 +35,6 @@ main' (TaintArgs taintReg (BasicArgs memAddr memSize trace putReg fp)) = do
     state <- mkArchState memAddr memSize
     entry <- loadExecutable fp state
 
-    -- Let stack pointer start at end of memory by default.
-    let initalSP = fromIntegral $ align (memAddr + memSize - 1)
-
     let interpreter =
             if trace then
                 runReader (runExpression, state) . runInstruction iftBehavior . runLogInstructionFetchM
@@ -45,7 +42,7 @@ main' (TaintArgs taintReg (BasicArgs memAddr memSize trace putReg fp)) = do
                 runReader (runExpression, state) . runInstruction iftBehavior . runNoLogging
     runM $ interpreter $ do
         writeRegister (MkTainted False (fromIntegral $ fromEnum taintReg)) (FromImm $ MkTainted True (0 :: Word32))
-        buildAST (MkTainted False (entry :: Word32)) (MkTainted False (initalSP :: Word32))
+        buildAST (MkTainted False (entry :: Word32))
 
     when putReg $
         dumpState state
