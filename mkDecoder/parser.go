@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"gopkg.in/yaml.v3"
 	"os"
-	"strings"
 )
 
 type Instruction struct {
@@ -35,23 +34,6 @@ func (i Instruction) Match() (uint, error) {
 	}
 
 	return n, nil
-}
-
-func (i Instruction) Fields() ([]Field, error) {
-	var fields []Field
-	for _, rawField := range i.RawFields {
-		// Ignore high immediates and only handle the low ones.
-		//
-		// Assumption: For every high immediate field there is an
-		// equally sized low immediate field in `variable_fields`.
-		if strings.HasSuffix(rawField, "hi") {
-			continue
-		}
-
-		fields = append(fields, MakeField(rawField))
-	}
-
-	return fields, nil
 }
 
 func ParseInstrs(fp string) (Instructions, error) {

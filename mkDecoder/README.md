@@ -12,13 +12,11 @@ In order to utilize the tool run the following commands:
 
     $ cd mkDecoder/
     $ go build
-    $ ./mkDecoder instr_dict.yaml ../src/Decoder.hs
+    $ ./mkDecoder instr_dict.yaml ../src/LibRISCV/Decoder/Opcode.hs
 
-These commands will write the Haskell decoder implementation to `../src/Decoder.hs`.
+These commands will write the Haskell decoder implementation to `../src/LibRISCV/Decoder/Opcode.hs`.
 
 ## Limitations
 
 The tool implementation is a bit hacky and currently uses string concatenation and the Go template language to generate Haskell code.
 Ideally one would create an [unparser](https://en.wikipedia.org/wiki/Unparser) and create a Haskell AST from the riscv-opcodes YAML.
-Furthermore, the immediate and register parsing functions are not generated from the YAML.
-This could be changed in the future, an issue in this regard is though that the YAML is rather low-level and for instance distinguishes the low and high bits for certain immediates.

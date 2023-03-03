@@ -2,76 +2,18 @@
 -- !! THIS FILE IS AUTO-GENERATED !!
 --
 
-module Decoder where
+module LibRISCV.Decoder.Opcode
+    ({{ .InstType }}(..), decode)
+where
 
-import Data.Ix
-import Data.Int
 import Data.Word
 import Data.Bits
-import Common.Types (RegIdx)
-
-type Immediate = Int32
 
 data {{ .InstType }} =
 {{- range $name, $instr := .Instrs }}
   {{ (makeRecord $name $instr) }} |
 {{- end }}
-  InvalidInstruction deriving (Eq,Show)
-
-------------------------------------------------------------------------
-
--- Convert to an unsigned word (in two's complement) to a signed number.
-fromTwoscomp :: Word32 -> Word32 -> Int32
-fromTwoscomp numBits n = fromIntegral $ -(n .&. mask) + (n .&. complement mask)
-    where
-        mask :: Word32
-        mask = 2^(numBits - 1)
-
--- Extract a bit field from a RISC-V instruction word.
-instrField :: Int -> Int -> Word32 -> Word32
-instrField start end w = mask start (end + 1) .&. shiftR w start
-    where
-        -- Create a 32-bit bit mask in the range [start,end-1].
-        mask :: Int -> Int -> Word32
-        mask start end = complement $ shift (maxBound :: Word32) (end - start)
-
-------------------------------------------------------------------------
-
-immI :: Word32 -> Immediate
-immI = fromIntegral . fromTwoscomp 12 . instrField 20 31
-
-immS :: Word32 -> Immediate
-immS i = fromTwoscomp 12 $ fromIntegral $
-    (instrField 25 31 i `shift` 5) .|.  instrField 07 11 i
-
-immB :: Word32 -> Immediate
-immB i = fromTwoscomp 13 $
-         (instrField 31 31 i `shift` 12)
-     .|. (instrField 07 07 i `shift` 11)
-     .|. (instrField 25 30 i `shift` 05)
-     .|. (instrField 08 11 i `shift` 01)
-
-immU :: Word32 -> Immediate
-immU i = fromIntegral $ instrField 12 31 i `shiftL` 12
-
-immJ :: Word32 -> Immediate
-immJ i = fromTwoscomp 21 $
-        (instrField 31 31 i `shift` 20)
-     .|. (instrField 12 19 i `shift` 12)
-     .|. (instrField 20 20 i `shift` 11)
-     .|. (instrField 21 30 i `shift` 1)
-
-mkShamt :: Word32 -> Word32
-mkShamt = instrField 20 25
-
-mkRs1 :: Word32 -> RegIdx
-mkRs1 = toEnum . fromIntegral . instrField 15 19
-
-mkRs2 :: Word32 -> RegIdx
-mkRs2 = toEnum . fromIntegral . instrField 20 24
-
-mkRd :: Word32 -> RegIdx
-mkRd = toEnum . fromIntegral . instrField 7 11
+  InvalidInstruction deriving (Eq, Show)
 
 ------------------------------------------------------------------------
 
