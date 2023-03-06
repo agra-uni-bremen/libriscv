@@ -128,6 +128,8 @@ iftBehavior (evalE , (regFile, mem)) = \case
     DecodeImmJ _ -> undefined
     DecodeShamt _ -> undefined
 
+    RunIf e next -> undefined
+    RunUnless e next -> undefined
     ReadRegister idx -> REG.readRegister regFile (toEnum $ fromIntegral (convert (evalE $ FromImm idx) :: Word32))
     WriteRegister idx reg -> REG.writeRegister regFile (toEnum $ fromIntegral (convert (evalE $ FromImm idx) :: Word32)) (evalE reg)
     LoadByte addr -> fmap fromIntegral <$> MEM.loadByte mem (convert $ evalE addr)
