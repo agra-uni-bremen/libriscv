@@ -24,6 +24,7 @@ import LibRISCV.Spec.Operations
 import LibRISCV.Utils (boolToWord)
 import Control.Monad.Freer.Reader (Reader, ask)
 import LibRISCV.Decoder.Instruction (mkRd, mkRs1, mkRs2, immI, immS, immU, immB, immJ, mkShamt)
+import Control.Monad (when, unless)
 
 -- Architectural state of the executor.
 type ArchState = (REG.RegisterFile IOUArray Register, MEM.Memory IOUArray Word8)
@@ -86,6 +87,8 @@ defaultBehavior (evalE , (regFile, mem)) = \case
     DecodeImmU inst -> pure (immU inst)
     DecodeImmJ inst -> pure (immJ inst)
     DecodeShamt inst -> pure (mkShamt inst)
+    RunIf e next -> when (evalE e == 1) $ defaultBehavior (evalE, (regFile, mem)) next
+    RunUnless e next -> unless (evalE e == 1) $ defaultBehavior (evalE, (regFile, mem)) next
     ReadRegister idx -> fromIntegral <$> REG.readRegister regFile (toEnum $ fromIntegral (evalE $ FromImm idx))
     WriteRegister idx reg -> REG.writeRegister regFile (toEnum $ fromIntegral (evalE $ FromImm idx)) (fromIntegral $ evalE reg)
     LoadByte addr -> fromIntegral <$> MEM.loadByte mem (evalE addr)

@@ -14,7 +14,6 @@ import LibRISCV.Decoder.Opcode
 import Data.Word
 import Control.Monad.Freer
 
-import LibRISCV.Utils (whenMword,unlessMword)
 import LibRISCV.Effects.Logging.InstructionFetch
 import Conversion
 import LibRISCV.Spec.Expr
@@ -156,43 +155,55 @@ instrSemantics pc inst BEQ = do
 
     -- TODO: Alignment handling
     let cond = FromImm r1 `Eq` FromImm r2
-    whenMword (convert @v <$> liftE cond) $
-        writePC @v $ FromImm pc `Add` FromImm imm
+    runIf cond $
+        WritePC @v $ FromImm pc `Add` FromImm imm
+    --whenMword (convert @v <$> liftE cond) $
+     --   writePC @v $ FromImm pc `Add` FromImm imm
 instrSemantics pc inst BNE = do
     (r1, r2, imm) <- decodeAndReadBType inst
 
     -- TODO: Alignment handling
     let cond = FromImm r1 `Eq` FromImm r2
-    unlessMword (convert @v <$> liftE cond) $
-        writePC @v $ FromImm pc `Add` FromImm imm
+    runUnless cond $
+        WritePC @v $ FromImm pc `Add` FromImm imm
+    --unlessMword (convert @v <$> liftE cond) $
+        --writePC @v $ FromImm pc `Add` FromImm imm
 instrSemantics pc inst BLT = do
     (r1, r2, imm) <- decodeAndReadBType inst
 
     -- TODO: Alignment handling
     let cond = FromImm r1 `Slt` FromImm r2
-    whenMword (convert @v <$> liftE cond) $
-        writePC @v $ FromImm pc `Add` FromImm imm
+    runIf cond $ 
+        WritePC @v $ FromImm pc `Add` FromImm imm
+    --whenMword (convert @v <$> liftE cond) $
+    --  writePC @v $ FromImm pc `Add` FromImm imm
 instrSemantics pc inst BLTU = do
     (r1, r2, imm) <- decodeAndReadBType inst
 
     -- TODO: Alignment handling
     let cond = FromImm r1 `Ult` FromImm r2
-    whenMword (convert @v <$> liftE cond) $
-        writePC @v $ FromImm pc `Add` FromImm imm
+    runIf cond $ 
+        WritePC @v $ FromImm pc `Add` FromImm imm
+    --whenMword (convert @v <$> liftE cond) $
+    --  writePC @v $ FromImm pc `Add` FromImm imm
 instrSemantics pc inst BGE = do
     (r1, r2, imm) <- decodeAndReadBType inst
 
     -- TODO: Alignment handling
     let cond = FromImm r1 `Sge` FromImm r2
-    whenMword (convert @v <$> liftE cond) $
-        writePC @v $ FromImm pc `Add` FromImm imm
+    runIf cond $
+        WritePC @v $ FromImm pc `Add` FromImm imm
+    --whenMword (convert @v <$> liftE cond) $
+    --   writePC @v $ FromImm pc `Add` FromImm imm
 instrSemantics pc inst BGEU = do
     (r1, r2, imm) <- decodeAndReadBType inst
 
     -- TODO: Alignment handling
     let cond = FromImm r1 `Uge` FromImm r2
-    whenMword (convert @v <$> liftE cond) $
-        writePC @v $ FromImm pc `Add` FromImm imm
+    runIf cond $
+        WritePC @v $ FromImm pc `Add` FromImm imm
+    --whenMword (convert @v <$> liftE cond) $
+    --    writePC @v $ FromImm pc `Add` FromImm imm
 instrSemantics _ _ FENCE = pure () -- XXX: ignore for now
 instrSemantics pc _ ECALL = ecall @v pc
 instrSemantics pc __  EBREAK = ebreak @v pc
