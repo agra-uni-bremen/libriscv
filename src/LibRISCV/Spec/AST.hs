@@ -28,7 +28,7 @@ import Control.Applicative (liftA3, Applicative (liftA2))
 --
 -- See: https://github.com/lexi-lambda/freer-simple/issues/7
 
-instrSemantics :: forall v r. (Member (Operations v) r, Conversion v Word32) => v -> v -> InstructionType -> Eff r ()
+instrSemantics :: forall v r. (Member (Operations v) r) => v -> v -> InstructionType -> Eff r ()
 instrSemantics _ inst ADDI = do
     (r1, rd, imm) <- decodeAndReadIType @v inst
     writeRegister @v rd $ r1 `addSImm` imm
@@ -157,8 +157,6 @@ instrSemantics pc inst BEQ = do
     let cond = FromImm r1 `Eq` FromImm r2
     runIf cond $
         WritePC @v $ FromImm pc `Add` FromImm imm
-    --whenMword (convert @v <$> liftE cond) $
-     --   writePC @v $ FromImm pc `Add` FromImm imm
 instrSemantics pc inst BNE = do
     (r1, r2, imm) <- decodeAndReadBType inst
 
@@ -166,8 +164,6 @@ instrSemantics pc inst BNE = do
     let cond = FromImm r1 `Eq` FromImm r2
     runUnless cond $
         WritePC @v $ FromImm pc `Add` FromImm imm
-    --unlessMword (convert @v <$> liftE cond) $
-        --writePC @v $ FromImm pc `Add` FromImm imm
 instrSemantics pc inst BLT = do
     (r1, r2, imm) <- decodeAndReadBType inst
 
@@ -175,8 +171,6 @@ instrSemantics pc inst BLT = do
     let cond = FromImm r1 `Slt` FromImm r2
     runIf cond $ 
         WritePC @v $ FromImm pc `Add` FromImm imm
-    --whenMword (convert @v <$> liftE cond) $
-    --  writePC @v $ FromImm pc `Add` FromImm imm
 instrSemantics pc inst BLTU = do
     (r1, r2, imm) <- decodeAndReadBType inst
 
@@ -184,8 +178,6 @@ instrSemantics pc inst BLTU = do
     let cond = FromImm r1 `Ult` FromImm r2
     runIf cond $ 
         WritePC @v $ FromImm pc `Add` FromImm imm
-    --whenMword (convert @v <$> liftE cond) $
-    --  writePC @v $ FromImm pc `Add` FromImm imm
 instrSemantics pc inst BGE = do
     (r1, r2, imm) <- decodeAndReadBType inst
 
@@ -193,8 +185,6 @@ instrSemantics pc inst BGE = do
     let cond = FromImm r1 `Sge` FromImm r2
     runIf cond $
         WritePC @v $ FromImm pc `Add` FromImm imm
-    --whenMword (convert @v <$> liftE cond) $
-    --   writePC @v $ FromImm pc `Add` FromImm imm
 instrSemantics pc inst BGEU = do
     (r1, r2, imm) <- decodeAndReadBType inst
 
@@ -202,8 +192,6 @@ instrSemantics pc inst BGEU = do
     let cond = FromImm r1 `Uge` FromImm r2
     runIf cond $
         WritePC @v $ FromImm pc `Add` FromImm imm
-    --whenMword (convert @v <$> liftE cond) $
-    --    writePC @v $ FromImm pc `Add` FromImm imm
 instrSemantics _ _ FENCE = pure () -- XXX: ignore for now
 instrSemantics pc _ ECALL = ecall @v pc
 instrSemantics pc __  EBREAK = ebreak @v pc
@@ -211,26 +199,26 @@ instrSemantics _ _ _ = error "InvalidInstruction"
 
 -- TODO add newTypes for type safety
 -- decode and read register
-decodeAndReadIType :: forall v r . (Conversion v Word32, Member (Operations v) r) => v -> Eff r (v,v,v)
+decodeAndReadIType :: forall v r . (Member (Operations v) r) => v -> Eff r (v,v,v)
 decodeAndReadIType inst = liftA3 (,,) (decodeRS1 inst >>= readRegister) (decodeRD inst) (decodeImmI inst)
 
 -- decode and read register
-decodeAndReadBType :: forall v r . (Conversion v Word32, Member (Operations v) r) => v -> Eff r (v,v,v)
+decodeAndReadBType :: forall v r . (Member (Operations v) r) => v -> Eff r (v,v,v)
 decodeAndReadBType inst = liftA3 (,,) (decodeRS1 inst >>= readRegister) (decodeRS2 inst >>= readRegister) (decodeImmB inst)
 
 -- decode and read register
-decodeAndReadSType :: forall v r . (Conversion v Word32, Member (Operations v) r) => v -> Eff r (v,v,v)
+decodeAndReadSType :: forall v r . (Member (Operations v) r) => v -> Eff r (v,v,v)
 decodeAndReadSType inst = liftA3 (,,) (decodeRS1 inst >>= readRegister) (decodeRS2 inst >>= readRegister) (decodeImmS inst)
 
 -- decode and read register
-decodeAndReadRType :: forall v r . (Conversion v Word32, Member (Operations v) r) => v -> Eff r (v,v,v)
+decodeAndReadRType :: forall v r . (Member (Operations v) r) => v -> Eff r (v,v,v)
 decodeAndReadRType inst = liftA3 (,,) (decodeRS1 inst >>= readRegister) (decodeRS2 inst >>= readRegister) (decodeRD inst)
 
 -- decode and read register
-decodeJType :: forall v r . (Conversion v Word32, Member (Operations v) r) => v -> Eff r (v,v)
+decodeJType :: forall v r . (Member (Operations v) r) => v -> Eff r (v,v)
 decodeJType inst = liftA2 (,) (decodeRD inst) (decodeImmJ inst)
 
-decodeUType :: forall v r . (Conversion v Word32, Member (Operations v) r) => v -> Eff r (v,v)
+decodeUType :: forall v r . (Member (Operations v) r) => v -> Eff r (v,v)
 decodeUType inst = liftA2 (,) (decodeRD inst) (decodeImmU inst)
 
 buildInstruction' :: forall v r. (Conversion v Word32, Member (Operations v) r, Member LogInstructionFetch r) => v -> v -> InstructionType -> Eff r ()
