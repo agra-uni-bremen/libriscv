@@ -19,6 +19,7 @@ import LibRISCV.Effects.Logging.InstructionFetch
 import Conversion
 import LibRISCV.Spec.Expr
 import LibRISCV.Spec.Operations
+import Control.Applicative (liftA3, Applicative (liftA2))
 
 ------------------------------------------------------------------------
 
@@ -30,255 +31,163 @@ import LibRISCV.Spec.Operations
 
 instrSemantics :: forall v r. (Member (Operations v) r, Conversion v Word32) => v -> v -> InstructionType -> Eff r ()
 instrSemantics _ inst ADDI = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-
-    imm <- decodeImmI @v inst
+    (r1, rd, imm) <- decodeAndReadIType @v inst
     writeRegister @v rd $ r1 `addSImm` imm
 instrSemantics _ inst SLTI = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-
-    imm <- decodeImmI @v inst
+    (r1, rd, imm) <- decodeAndReadIType @v inst
     let cond = FromImm r1 `Slt` FromImm imm :: Expr v
     writeRegister @v rd $ convert cond
 instrSemantics _ inst SLTIU = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-
-    imm <- decodeImmI @v inst
+    (r1, rd, imm) <- decodeAndReadIType @v inst
     let cond = FromImm r1 `Ult` FromImm imm :: Expr v
     writeRegister @v rd $ convert cond
 instrSemantics _ inst ANDI = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-
-    imm <- decodeImmI @v inst
+    (r1, rd, imm) <- decodeAndReadIType @v inst
     writeRegister @v rd $ r1 `andImm` imm
 instrSemantics _ inst ORI = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-
-    imm <- decodeImmI @v inst
+    (r1, rd, imm) <- decodeAndReadIType @v inst
     writeRegister @v rd $ r1 `orImm` imm
 instrSemantics _ inst XORI = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-
-    imm <- decodeImmI @v inst
+    (r1, rd, imm) <- decodeAndReadIType @v inst
     writeRegister @v rd $ r1 `xorImm` imm
 instrSemantics _ inst SLLI = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-
+    (r1, rd, _) <- decodeAndReadIType inst
     shamt <- decodeShamt @v inst
     writeRegister @v rd $ r1 `lshlImm` shamt
 instrSemantics _ inst SRLI = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-
+    (r1, rd, _) <- decodeAndReadIType inst
     shamt <- decodeShamt @v inst
     writeRegister @v rd $ r1 `lshrImm` shamt
 instrSemantics _ inst SRAI = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-
+    (r1, rd, _) <- decodeAndReadIType inst
     shamt <- decodeShamt @v inst
     writeRegister @v rd $ r1 `ashrImm` shamt
 instrSemantics _ inst LUI = do
-    rd <- decodeRD @v inst
-    imm <- decodeImmU @v inst
+    (rd, imm) <- decodeUType inst
     writeRegister @v rd $ FromImm imm
 instrSemantics pc inst AUIPC = do
-    rd <- decodeRD @v inst
-    imm <- decodeImmU @v inst
+    (rd, imm) <- decodeUType inst
     writeRegister @v rd $ pc `addSImm` imm
 instrSemantics _ inst ADD = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-    r2 <- decodeRS2 @v inst >>= readRegister
+    (r1, r2, rd) <- decodeAndReadRType inst
     writeRegister @v rd $ r1 `addSImm` r2
 instrSemantics _ inst SLT = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-    r2 <- decodeRS2 @v inst >>= readRegister
-
+    (r1, r2, rd) <- decodeAndReadRType inst
     let cond = FromImm r1 `Slt` FromImm r2 :: Expr v
     writeRegister @v rd $ convert cond
 instrSemantics _ inst SLTU = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-    r2 <- decodeRS2 @v inst >>= readRegister
-
+    (r1, r2, rd) <- decodeAndReadRType inst
     let cond = FromImm r1 `Ult` FromImm r2 :: Expr v
     writeRegister @v rd $ convert cond
 instrSemantics _ inst AND = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-    r2 <- decodeRS2 @v inst >>= readRegister
-
+    (r1, r2, rd) <- decodeAndReadRType inst
     writeRegister @v rd $ r1 `andImm` r2
 instrSemantics _ inst OR = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-    r2 <- decodeRS2 @v inst >>= readRegister
-
+    (r1, r2, rd) <- decodeAndReadRType inst
     writeRegister @v rd $ r1 `orImm` r2
 instrSemantics _ inst XOR = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-    r2 <- decodeRS2 @v inst >>= readRegister
-
+    (r1, r2, rd) <- decodeAndReadRType inst
     writeRegister @v rd $ r1 `xorImm` r2
 instrSemantics _ inst SLL = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-    r2 <- decodeRS2 @v inst >>= readRegister
-
+    (r1, r2, rd) <- decodeAndReadRType inst
     writeRegister @v rd $ FromImm r1 `LShl` regShamt (FromImm r2)
 instrSemantics _ inst SRL = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-    r2 <- decodeRS2 @v inst >>= readRegister
-
+    (r1, r2, rd) <- decodeAndReadRType inst
     writeRegister @v rd $ FromImm r1 `LShr` regShamt (FromImm r2)
 instrSemantics _ inst SUB = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-    r2 <- decodeRS2 @v inst >>= readRegister
-
+    (r1, r2, rd) <- decodeAndReadRType inst
     writeRegister @v rd $ FromImm r1 `Sub` FromImm r2
 instrSemantics _ inst SRA = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-    r2 <- decodeRS2 @v inst >>= readRegister
-
+    (r1, r2, rd) <- decodeAndReadRType inst
     writeRegister @v rd $ FromImm r1 `AShr` regShamt (FromImm r2)
 instrSemantics pc inst JAL = do
     nextInstr <- readPC
-    rd <- decodeRD @v inst
-
-    imm <- decodeImmJ @v inst
+    (rd, imm) <- decodeJType inst
     writePC @v $ pc `addSImm` imm
     writeRegister @v rd (FromImm nextInstr)
 instrSemantics _ inst JALR = do
     nextInstr <- readPC
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-
-    imm <- decodeImmI @v inst
+    (r1, rd, imm) <- decodeAndReadIType @v inst
     writePC @v $ (r1 `addSImm` imm) `And` FromUInt 0xfffffffe
     writeRegister @v rd $ FromImm nextInstr
 instrSemantics _ inst LB = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-    imm <- decodeImmI @v inst
-
+    (r1, rd, imm) <- decodeAndReadIType @v inst
     byte <- loadByte @v $ r1 `addSImm` imm
     -- TODO: Alignment handling
     writeRegister @v rd (SExtByte $ FromImm byte)
 instrSemantics _ inst LBU = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-    imm <- decodeImmI @v inst
-
+    (r1, rd, imm) <- decodeAndReadIType @v inst
     -- TODO: Alignment handling
     byte <- loadByte @v $ r1 `addSImm` imm
     writeRegister @v rd (ZExtByte $ FromImm byte)
 instrSemantics _ inst LH = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-    imm <- decodeImmI @v inst
-
+    (r1, rd, imm) <- decodeAndReadIType @v inst
     -- TODO: Alignment handling
     half <- loadHalf $ r1 `addSImm` imm
     writeRegister @v rd (SExtHalf $ FromImm half)
 instrSemantics _ inst LHU = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-    imm <- decodeImmI @v inst
-
+    (r1, rd, imm) <- decodeAndReadIType @v inst
     -- TODO: Alignment handling
     half <- loadHalf $ r1 `addSImm` imm
     writeRegister @v rd (ZExtHalf $ FromImm half)
 instrSemantics _ inst LW = do
-    rd <- decodeRD @v inst
-    r1 <- decodeRS1 @v inst >>= readRegister
-    imm <- decodeImmI @v inst
+    (r1, rd, imm) <- decodeAndReadIType @v inst
 
     -- TODO: Alignment handling
     word <- loadWord $ r1 `addSImm` imm
     writeRegister @v rd (FromImm word)
 instrSemantics _ inst SB = do
-    r1 <- decodeRS1 @v inst >>= readRegister
-    r2 <- decodeRS2 @v inst >>= readRegister
-    imm <- decodeImmS @v inst
+    (r1, r2, imm) <- decodeAndReadSType inst
 
     -- TODO: Alignment handling
     storeByte @v (r1 `addSImm` imm) $ FromImm r2
 instrSemantics _ inst SH = do
-    r1 <- decodeRS1 @v inst >>= readRegister
-    r2 <- decodeRS2 @v inst >>= readRegister
-    imm <- decodeImmS @v inst
+    (r1, r2, imm) <- decodeAndReadSType inst
 
     -- TODO: Alignment handling
     storeHalf @v (r1 `addSImm` imm) $ FromImm r2
 instrSemantics _ inst SW = do
-    r1 <- decodeRS1 @v inst >>= readRegister
-    r2 <- decodeRS2 @v inst >>= readRegister
-    imm <- decodeImmS @v inst
+    (r1, r2, imm) <- decodeAndReadSType inst
 
     -- TODO: Alignment handling
     storeWord @v (r1 `addSImm` imm) $ FromImm r2
 instrSemantics pc inst BEQ = do
-    r1 <- decodeRS1 @v inst >>= readRegister
-    r2 <- decodeRS2 @v inst >>= readRegister
-    imm <- decodeImmB @v inst
+    (r1, r2, imm) <- decodeAndReadBType inst
 
     -- TODO: Alignment handling
     let cond = FromImm r1 `Eq` FromImm r2
     whenMword (convert @v <$> liftE cond) $
         writePC @v $ FromImm pc `Add` FromImm imm
 instrSemantics pc inst BNE = do
-    r1 <- decodeRS1 @v inst >>= readRegister
-    r2 <- decodeRS2 @v inst >>= readRegister
-    imm <- decodeImmB @v inst
+    (r1, r2, imm) <- decodeAndReadBType inst
 
     -- TODO: Alignment handling
     let cond = FromImm r1 `Eq` FromImm r2
     unlessMword (convert @v <$> liftE cond) $
         writePC @v $ FromImm pc `Add` FromImm imm
 instrSemantics pc inst BLT = do
-    r1 <- decodeRS1 @v inst >>= readRegister
-    r2 <- decodeRS2 @v inst >>= readRegister
-    imm <- decodeImmB @v inst
+    (r1, r2, imm) <- decodeAndReadBType inst
 
     -- TODO: Alignment handling
     let cond = FromImm r1 `Slt` FromImm r2
     whenMword (convert @v <$> liftE cond) $
         writePC @v $ FromImm pc `Add` FromImm imm
 instrSemantics pc inst BLTU = do
-    r1 <- decodeRS1 @v inst >>= readRegister
-    r2 <- decodeRS2 @v inst >>= readRegister
-    imm <- decodeImmB @v inst
+    (r1, r2, imm) <- decodeAndReadBType inst
 
     -- TODO: Alignment handling
     let cond = FromImm r1 `Ult` FromImm r2
     whenMword (convert @v <$> liftE cond) $
         writePC @v $ FromImm pc `Add` FromImm imm
 instrSemantics pc inst BGE = do
-    r1 <- decodeRS1 @v inst >>= readRegister
-    r2 <- decodeRS2 @v inst >>= readRegister
-    imm <- decodeImmB @v inst
+    (r1, r2, imm) <- decodeAndReadBType inst
 
     -- TODO: Alignment handling
     let cond = FromImm r1 `Sge` FromImm r2
     whenMword (convert @v <$> liftE cond) $
         writePC @v $ FromImm pc `Add` FromImm imm
 instrSemantics pc inst BGEU = do
-    r1 <- decodeRS1 @v inst >>= readRegister
-    r2 <- decodeRS2 @v inst >>= readRegister
-    imm <- decodeImmB @v inst
+    (r1, r2, imm) <- decodeAndReadBType inst
 
     -- TODO: Alignment handling
     let cond = FromImm r1 `Uge` FromImm r2
@@ -288,6 +197,30 @@ instrSemantics _ _ FENCE = pure () -- XXX: ignore for now
 instrSemantics pc _ ECALL = ecall @v pc
 instrSemantics pc __  EBREAK = ebreak @v pc
 instrSemantics _ _ _ = error "InvalidInstruction"
+
+-- TODO add newTypes for type safety
+-- decode and read register
+decodeAndReadIType :: forall v r . (Conversion v Word32, Member (Operations v) r) => v -> Eff r (v,v,v)
+decodeAndReadIType inst = liftA3 (,,) (decodeRS1 inst >>= readRegister) (decodeRD inst) (decodeImmI inst)
+
+-- decode and read register
+decodeAndReadBType :: forall v r . (Conversion v Word32, Member (Operations v) r) => v -> Eff r (v,v,v)
+decodeAndReadBType inst = liftA3 (,,) (decodeRS1 inst >>= readRegister) (decodeRS2 inst >>= readRegister) (decodeImmB inst)
+
+-- decode and read register
+decodeAndReadSType :: forall v r . (Conversion v Word32, Member (Operations v) r) => v -> Eff r (v,v,v)
+decodeAndReadSType inst = liftA3 (,,) (decodeRS1 inst >>= readRegister) (decodeRS2 inst >>= readRegister) (decodeImmS inst)
+
+-- decode and read register
+decodeAndReadRType :: forall v r . (Conversion v Word32, Member (Operations v) r) => v -> Eff r (v,v,v)
+decodeAndReadRType inst = liftA3 (,,) (decodeRS1 inst >>= readRegister) (decodeRS2 inst >>= readRegister) (decodeRD inst)
+
+-- decode and read register
+decodeJType :: forall v r . (Conversion v Word32, Member (Operations v) r) => v -> Eff r (v,v)
+decodeJType inst = liftA2 (,) (decodeRD inst) (decodeImmJ inst)
+
+decodeUType :: forall v r . (Conversion v Word32, Member (Operations v) r) => v -> Eff r (v,v)
+decodeUType inst = liftA2 (,) (decodeRD inst) (decodeImmU inst)
 
 buildInstruction' :: forall v r. (Conversion v Word32, Member (Operations v) r, Member LogInstructionFetch r) => v -> v -> InstructionType -> Eff r ()
 buildInstruction' _ _ InvalidInstruction = pure () -- XXX: ignore for now
