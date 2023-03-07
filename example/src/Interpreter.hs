@@ -142,4 +142,3 @@ iftBehavior (evalE , (regFile, mem)) = \case
     ReadPC -> MkTainted False <$> REG.readPC regFile       -- TODO
     Ecall _ -> putStrLn "ECALL"
     Ebreak _ -> putStrLn "EBREAK"
-    LiftE e -> pure $ evalE e

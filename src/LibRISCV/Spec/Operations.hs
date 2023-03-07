@@ -31,6 +31,5 @@ data Operations v r where
     ReadPC :: Operations v v
     Ecall :: v -> Operations v ()
     Ebreak :: v -> Operations v ()
-    LiftE :: Expr v -> Operations v v
 
 makeEffect ''Operations

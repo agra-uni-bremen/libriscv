@@ -101,4 +101,3 @@ defaultBehavior (evalE , (regFile, mem)) = \case
     ReadPC -> REG.readPC regFile
     Ecall pc -> putStrLn $ "ecall at 0x" ++ showHex pc ""
     Ebreak pc -> putStrLn $ "ebreak at 0x" ++ showHex pc ""
-    LiftE e -> pure $ evalE e
