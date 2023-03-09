@@ -102,12 +102,20 @@ instrSemantics _ inst SRA = do
 instrSemantics pc inst JAL = do
     nextInstr <- readPC
     (rd, imm) <- decodeJType inst
-    writePC @v $ pc `addSImm` imm
+
+    let newPC = pc `addSImm` imm
+    writePC @v newPC
+    runIf (isMisaligned newPC) $
+        Exception pc "misaligned PC"
     writeRegister @v rd (FromImm nextInstr)
-instrSemantics _ inst JALR = do
+instrSemantics pc inst JALR = do
     nextInstr <- readPC
     (r1, rd, imm) <- decodeAndReadIType @v inst
-    writePC @v $ (r1 `addSImm` imm) `And` FromUInt 0xfffffffe
+
+    let newPC = (r1 `addSImm` imm) `And` FromUInt 0xfffffffe
+    writePC @v newPC
+    runIf (isMisaligned newPC) $
+        Exception pc "misaligned PC"
     writeRegister @v rd $ FromImm nextInstr
 instrSemantics _ inst LB = do
     (r1, rd, imm) <- decodeAndReadIType @v inst
@@ -167,35 +175,47 @@ instrSemantics pc inst BNE = do
 instrSemantics pc inst BLT = do
     (r1, r2, imm) <- decodeAndReadBType inst
 
-    -- TODO: Alignment handling
+    let addr = FromImm pc `Add` FromImm imm
     let cond = FromImm r1 `Slt` FromImm r2
-    runIf cond $ 
-        WritePC @v $ FromImm pc `Add` FromImm imm
+    runIf cond $
+        WritePC @v $ addr
+    runIf (cond `And` isMisaligned addr) $
+        Exception pc "misaligned PC"
 instrSemantics pc inst BLTU = do
     (r1, r2, imm) <- decodeAndReadBType inst
 
-    -- TODO: Alignment handling
+    let addr = FromImm pc `Add` FromImm imm
     let cond = FromImm r1 `Ult` FromImm r2
-    runIf cond $ 
-        WritePC @v $ FromImm pc `Add` FromImm imm
+    runIf cond $
+        WritePC @v $ addr
+    runIf (cond `And` isMisaligned addr) $
+        Exception pc "misaligned PC"
 instrSemantics pc inst BGE = do
     (r1, r2, imm) <- decodeAndReadBType inst
 
-    -- TODO: Alignment handling
+    let addr = FromImm pc `Add` FromImm imm
     let cond = FromImm r1 `Sge` FromImm r2
     runIf cond $
-        WritePC @v $ FromImm pc `Add` FromImm imm
+        WritePC @v $ addr
+    runIf (cond `And` isMisaligned addr) $
+        Exception pc "misaligned PC"
 instrSemantics pc inst BGEU = do
     (r1, r2, imm) <- decodeAndReadBType inst
 
-    -- TODO: Alignment handling
+    let addr = FromImm pc `Add` FromImm imm
     let cond = FromImm r1 `Uge` FromImm r2
     runIf cond $
-        WritePC @v $ FromImm pc `Add` FromImm imm
+        WritePC @v $ addr
+    runIf (cond `And` isMisaligned addr) $
+        Exception pc "misaligned PC"
 instrSemantics _ _ FENCE = pure () -- XXX: ignore for now
 instrSemantics pc _ ECALL = ecall @v pc
 instrSemantics pc __  EBREAK = ebreak @v pc
 instrSemantics _ _ _ = error "InvalidInstruction"
+
+-- False if a given address is not aligned at the four-byte boundary.
+isMisaligned :: Expr v -> Expr v
+isMisaligned addr = (addr `And` (FromUInt 0x3)) `Uge` (FromUInt 1)
 
 -- TODO add newTypes for type safety
 -- decode and read register

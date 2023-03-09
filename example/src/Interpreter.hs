@@ -140,5 +140,6 @@ iftBehavior (evalE , (regFile, mem)) = \case
     StoreWord addr w -> MEM.storeWord mem (convert $ evalE addr) (evalE w)
     WritePC w -> REG.writePC regFile (convert $ evalE w) -- TODO
     ReadPC -> MkTainted False <$> REG.readPC regFile       -- TODO
+    Exception _ msg -> error msg
     Ecall _ -> putStrLn "ECALL"
     Ebreak _ -> putStrLn "EBREAK"

@@ -29,6 +29,7 @@ data Operations v r where
     StoreWord :: Expr v -> Expr v -> Operations v ()
     WritePC :: Expr v -> Operations v ()
     ReadPC :: Operations v v
+    Exception :: v -> String -> Operations v ()
     Ecall :: v -> Operations v ()
     Ebreak :: v -> Operations v ()
 

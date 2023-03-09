@@ -99,5 +99,6 @@ defaultBehavior (evalE , (regFile, mem)) = \case
     StoreWord addr w -> MEM.storeWord mem (evalE addr) (evalE w)
     WritePC w -> REG.writePC regFile (evalE w)
     ReadPC -> REG.readPC regFile
+    Exception pc msg -> error $ "[0x" ++ (showHex pc "") ++ "] " ++ msg
     Ecall pc -> putStrLn $ "ecall at 0x" ++ showHex pc ""
     Ebreak pc -> putStrLn $ "ebreak at 0x" ++ showHex pc ""
