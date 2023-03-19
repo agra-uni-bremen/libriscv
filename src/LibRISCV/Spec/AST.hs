@@ -7,7 +7,8 @@
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE GADTs #-}
-{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE QualifiedDo #-}
+{-# OPTIONS_GHC -Wno-unused-imports #-}
 module LibRISCV.Spec.AST where
 
 import LibRISCV.Decoder.Opcode
@@ -17,7 +18,8 @@ import Control.Monad.Freer
 import LibRISCV.Effects.Logging.InstructionFetch
 import Conversion
 import LibRISCV.Spec.Expr
-import LibRISCV.Spec.Operations
+import LibRISCV.Spec.Operations hiding ((>>))
+import qualified LibRISCV.Spec.Operations as OP ((>>))
 import Control.Applicative (liftA3, Applicative (liftA2))
 
 ------------------------------------------------------------------------
@@ -204,10 +206,10 @@ instrSemantics pc inst BGEU = do
 
     let addr = FromImm pc `Add` FromImm imm
     let cond = FromImm r1 `Uge` FromImm r2
-    runIf cond $
+    runIf cond $ OP.do 
         WritePC @v $ addr
-    runIf (cond `And` isMisaligned addr) $
-        Exception pc "misaligned PC"
+        RunIf (isMisaligned addr) $
+            Exception pc "misaligned PC"
 instrSemantics _ _ FENCE = pure () -- XXX: ignore for now
 instrSemantics pc _ ECALL = ecall @v pc
 instrSemantics pc __  EBREAK = ebreak @v pc
@@ -215,7 +217,7 @@ instrSemantics _ _ _ = error "InvalidInstruction"
 
 -- False if a given address is not aligned at the four-byte boundary.
 isMisaligned :: Expr v -> Expr v
-isMisaligned addr = (addr `And` (FromUInt 0x3)) `Uge` (FromUInt 1)
+isMisaligned addr = (addr `And` FromUInt 0x3) `Uge` FromUInt 1
 
 -- TODO add newTypes for type safety
 -- decode and read register

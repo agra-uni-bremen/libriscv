@@ -77,7 +77,7 @@ runInstruction f eff =
     ask >>= \env -> interpretM (f env) eff
 
 defaultBehavior :: DefaultEnv -> Operations Word32 ~> IO
-defaultBehavior (evalE , (regFile, mem)) = \case
+defaultBehavior env@(evalE , (regFile, mem)) = \case
     DecodeRD inst -> pure (mkRd inst)
     DecodeRS1 inst -> pure (mkRs1 inst)
     DecodeRS2 inst -> pure (mkRs2 inst)
@@ -102,3 +102,6 @@ defaultBehavior (evalE , (regFile, mem)) = \case
     Exception pc msg -> error $ "[0x" ++ (showHex pc "") ++ "] " ++ msg
     Ecall pc -> putStrLn $ "ecall at 0x" ++ showHex pc ""
     Ebreak pc -> putStrLn $ "ebreak at 0x" ++ showHex pc ""
+    Append__ s s' -> do
+        defaultBehavior env s 
+        defaultBehavior env s'

@@ -22,7 +22,7 @@ copyright:          (c) 2022 University of Bremen
 -- extra-source-files: CHANGELOG.md
 
 common opts
-    ghc-options:    -Wincomplete-patterns -Wincomplete-uni-patterns -Wunused-imports -Wunused-matches -Werror
+    ghc-options:    -Wincomplete-patterns -Wincomplete-uni-patterns -Wunused-matches -Werror
 
 library
     import:          opts

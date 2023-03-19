@@ -1,6 +1,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE InstanceSigs #-}
+{-# LANGUAGE LambdaCase #-}
 module LibRISCV.Spec.Operations where
 
 import LibRISCV.Spec.Expr (Expr)
@@ -33,4 +35,10 @@ data Operations v r where
     Ecall :: v -> Operations v ()
     Ebreak :: v -> Operations v ()
 
+    -- Technical
+    Append__ :: Operations v b -> Operations v r -> Operations v r
+
 makeEffect ''Operations
+
+(>>) :: Operations v b -> Operations v r -> Operations v r
+(>>) = Append__
