@@ -8,7 +8,6 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE QualifiedDo #-}
-{-# OPTIONS_GHC -Wno-unused-imports #-}
 module LibRISCV.Spec.AST where
 
 import LibRISCV.Decoder.Opcode
