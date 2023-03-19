@@ -143,3 +143,5 @@ iftBehavior (evalE , (regFile, mem)) = \case
     Exception _ msg -> error msg
     Ecall _ -> putStrLn "ECALL"
     Ebreak _ -> putStrLn "EBREAK"
+
+    Append__ _ _ -> undefined    
