@@ -179,28 +179,28 @@ instrSemantics pc inst BLT = do
 
     let addr = FromImm pc `Add` FromImm imm
     let cond = FromImm r1 `Slt` FromImm r2
-    runIf cond $
+    runIf cond $ OP.do
         WritePC @v $ addr
-    runIf (cond `And` isMisaligned addr) $
-        Exception pc "misaligned PC"
+        RunIf (isMisaligned addr) $
+            Exception pc "misaligned PC"
 instrSemantics pc inst BLTU = do
     (r1, r2, imm) <- decodeAndReadBType inst
 
     let addr = FromImm pc `Add` FromImm imm
     let cond = FromImm r1 `Ult` FromImm r2
-    runIf cond $
+    runIf cond $ OP.do
         WritePC @v $ addr
-    runIf (cond `And` isMisaligned addr) $
-        Exception pc "misaligned PC"
+        RunIf (isMisaligned addr) $
+            Exception pc "misaligned PC"
 instrSemantics pc inst BGE = do
     (r1, r2, imm) <- decodeAndReadBType inst
 
     let addr = FromImm pc `Add` FromImm imm
     let cond = FromImm r1 `Sge` FromImm r2
-    runIf cond $
+    runIf cond $ OP.do
         WritePC @v $ addr
-    runIf (cond `And` isMisaligned addr) $
-        Exception pc "misaligned PC"
+        RunIf (isMisaligned addr) $
+            Exception pc "misaligned PC"
 instrSemantics pc inst BGEU = do
     (r1, r2, imm) <- decodeAndReadBType inst
 
