@@ -1,4 +1,5 @@
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TypeOperators #-}
@@ -32,6 +33,7 @@ import LibRISCV.Utils
 
 import qualified LibRISCV.Machine.Register as REG
 import qualified LibRISCV.Machine.Memory as MEM
+import Data.BitVector (BV, bitVec)
 
 -- Syscall number for the newlib exit syscall (used by riscv-tests).
 sys_exit :: Int32
@@ -40,7 +42,7 @@ sys_exit = 93
 -- The riscv-tests repository uses a special ecall to communicate test
 -- failures to the execution environment. This function implements the
 -- ECALL instruction accordingly.
-ecallHandler :: DefaultEnv -> Operations Word32 ~> MaybeT IO
+ecallHandler :: DefaultEnv -> Operations BV ~> MaybeT IO
 ecallHandler (evalE, (regFile, mem)) = \case
         Ecall pc -> do
             sys <- lift $ REG.readRegister regFile A7
@@ -65,7 +67,7 @@ main' (BasicArgs memAddr memSize trace putReg fp) = do
                 runReader (runExpression, state) . runInstruction (ecallHandler `extends` defaultBehavior) . runLogInstructionFetchM
             else
                 runReader (runExpression, state) . runInstruction (ecallHandler `extends` defaultBehavior) . runNoLogging
-    runM $ interpreter $ buildAST entry
+    runM $ interpreter $ buildAST @32 (bitVec 32 entry)
 
     when putReg $
         dumpState state

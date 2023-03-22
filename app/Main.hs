@@ -1,3 +1,5 @@
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE DataKinds #-}
 module Main where
 
 import Options.Applicative
@@ -14,6 +16,9 @@ import LibRISCV.CmdLine
 import LibRISCV.Effects.Logging.InstructionFetch
 import LibRISCV.Machine.Interpreter
 import qualified LibRISCV.Spec.Expr as E
+import Data.BitVector 
+import qualified Debug.Trace as Debug
+
 
 main' :: BasicArgs -> IO ()
 main' (BasicArgs memAddr memSize trace putReg fp) = do
@@ -30,8 +35,9 @@ main' (BasicArgs memAddr memSize trace putReg fp) = do
             else
                 runReader (runExpression, state) . runInstruction defaultBehavior . runNoLogging
     runM $ interpreter $ do
-        writeRegister (fromIntegral $ fromEnum SP) (E.FromImm initalSP)
-        buildAST entry
+        writeRegister (bitVec 32 $ fromEnum SP) (E.FromImm 32 (bitVec 32 initalSP))
+        Debug.trace "Starting23" (pure ())
+        buildAST @32 (bitVec 32 entry)
 
     when putReg $
         dumpState state

@@ -29,6 +29,7 @@ import Data.Singletons ( SingI )
 import Data.Singletons.Sigma ( Sigma((:&:)) )
 import qualified Data.ByteString.Lazy as BSL
 import System.FilePath ()
+import Debug.Trace (trace)
 
 -- Return the entry point from the ELF header.
 startAddr :: MonadCatch m => Elf -> m Word32

@@ -112,6 +112,14 @@ runExpression (Xor e1 e2)  = binOp e1 e2 Xor
 runExpression (LShl e1 e2) = binOp e1 e2 LShl
 runExpression (LShr e1 e2) = binOp e1 e2 LShr
 runExpression (AShr e1 e2) = binOp e1 e2 AShr
+runExpression (Mul e1 e2) = binOp e1 e2 Mul
+runExpression (Mulh e1 e2) = binOp e1 e2 Mulh
+runExpression (Mulhu e1 e2) = binOp e1 e2 Mulhu
+runExpression (Mulhsu e1 e2) = binOp e1 e2 Mulhsu
+runExpression (Div e1 e2) = binOp e1 e2 Div
+runExpression (Divu e1 e2) = binOp e1 e2 Divu
+runExpression (Rem e1 e2) = binOp e1 e2 Rem
+runExpression (Remu e1 e2) = binOp e1 e2 Remu
 
 ------------------------------------------------------------------------
 
@@ -130,6 +138,7 @@ iftBehavior env@(evalE , (regFile, mem)) = \case
     DecodeShamt inst -> pure $ convert (mkShamt $ convert inst)
 
     RunIf e next -> undefined
+    RunIfElse e ifB elseB -> undefined
     RunUnless e next -> undefined
     ReadRegister idx -> REG.readRegister regFile (toEnum $ fromIntegral (convert (evalE $ FromImm idx) :: Word32))
     WriteRegister idx reg -> REG.writeRegister regFile (toEnum $ fromIntegral (convert (evalE $ FromImm idx) :: Word32)) (evalE reg)

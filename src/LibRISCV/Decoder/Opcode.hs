@@ -8,6 +8,7 @@ where
 
 import Data.Word
 import Data.Bits
+import Data.BitVector (BV)
 
 data InstructionType =
   ADD |
@@ -21,6 +22,8 @@ data InstructionType =
   BLT |
   BLTU |
   BNE |
+  DIV |
+  DIVU |
   EBREAK |
   ECALL |
   FENCE |
@@ -32,8 +35,14 @@ data InstructionType =
   LHU |
   LUI |
   LW |
+  MUL |
+  MULH |
+  MULHSU |
+  MULHU |
   OR |
   ORI |
+  REM |
+  REMU |
   SB |
   SH |
   SLL |
@@ -81,6 +90,10 @@ bltu_mask = 0x707f
 bltu_match = 0x6063
 bne_mask = 0x707f
 bne_match = 0x1063
+div_mask = 0xfe00707f
+div_match = 0x2004033
+divu_mask = 0xfe00707f
+divu_match = 0x2005033
 ebreak_mask = 0xffffffff
 ebreak_match = 0x100073
 ecall_mask = 0xffffffff
@@ -103,10 +116,22 @@ lui_mask = 0x7f
 lui_match = 0x37
 lw_mask = 0x707f
 lw_match = 0x2003
+mul_mask = 0xfe00707f
+mul_match = 0x2000033
+mulh_mask = 0xfe00707f
+mulh_match = 0x2001033
+mulhsu_mask = 0xfe00707f
+mulhsu_match = 0x2002033
+mulhu_mask = 0xfe00707f
+mulhu_match = 0x2003033
 or_mask = 0xfe00707f
 or_match = 0x6033
 ori_mask = 0x707f
 ori_match = 0x6013
+rem_mask = 0xfe00707f
+rem_match = 0x2006033
+remu_mask = 0xfe00707f
+remu_match = 0x2007033
 sb_mask = 0x707f
 sb_match = 0x23
 sh_mask = 0x707f
@@ -155,6 +180,8 @@ decode instrWord
   | instrWord .&. blt_mask == blt_match = BLT
   | instrWord .&. bltu_mask == bltu_match = BLTU
   | instrWord .&. bne_mask == bne_match = BNE
+  | instrWord .&. div_mask == div_match = DIV
+  | instrWord .&. divu_mask == divu_match = DIVU
   | instrWord .&. ebreak_mask == ebreak_match = EBREAK
   | instrWord .&. ecall_mask == ecall_match = ECALL
   | instrWord .&. fence_mask == fence_match = FENCE
@@ -166,8 +193,14 @@ decode instrWord
   | instrWord .&. lhu_mask == lhu_match = LHU
   | instrWord .&. lui_mask == lui_match = LUI
   | instrWord .&. lw_mask == lw_match = LW
+  | instrWord .&. mul_mask == mul_match = MUL
+  | instrWord .&. mulh_mask == mulh_match = MULH
+  | instrWord .&. mulhsu_mask == mulhsu_match = MULHSU
+  | instrWord .&. mulhu_mask == mulhu_match = MULHU
   | instrWord .&. or_mask == or_match = OR
   | instrWord .&. ori_mask == ori_match = ORI
+  | instrWord .&. rem_mask == rem_match = REM
+  | instrWord .&. remu_mask == remu_match = REMU
   | instrWord .&. sb_mask == sb_match = SB
   | instrWord .&. sh_mask == sh_match = SH
   | instrWord .&. sll_mask == sll_match = SLL
@@ -184,4 +217,4 @@ decode instrWord
   | instrWord .&. sw_mask == sw_match = SW
   | instrWord .&. xor_mask == xor_match = XOR
   | instrWord .&. xori_mask == xori_match = XORI
-  | True = InvalidInstruction
+  | otherwise = InvalidInstruction

@@ -20,6 +20,7 @@ data Operations v r where
     DecodeShamt :: v -> Operations v v
 
     RunIf :: Expr v -> Operations v () -> Operations v ()
+    RunIfElse :: Expr v -> Operations v () -> Operations v () -> Operations v ()
     RunUnless :: Expr v -> Operations v () -> Operations v ()
     ReadRegister :: v -> Operations v v
     WriteRegister :: v -> Expr v -> Operations v ()
