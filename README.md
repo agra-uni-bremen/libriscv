@@ -92,6 +92,10 @@ If these dependencies are installed (e.g. if you are using the provided Docker i
 
 	$ ./riscv-tests/run.sh
 
+## Acknowledgements
+
+This work was supported in part by the German Federal Ministry of Education and Research (BMBF) within the project EXCL under contract no. 01IW22002 and within the project Scale4Edge under contract no. 16ME0127.
+
 ## License
 
 This program is free software: you can redistribute it and/or modify it
