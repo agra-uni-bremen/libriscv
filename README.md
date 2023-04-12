@@ -2,8 +2,7 @@
 
 This is an extensible [RISC-V][riscv web] implementation which is based on a formal model of the architecture.
 The formal model is implemented using [free monads][free monads] and a custom expression language for arithmetic operations.
-Based on this formal model, different interpretation of RISC-V instructions can be implemented.
-As such, LibRISCV is a versatile tool for prototyping software analysis tools (e.g. [symbolic execution][symex wp]) or [hardware-based security mechanisms][hardbound paper].
+Based on this formal model, custom interpreters for RISC-V instructions can be easily implemented, e.g. to perform a taint analysis.
 More information about LibRISCV is available in the publication *Versatile and Flexible Modelling of the RISC-V Instruction Set Architecture* which will be published as part of the proceedings of the 2023 *Trends in Functional Programming* conference.
 
 ## Features
@@ -99,6 +98,4 @@ This work was supported in part by the German Federal Ministry of Education and 
 [riscv-gnu-toolchain github]: https://github.com/riscv-collab/riscv-gnu-toolchain
 [docker web]: https://www.docker.io
 [free monads]: https://doi.org/10.1145/2887747.2804319
-[symex wp]: https://en.wikipedia.org/wiki/Symbolic_execution
-[hardbound paper]: https://doi.org/10.1145/1353535.1346295
 [riscv-opcodes github]: https://github.com/riscv/riscv-opcodes
