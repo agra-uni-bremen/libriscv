@@ -3,12 +3,8 @@
 This is an extensible [RISC-V][riscv web] implementation which is based on a formal model of the architecture.
 The formal model is implemented using [free monads][free monads] and a custom expression language for arithmetic operations.
 Based on this formal model, different interpretation of RISC-V instructions can be implemented.
-As such, `libriscv` is a versatile tool for prototyping software analysis tools (e.g. [symbolic execution][symex wp]) or [hardware-based security mechanisms][hardbound paper].
-
-## Status
-
-Currently, the RV32 base instruction set (i.e. `rv32i`) is implemented and passes the [riscv-tests][riscv-tests github].
-Apart from the formal model for `rv32i`, a minimal concrete interpreter is also implemented.
+As such, LibRISCV is a versatile tool for prototyping software analysis tools (e.g. [symbolic execution][symex wp]) or [hardware-based security mechanisms][hardbound paper].
+More information about LibRISCV is available in the publication *Versatile and Flexible Modelling of the RISC-V Instruction Set Architecture* which will be published as part of the proceedings of the 2023 *Trends in Functional Programming* conference.
 
 ## Features
 
@@ -28,7 +24,7 @@ Both methods are described further below under the assumption that the repositor
 
 ### Cabal
 
-Assuming cabal has already been setup, run the following command within the source directory to install `libriscv`:
+Assuming cabal has already been setup, run the following command within the source directory to install LibRISCV:
 
     $ cabal install
 
@@ -44,7 +40,7 @@ To build and run a Docker container using this file invoke the following command
 
 This will drop you in an interactive shell within the Docker container.
 See the section below for more information on which commands can be run within the container.
-Within the container, the `libriscv` source code is available in the `libriscv` subdirectory.
+Within the container, the LibRISCV source code is available in the LibRISCV subdirectory.
 
 ## Usage
 
@@ -75,9 +71,9 @@ Afterwards, it will dump all register values.
 ### The Library Interface
 
 The concreter interpreter implements just one possible interpretation of RISC-V instructions.
-As the name suggests, `libriscv` is specifically intended to implement custom interpreters on top of the abstract RISC-V model.
+As the name suggests, LibRISCV is specifically intended to implement custom interpreters on top of the abstract RISC-V model.
 For this purpose, the Cabal file provides a Haskell library component.
-Based on this library, the `example/` subdirectory contains a custom example interpreter which performs [dynamic information flow tracking][dift paper] on RISC-V machine code.
+Based on this library, the `example/` subdirectory contains a custom example interpreter which performs a primitive taint analysis on RISC-V machine code.
 Refer to `example/README.md` for more information.
 
 ## Tests
@@ -96,21 +92,6 @@ If these dependencies are installed (e.g. if you are using the provided Docker i
 
 This work was supported in part by the German Federal Ministry of Education and Research (BMBF) within the project EXCL under contract no. 01IW22002 and within the project Scale4Edge under contract no. 16ME0127.
 
-## License
-
-This program is free software: you can redistribute it and/or modify it
-under the terms of the GNU General Public License as published by the
-Free Software Foundation, either version 3 of the License, or (at your
-option) any later version.
-
-This program is distributed in the hope that it will be useful, but
-WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
-Public License for more details.
-
-You should have received a copy of the GNU General Public License along
-with this program. If not, see <https://www.gnu.org/licenses/>.
-
 [riscv web]: https://riscv.org
 [cabal web]: https://www.haskell.org/cabal/
 [make web]: https://www.gnu.org/software/make
@@ -120,5 +101,4 @@ with this program. If not, see <https://www.gnu.org/licenses/>.
 [free monads]: https://doi.org/10.1145/2887747.2804319
 [symex wp]: https://en.wikipedia.org/wiki/Symbolic_execution
 [hardbound paper]: https://doi.org/10.1145/1353535.1346295
-[dift paper]: https://doi.org/10.1145/1024393.1024404
 [riscv-opcodes github]: https://github.com/riscv/riscv-opcodes
