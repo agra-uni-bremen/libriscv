@@ -2,7 +2,7 @@ cabal-version:      2.4
 name:               riscv-test
 version:            0.1.0.0
 
-license:            GPL-3.0-or-later
+license:            MIT
 author:             Sören Tempel, Tobias Brandt, and Christoph Lüth
 maintainer:         Group of Computer Architecture <riscv@informatik.uni-bremen.de>
 copyright:          (c) 2022 University of Bremen
