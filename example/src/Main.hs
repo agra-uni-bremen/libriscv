@@ -30,6 +30,7 @@ taintArgs = TaintArgs
        <> help "Taint the given register" )
     <*> basicArgs
 
+{-
 main' :: TaintArgs -> IO ()
 main' (TaintArgs taintReg (BasicArgs memAddr memSize trace putReg fp)) = do
     state <- mkArchState memAddr memSize
@@ -47,8 +48,9 @@ main' (TaintArgs taintReg (BasicArgs memAddr memSize trace putReg fp)) = do
     when putReg $
         dumpState state
 
+-}
 main :: IO ()
-main = main' =<< execParser opts
+main = undefined -- main' =<< execParser opts
     where
         opts = info (taintArgs <**> helper)
             ( fullDesc

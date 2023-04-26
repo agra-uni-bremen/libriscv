@@ -1,4 +1,3 @@
-{-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -23,6 +22,7 @@ import LibRISCV.Decoder.Instruction (mkRd, mkRs1, mkRs2, immI, immS, immU, immB,
 import Control.Monad.Freer
 import Conversion
 import Numeric (showHex)
+import Data.BitVector (BV, bitVec)
 
 import qualified LibRISCV.Machine.Interpreter as STD
 import qualified LibRISCV.Machine.Register as REG
@@ -39,7 +39,7 @@ instance Conversion (Tainted a) a where
     convert (MkTainted _ v) = v
 
 ------------------------------------------------------------------------
-
+{-
 fromBytes :: Num b => [Tainted Word8] -> Tainted b
 fromBytes v = MkTainted tainted (fromIntegral $ MEM.mkWord bytes)
     where
@@ -64,7 +64,7 @@ type ArchState = (REG.RegisterFile IOArray (Tainted Word32), MEM.Memory IOArray 
 
 mkArchState :: Address -> Word32 -> IO ArchState
 mkArchState memStart memSize = do
-    reg <- REG.mkRegFile $ MkTainted False (0 :: Word32)
+    reg <- REG.mkRegFile $ MkTainted False (bitVec 32 0)
     mem <- MEM.mkMemory memStart memSize
     pure (reg, mem)
 
@@ -79,26 +79,24 @@ instance ByteAddrsMem ArchState where
 ------------------------------------------------------------------------
 
 -- Execute a binary operation with tainted values.
-binOp :: Expr (Tainted Word32) -> Expr (Tainted Word32) -> (Expr Word32 -> Expr Word32 -> Expr Word32) -> Tainted Word32
+binOp :: Expr (Tainted BV) -> Expr (Tainted BV) -> (Expr BV -> Expr BV -> Expr BV) -> Tainted BV
 binOp e1 e2 op = MkTainted (t1 || t2) $
-        STD.runExpression (FromImm v1 `op` FromImm v2)
+        STD.runExpression (FromImm 32 v1 `op` FromImm 32 v2)
     where
         (MkTainted t1 v1) = runExpression e1
         (MkTainted t2 v2) = runExpression e2
 
 -- Execute a unary operation with tainted values.
-unOp :: Expr (Tainted Word32) -> (Expr Word32 -> Expr Word32) -> Tainted Word32
-unOp e1 op = MkTainted taint $ STD.runExpression (op $ FromImm value)
+unOp :: Expr (Tainted BV) -> (Expr BV -> Expr BV) -> Tainted BV
+unOp e1 op = MkTainted taint $ STD.runExpression (op $ FromImm 32 value)
     where
         (MkTainted taint value) = runExpression e1
 
-runExpression :: Expr (Tainted Word32) -> Tainted Word32
-runExpression (FromImm t)  = t
-runExpression (FromUInt i) = MkTainted False i
-runExpression (ZExtByte e) = unOp e ZExtByte
-runExpression (ZExtHalf e) = unOp e ZExtHalf
-runExpression (SExtByte e) = unOp e SExtByte
-runExpression (SExtHalf e) = unOp e SExtHalf
+runExpression :: Expr (Tainted BV) -> Tainted BV
+runExpression (FromImm n t)  = t
+runExpression (FromUInt n i) = MkTainted False i
+runExpression (ZExt n e) = unOp e (ZExt n)
+runExpression (SExt n e) = unOp e (SExt n)
 runExpression (Add e1 e2)  = binOp e1 e2 Add
 runExpression (Sub e1 e2)  = binOp e1 e2 Sub
 runExpression (Eq e1 e2)   = binOp e1 e2 Eq
@@ -113,17 +111,14 @@ runExpression (LShl e1 e2) = binOp e1 e2 LShl
 runExpression (LShr e1 e2) = binOp e1 e2 LShr
 runExpression (AShr e1 e2) = binOp e1 e2 AShr
 runExpression (Mul e1 e2) = binOp e1 e2 Mul
-runExpression (Mulh e1 e2) = binOp e1 e2 Mulh
-runExpression (Mulhu e1 e2) = binOp e1 e2 Mulhu
-runExpression (Mulhsu e1 e2) = binOp e1 e2 Mulhsu
-runExpression (Div e1 e2) = binOp e1 e2 Div
-runExpression (Divu e1 e2) = binOp e1 e2 Divu
-runExpression (Rem e1 e2) = binOp e1 e2 Rem
-runExpression (Remu e1 e2) = binOp e1 e2 Remu
+runExpression (SDiv e1 e2) = binOp e1 e2 SDiv
+runExpression (UDiv e1 e2) = binOp e1 e2 UDiv
+runExpression (SRem e1 e2) = binOp e1 e2 SRem
+runExpression (URem e1 e2) = binOp e1 e2 URem
 
 ------------------------------------------------------------------------
 
-type IftEnv = (Expr (Tainted Word32) -> Tainted Word32, ArchState)
+type IftEnv = (Expr (Tainted BV) -> Tainted BV, ArchState)
 
 iftBehavior :: IftEnv -> Operations (Tainted Word32) ~> IO
 iftBehavior env@(evalE , (regFile, mem)) = \case
@@ -140,16 +135,16 @@ iftBehavior env@(evalE , (regFile, mem)) = \case
     RunIf e next -> undefined
     RunIfElse e ifB elseB -> undefined
     RunUnless e next -> undefined
-    ReadRegister idx -> REG.readRegister regFile (toEnum $ fromIntegral (convert (evalE $ FromImm idx) :: Word32))
-    WriteRegister idx reg -> REG.writeRegister regFile (toEnum $ fromIntegral (convert (evalE $ FromImm idx) :: Word32)) (evalE reg)
-    LoadByte addr -> fmap fromIntegral <$> MEM.loadByte mem (convert $ evalE addr)
-    LoadHalf addr -> fmap fromIntegral <$> (MEM.loadHalf mem (convert $ evalE addr) :: IO (Tainted Word16))
-    LoadWord addr -> MEM.loadWord mem (convert $ evalE addr)
-    StoreByte addr w -> MEM.storeByte mem (convert $ evalE addr) (fromIntegral <$> evalE w)
-    StoreHalf addr w -> MEM.storeHalf mem (convert $ evalE addr) (fromIntegral @Word32 @Word16 <$> evalE w)
-    StoreWord addr w -> MEM.storeWord mem (convert $ evalE addr) (evalE w)
-    WritePC w -> REG.writePC regFile (convert $ evalE w) -- TODO
-    ReadPC -> MkTainted False <$> REG.readPC regFile       -- TODO
+    ReadRegister idx -> undefined
+    WriteRegister idx reg -> undefined
+    LoadByte addr -> undefined
+    LoadHalf addr -> undefined
+    LoadWord addr -> undefined
+    StoreByte addr w -> undefined
+    StoreHalf addr w -> undefined
+    StoreWord addr w -> undefined
+    WritePC w -> undefined
+    ReadPC -> undefined
     Exception _ msg -> error msg
     Ecall _ -> putStrLn "ECALL"
     Ebreak _ -> putStrLn "EBREAK"
