@@ -1,4 +1,4 @@
-# A Versatile and Flexibel RISC-V Model
+# A Versatile and Flexible RISC-V Model
 
 This is an extensible [RISC-V][riscv web] implementation which is based on a formal model of the architecture.
 The formal model is implemented using [free monads][free monads] and a custom expression language for arithmetic operations.
