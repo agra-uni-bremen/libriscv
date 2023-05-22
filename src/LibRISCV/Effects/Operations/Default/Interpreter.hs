@@ -9,7 +9,7 @@ import Control.Monad.IO.Class ( MonadIO(..) )
 import LibRISCV.Effects.Operations.Language
     ( Operations(..), Size(Word, Byte, Half) )
 import Data.Array.IO (IOUArray)
-import LibRISCV ( ByteAddrsMem(..), Register, Address )
+import LibRISCV ( Register, Address )
 import qualified LibRISCV.Effects.Operations.Default.Machine.Memory as MEM
 import qualified LibRISCV.Effects.Operations.Default.Machine.Register as REG
 import Data.Word ( Word8, Word16, Word32 )
@@ -31,10 +31,6 @@ mkArchState memStart memSize = do
 dumpState :: ArchState -> IO ()
 dumpState (r, _) =
     REG.dumpRegs (showHex . fromIntegral @Int32 @Word32) r >>= putStr
-
-instance ByteAddrsMem ArchState where
-    storeByteString (_, mem) = MEM.storeByteString mem
-
 
 type DefaultInstructionsEnv = ArchState
 

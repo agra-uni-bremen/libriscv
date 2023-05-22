@@ -33,9 +33,5 @@ data RegIdx = Zero | RA | SP | GP | TP | T0 | T1 | T2 | FP
 
 ------------------------------------------------------------------------
 
-class ByteAddrsMem a where
-    storeByteString :: a -> Address -> BSL.ByteString -> IO ()
-
-
 instance Conversion BV Word32 where  
     convert = fromIntegral

@@ -73,9 +73,6 @@ dumpState (r, m) = REG.dumpRegs showTainted r >>= putStr
     where
         showTainted (MkTainted t v) = (++) $ (showHex v) (if t then " (tainted)" else "")
 
-instance ByteAddrsMem ArchState where
-    storeByteString (_, mem) = MEM.storeByteString mem
-
 ------------------------------------------------------------------------
 
 -- Execute a binary operation with tainted values.

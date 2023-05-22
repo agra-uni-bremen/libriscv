@@ -15,6 +15,7 @@ import LibRISCV.Spec.Expr
 import LibRISCV.Spec.Operations
 import LibRISCV.CmdLine
 import LibRISCV.Effects.Logging.InstructionFetch
+import LibRISCV.Machine.Memory (storeByteString)
 import LibRISCV.Machine.Interpreter (runInstruction)
 
 import Interpreter
@@ -33,8 +34,10 @@ taintArgs = TaintArgs
 {-
 main' :: TaintArgs -> IO ()
 main' (TaintArgs taintReg (BasicArgs memAddr memSize trace putReg fp)) = do
-    state <- mkArchState memAddr memSize
-    entry <- loadExecutable fp state
+    state@(_, mem) <- mkArchState memAddr memSize
+    elf <- readElf fp
+    loadElf elf $ storeByteString mem
+    entry <- startAddr elf
 
     let interpreter =
             if trace then

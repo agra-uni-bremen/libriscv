@@ -32,10 +32,10 @@ import LibRISCV.Effects.Expressions.Default.Interpreter
 import LibRISCV.Effects.Expressions.Default.EvalE 
 import LibRISCV.Effects.Decoding.Default.Interpreter
 import LibRISCV.Utils
+import LibRISCV.Effects.Operations.Default.Machine.Memory (storeByteString)
 
 import Control.Monad.IO.Class ( MonadIO(..) )
 import qualified LibRISCV.Effects.Operations.Default.Machine.Register as REG
-import qualified LibRISCV.Effects.Operations.Default.Machine.Memory as MEM
 import Data.BitVector (BV, bitVec)
 
 -- Syscall number for the newlib exit syscall (used by riscv-tests).
@@ -64,10 +64,13 @@ ecallHandler env@(regFile, mem) = \case
 
 main' :: BasicArgs -> IO ()
 main' (BasicArgs memAddr memSize trace putReg fp) = do
-    state   <- mkArchState memAddr memSize
-    entry   <- loadExecutable fp state
-    instRef <- newIORef (0 :: Word32)
+    state@(_, mem) <- mkArchState memAddr memSize
 
+    elf <- readElf fp
+    loadElf elf $ storeByteString mem
+    entry <- startAddr elf
+
+    instRef <- newIORef (0 :: Word32)
     let 
         evalEnv         = ((==1), evalE)
         interpreter =

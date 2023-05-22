@@ -25,16 +25,18 @@ import Data.BitVector
 import qualified Debug.Trace as Debug
 import Data.IORef (newIORef)
 import Data.Word (Word32)
+import LibRISCV.Effects.Operations.Default.Machine.Memory (storeByteString)
 
 
 main' :: BasicArgs -> IO ()
 main' (BasicArgs memAddr memSize trace putReg fp) = do
-    state   <- mkArchState memAddr memSize
-    entry   <- loadExecutable fp state
-    instRef <- newIORef (0 :: Word32)
-    -- Let stack pointer start at end of memory by default.
-    -- It must be possible to perform a LW with this address.
+    state@(_, mem) <- mkArchState memAddr memSize
 
+    elf <- readElf fp
+    loadElf elf $ storeByteString mem
+    entry <- startAddr elf
+
+    instRef <- newIORef (0 :: Word32)
     let 
         initalSP = align (memAddr + memSize - 1)
         evalEnv = ((==1), evalE)
