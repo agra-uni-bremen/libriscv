@@ -2,7 +2,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeApplications #-}
-module LibRISCV.Machine.Memory where
+module LibRISCV.Effects.Operations.Default.Machine.Memory where
 
 import LibRISCV
 import Conversion
@@ -44,7 +44,7 @@ instance HalfStorage BV Word8 where
 -- Converts a list of bytes to a Word32 in little endian.
 mkWord :: [Word8] -> Word32
 mkWord bytes = foldl (\x (byte,idx) -> (fromIntegral byte `shift` (idx * 8)) .|. x)
-    0 $ zip bytes [0..(length bytes) - 1]
+    0 $ zip bytes [0..length bytes - 1]
 
 -- Split a 32-bit word into four octets in little endian.
 mkBytes :: Word32 -> [Word8]

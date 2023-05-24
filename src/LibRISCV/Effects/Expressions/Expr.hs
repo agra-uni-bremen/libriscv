@@ -1,4 +1,4 @@
-module LibRISCV.Spec.Expr where
+module LibRISCV.Effects.Expressions.Expr where
 
 import Data.Word
 import Data.Function (on)
@@ -10,6 +10,7 @@ data Expr a =
     FromUInt Int BV |
     ZExt Int (Expr a) |
     SExt Int (Expr a) |
+    Extract Int Int (Expr a) |
     Add  (Expr a) (Expr a) |
     Sub  (Expr a) (Expr a) |
     Eq   (Expr a) (Expr a) |

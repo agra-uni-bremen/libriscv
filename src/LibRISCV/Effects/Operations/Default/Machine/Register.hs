@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
-module LibRISCV.Machine.Register where
+module LibRISCV.Effects.Operations.Default.Machine.Register where
 
 import LibRISCV
 import Data.Word ( Word32 )
@@ -19,7 +19,7 @@ mkRegFile defValue = RegisterFile <$> newIORef 0 <*> newArray (minBound, maxBoun
 
 -- Dump all register values.
 dumpRegs :: MArray t a IO => (a -> ShowS) -> RegisterFile t a -> IO String
-dumpRegs sh = fmap (foldr (\(a, v) s -> show a ++ "\t= 0x" ++ ((sh v) "\n") ++ s) ""
+dumpRegs sh = fmap (foldr (\(a, v) s -> show a ++ "\t= 0x" ++ sh v "\n" ++ s) ""
         . zip [(minBound :: RegIdx)..maxBound]) . getElems . regs
 
 ------------------------------------------------------------------------

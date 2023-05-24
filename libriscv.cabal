@@ -34,13 +34,19 @@ library
                    , LibRISCV.Loader
                    , LibRISCV.CmdLine
                    , LibRISCV.Utils
-                   , LibRISCV.Effects.Logging.InstructionFetch
-                   , LibRISCV.Machine.Register
-                   , LibRISCV.Machine.Memory
-                   , LibRISCV.Machine.Interpreter
-                   , LibRISCV.Spec.AST
-                   , LibRISCV.Spec.Expr
-                   , LibRISCV.Spec.Operations
+                   , LibRISCV.Effects.Decoding.Language
+                   , LibRISCV.Effects.Decoding.Default.Interpreter
+                   , LibRISCV.Effects.Operations.Language
+                   , LibRISCV.Effects.Operations.Default.Interpreter
+                   , LibRISCV.Effects.Operations.Default.Machine.Register
+                   , LibRISCV.Effects.Operations.Default.Machine.Memory
+                   , LibRISCV.Effects.Logging.Language
+                   , LibRISCV.Effects.Logging.Default.Interpreter
+                   , LibRISCV.Effects.Expressions.Language
+                   , LibRISCV.Effects.Expressions.Default.Interpreter
+                   , LibRISCV.Effects.Expressions.Default.EvalE
+                   , LibRISCV.Effects.Expressions.Expr
+                   , LibRISCV.Semantics.Default
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -58,6 +64,7 @@ library
         , optparse-applicative  >= 0.16.1 && <0.17
         , bv                   ^>= 0.5
         , parameterized-utils  ^>= 2.1.6.0 
+        , extra                >= 1.7.13 
 
     hs-source-dirs:   src
     default-language: Haskell2010
