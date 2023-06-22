@@ -94,7 +94,7 @@ unOp e1 op = MkTainted taint $ STD.runExpression (op $ FromImm 32 value)
 
 runExpression :: Expr (Tainted BV) -> Tainted BV
 runExpression (FromImm n t)  = t
-runExpression (FromUInt n i) = MkTainted False i
+runExpression (FromInt n i) = MkTainted False i
 runExpression (ZExt n e) = unOp e (ZExt n)
 runExpression (SExt n e) = unOp e (SExt n)
 runExpression (Add e1 e2)  = binOp e1 e2 Add

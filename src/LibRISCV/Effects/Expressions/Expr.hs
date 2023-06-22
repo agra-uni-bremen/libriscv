@@ -6,8 +6,8 @@ import Data.Int (Int32)
 import Data.BitVector (BV)
 
 data Expr a =
-    FromImm Int a |
-    FromUInt Int BV |
+    FromImm a |
+    FromInt Int Integer |
     ZExt Int (Expr a) |
     SExt Int (Expr a) |
     Extract Int Int (Expr a) |
@@ -30,39 +30,30 @@ data Expr a =
     URem (Expr a) (Expr a) |
     SRem (Expr a) (Expr a) 
 
-fromImm32 :: a -> Expr a
-fromImm32 = FromImm 32
-
-fromImm64 :: a -> Expr a
-fromImm64 = FromImm 64
-
-fromImm128 :: a -> Expr a
-fromImm128 = FromImm 128
-
 addSImm :: a -> a -> Expr a
-addSImm = Add `on` FromImm 32
+addSImm = Add `on` FromImm
 
 andImm :: a -> a -> Expr a
-andImm = And `on` FromImm 32
+andImm = And `on` FromImm
 
 orImm :: a -> a -> Expr a
-orImm = Or `on` FromImm 32
+orImm = Or `on` FromImm
 
 xorImm :: a -> a -> Expr a
-xorImm =  Xor `on` FromImm 32
+xorImm =  Xor `on` FromImm
 
 lshlImm :: a -> a -> Expr a
-lshlImm = LShl `on` FromImm 32
+lshlImm = LShl `on` FromImm
 
 lshrImm :: a -> a -> Expr a
-lshrImm = LShr `on` FromImm 32
+lshrImm = LShr `on` FromImm
 
 ashrImm :: a -> a -> Expr a
-ashrImm = AShr `on` FromImm 32
+ashrImm = AShr `on` FromImm
 
 
 ------------------------------------------------------------------------
 
 -- Extract shamt value from an expression (lower 5 bits).
 regShamt :: Int -> Expr a -> Expr a
-regShamt w a = a `And` FromUInt w 0x1f
+regShamt w a = a `And` FromInt w 0x1f

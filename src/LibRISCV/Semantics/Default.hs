@@ -26,7 +26,7 @@ import Data.Int (Int32)
 
 import Data.Parameterized.NatRepr
 import GHC.TypeLits
-import Data.BitVector (BV, pow, ones)
+import Data.BitVector (BV, bitVec, pow, ones)
 import Debug.Trace (trace)
 import Data.Function (on)
 import Data.Data (Proxy(..))
@@ -52,11 +52,8 @@ instrSemantics width pc = do
     where
         exec =
             let
-                fromImm = FromImm width
-                fromImmHalf = FromImm (div width 2)
-                fromImmByte = FromImm 8
-                fromUInt = FromUInt width
-                mask1 = fromUInt (ones width)
+                fromUInt = FromInt width
+                mask1 = FromInt width (2^width - 1)
                 extract32 = flip Extract 32
 
                 -- False if a given address is not aligned at the four-byte boundary.
@@ -67,12 +64,12 @@ instrSemantics width pc = do
                     (r1, rd, imm) <- decodeAndReadIType @v
                     writeRegister rd $ r1 `addSImm` imm
                 SLTI -> do
-                    (r1, rd, imm) <- decodeAndReadIType
-                    let cond = fromImm r1 `Slt` fromImm imm
+                    (r1, rd, imm) <- decodeAndReadIType @v
+                    let cond = FromImm r1 `Slt` FromImm imm
                     writeRegister rd $ convert cond
                 SLTIU -> do
-                    (r1, rd, imm) <- decodeAndReadIType
-                    let cond = fromImm r1 `Ult` fromImm imm
+                    (r1, rd, imm) <- decodeAndReadIType @v
+                    let cond = FromImm r1 `Ult` FromImm imm
                     writeRegister rd $ convert cond
                 ANDI -> do
                     (r1, rd, imm) <- decodeAndReadIType @v
@@ -96,8 +93,8 @@ instrSemantics width pc = do
                     shamt <- decodeShamt
                     writeRegister rd $ r1 `ashrImm` shamt
                 LUI -> do
-                    (rd, imm) <- decodeUType
-                    writeRegister rd $ fromImm imm
+                    (rd, imm) <- decodeUType @v
+                    writeRegister rd $ FromImm imm
                 AUIPC -> do
                     (rd, imm) <- decodeUType
                     writeRegister rd $ pc `addSImm` imm
@@ -106,11 +103,11 @@ instrSemantics width pc = do
                     writeRegister rd $ r1 `addSImm` r2
                 SLT -> do
                     (r1, r2, rd) <- decodeAndReadRType
-                    let cond = fromImm r1 `Slt` fromImm r2 :: Expr v
+                    let cond = FromImm r1 `Slt` FromImm r2 :: Expr v
                     writeRegister rd $ convert cond
                 SLTU -> do
                     (r1, r2, rd) <- decodeAndReadRType
-                    let cond = fromImm r1 `Ult` fromImm r2 :: Expr v
+                    let cond = FromImm r1 `Ult` FromImm r2 :: Expr v
                     writeRegister rd $ convert cond
                 AND -> do
                     (r1, r2, rd) <- decodeAndReadRType @v
@@ -122,17 +119,17 @@ instrSemantics width pc = do
                     (r1, r2, rd) <- decodeAndReadRType @v
                     writeRegister rd $ r1 `xorImm` r2
                 SLL -> do
-                    (r1, r2, rd) <- decodeAndReadRType
-                    writeRegister rd $ fromImm r1 `LShl` regShamt width (fromImm r2)
+                    (r1, r2, rd) <- decodeAndReadRType @v
+                    writeRegister rd $ FromImm r1 `LShl` regShamt width (FromImm r2)
                 SRL -> do
-                    (r1, r2, rd) <- decodeAndReadRType
-                    writeRegister rd $ fromImm r1 `LShr` regShamt width (fromImm r2)
+                    (r1, r2, rd) <- decodeAndReadRType @v
+                    writeRegister rd $ FromImm r1 `LShr` regShamt width (FromImm r2)
                 SUB -> do
-                    (r1, r2, rd) <- decodeAndReadRType
-                    writeRegister rd $ fromImm r1 `Sub` fromImm r2
+                    (r1, r2, rd) <- decodeAndReadRType @v
+                    writeRegister rd $ FromImm r1 `Sub` FromImm r2
                 SRA -> do
-                    (r1, r2, rd) <- decodeAndReadRType
-                    writeRegister rd $ fromImm r1 `AShr` regShamt width (fromImm r2)
+                    (r1, r2, rd) <- decodeAndReadRType @v
+                    writeRegister rd $ FromImm r1 `AShr` regShamt width (FromImm r2)
                 JAL -> do
                     nextInstr <- readPC
                     (rd, imm) <- decodeJType
@@ -141,7 +138,7 @@ instrSemantics width pc = do
                     writePC newPC
                     whenM (isMisaligned newPC) $
                         exception pc "misaligned PC"
-                    writeRegister rd (fromImm nextInstr)
+                    writeRegister rd (FromImm nextInstr)
                 JALR -> do
                     nextInstr <- readPC
                     (r1, rd, imm) <- decodeAndReadIType
@@ -150,141 +147,141 @@ instrSemantics width pc = do
                     writePC newPC
                     whenM (isMisaligned newPC) $ 
                         exception pc "misaligned PC"
-                    writeRegister rd $ fromImm nextInstr
+                    writeRegister rd $ FromImm nextInstr
                 LB -> do
                     (r1, rd, imm) <- decodeAndReadIType @v
                     byte <- load Byte $ r1 `addSImm` imm
                     -- TODO: Alignment handling
-                    writeRegister rd (SExt 8 $ fromImmByte byte)
+                    writeRegister rd (SExt 8 $ FromImm byte)
                 LBU -> do
                     (r1, rd, imm) <- decodeAndReadIType @v
                     -- TODO: Alignment handling
                     byte <- load Byte $ r1 `addSImm` imm
-                    writeRegister rd (ZExt 8 $ fromImmByte byte)
+                    writeRegister rd (ZExt 8 $ FromImm byte)
                 LH -> do
                     (r1, rd, imm) <- decodeAndReadIType @v
                     -- TODO: Alignment handling
                     half <- load Half $ r1 `addSImm` imm
-                    writeRegister rd (SExt (div width 2) $ fromImmHalf half)
+                    writeRegister rd (SExt 16 $ FromImm half)
                 LHU -> do
                     (r1, rd, imm) <- decodeAndReadIType @v
                     -- TODO: Alignment handling
                     half <- load Half $ r1 `addSImm` imm
-                    writeRegister rd (ZExt (div width 2) $ fromImmHalf half)
+                    writeRegister rd (ZExt 16 $ FromImm half)
                 LW -> do
                     (r1, rd, imm) <- decodeAndReadIType
 
                     -- TODO: Alignment handling
-                    word <- load Word $ r1 `addSImm` imm
-                    writeRegister rd (fromImm word)
+                    word <- load @v Word $ r1 `addSImm` imm
+                    writeRegister rd (FromImm word)
                 SB -> do
                     (r1, r2, imm) <- decodeAndReadSType
 
                     -- TODO: Alignment handling
-                    store Byte (r1 `addSImm` imm) $ fromImm r2
+                    store @v Byte (r1 `addSImm` imm) $ FromImm r2
                 SH -> do
                     (r1, r2, imm) <- decodeAndReadSType
 
                     -- TODO: Alignment handling
-                    store Half (r1 `addSImm` imm) $ fromImm r2
+                    store @v Half (r1 `addSImm` imm) $ FromImm r2
                 SW -> do
-                    (r1, r2, imm) <- decodeAndReadSType
+                    (r1, r2, imm) <- decodeAndReadSType @v
                     -- TODO: Alignment handling
-                    store Word (r1 `addSImm` imm) $ fromImm r2
+                    store Word (r1 `addSImm` imm) $ FromImm r2
                 BEQ -> do
                     (r1, r2, imm) <- decodeAndReadBType
 
                     -- TODO: Alignment handling
-                    whenM (evalBool $ fromImm r1 `Eq` fromImm r2) $ do
-                        writePC $ fromImm pc `Add` fromImm imm
+                    whenM (evalBool $ FromImm r1 `Eq` FromImm r2) $ do
+                        writePC $ FromImm pc `Add` FromImm imm
                 BNE -> do
                     (r1, r2, imm) <- decodeAndReadBType
 
                     -- TODO: Alignment handling
-                    unlessM (evalBool $ fromImm r1 `Eq` fromImm r2) $ do
-                        writePC $ fromImm pc `Add` fromImm imm
+                    unlessM (evalBool $ FromImm r1 `Eq` FromImm r2) $ do
+                        writePC $ FromImm pc `Add` FromImm imm
                 BLT -> do
                     (r1, r2, imm) <- decodeAndReadBType
 
-                    let addr = fromImm pc `Add` fromImm imm
-                    whenM (evalBool $ fromImm r1 `Slt` fromImm r2) $ do
+                    let addr = FromImm pc `Add` FromImm imm
+                    whenM (evalBool $ FromImm r1 `Slt` FromImm r2) $ do
                         writePC addr
                         whenM (isMisaligned addr) $
                             exception pc "misaligned PC"
                 BLTU -> do
                     (r1, r2, imm) <- decodeAndReadBType
 
-                    let addr = fromImm pc `Add` fromImm imm
-                    whenM (evalBool $ fromImm r1 `Ult` fromImm r2) $ do
+                    let addr = FromImm pc `Add` FromImm imm
+                    whenM (evalBool $ FromImm r1 `Ult` FromImm r2) $ do
                         writePC @v $ addr
                         whenM (isMisaligned addr) $
                             exception pc "misaligned PC"
                 BGE -> do
                     (r1, r2, imm) <- decodeAndReadBType
 
-                    let addr = fromImm pc `Add` fromImm imm
-                    whenM (evalBool $ fromImm r1 `Sge` fromImm r2) $ do
+                    let addr = FromImm pc `Add` FromImm imm
+                    whenM (evalBool $ FromImm r1 `Sge` FromImm r2) $ do
                         writePC addr
                         whenM (isMisaligned addr) $
                             exception pc "misaligned PC"
                 BGEU -> do
                     (r1, r2, imm) <- decodeAndReadBType
 
-                    let addr = fromImm pc `Add` fromImm imm
-                    whenM (evalBool $ fromImm r1 `Uge` fromImm r2) $ do
+                    let addr = FromImm pc `Add` FromImm imm
+                    whenM (evalBool $ FromImm r1 `Uge` FromImm r2) $ do
                         writePC addr
                         whenM (isMisaligned addr) $
                             exception pc "misaligned PC"
                 MUL -> do
-                    (r1, r2, rd) <- decodeAndReadRType
+                    (r1, r2, rd) <- decodeAndReadRType @v
                     let
-                        multRes = (Mul `on` (SExt 32 . fromImm)) r1 r2
+                        multRes = (Mul `on` (SExt 32 . FromImm)) r1 r2
                         res = extract32 0 multRes
                     writeRegister rd res
                 MULH -> do
-                    (r1, r2, rd) <- decodeAndReadRType
+                    (r1, r2, rd) <- decodeAndReadRType @v
                     let
-                        multRes = (Mul `on` (SExt 32 . fromImm)) r1 r2
+                        multRes = (Mul `on` (SExt 32 . FromImm)) r1 r2
                         res = extract32 32 multRes
                     writeRegister rd res
                 MULHU -> do
-                    (r1, r2, rd) <- decodeAndReadRType
+                    (r1, r2, rd) <- decodeAndReadRType @v
                     let
-                        multRes = (Mul `on` (ZExt 32 . fromImm)) r1 r2
+                        multRes = (Mul `on` (ZExt 32 . FromImm)) r1 r2
                         res = extract32 32 multRes
                     writeRegister rd res
                 MULHSU -> do
-                    (r1, r2, rd) <- decodeAndReadRType
+                    (r1, r2, rd) <- decodeAndReadRType @v
                     let
-                        multRes = (SExt 32 . fromImm) r1 `Mul` (ZExt 32 . fromImm) r2
+                        multRes = (SExt 32 . FromImm) r1 `Mul` (ZExt 32 . FromImm) r2
                         res = extract32 32 multRes
                     writeRegister rd res
                 DIV -> do
-                    (r1, r2, rd) <- decodeAndReadRType
+                    (r1, r2, rd) <- decodeAndReadRType @v
 
-                    ifM (evalBool $ fromImm r2 `Eq` fromUInt 0) 
+                    ifM (evalBool $ FromImm r2 `Eq` fromUInt 0)
                         do writeRegister rd mask1
-                        do ifM (evalBool $ (fromImm r1 `Eq` fromUInt (fromIntegral (minBound :: Int32))) `And` mask1) 
-                            do writeRegister rd $ fromImm r1
-                            do writeRegister rd $ fromImm r1 `SDiv` fromImm r2
+                        do ifM (evalBool $ (FromImm r1 `Eq` fromUInt (fromIntegral (minBound :: Int32))) `And` mask1)
+                            do writeRegister rd $ FromImm r1
+                            do writeRegister rd $ FromImm r1 `SDiv` FromImm r2
                 DIVU -> do
-                    (r1, r2, rd) <- decodeAndReadRType
-                    
-                    ifM (evalBool $ fromImm r2 `Eq` fromUInt 0) 
+                    (r1, r2, rd) <- decodeAndReadRType @v
+
+                    ifM (evalBool $ FromImm r2 `Eq` fromUInt 0)
                         do writeRegister rd mask1
-                        do writeRegister rd $ fromImm r1 `UDiv` fromImm r2
+                        do writeRegister rd $ FromImm r1 `UDiv` FromImm r2
                 REM -> do
-                    (r1, r2, rd) <- decodeAndReadRType
-                    ifM (evalBool $ fromImm r2 `Eq` fromUInt 0)
-                        do writeRegister rd $ fromImm r1
-                        do ifM (evalBool $ (fromImm r1 `Eq` fromUInt (fromIntegral (minBound :: Int32))) `And` (fromImm r2 `Eq` fromUInt 0xFFFFFFFF)) 
+                    (r1, r2, rd) <- decodeAndReadRType @v
+                    ifM (evalBool $ FromImm r2 `Eq` fromUInt 0)
+                        do writeRegister rd $ FromImm r1
+                        do ifM (evalBool $ (FromImm r1 `Eq` fromUInt (fromIntegral (minBound :: Int32))) `And` (FromImm r2 `Eq` fromUInt 0xFFFFFFFF))
                             do writeRegister rd $ fromUInt 0
-                            do writeRegister rd $ fromImm r1 `SRem` fromImm r2
+                            do writeRegister rd $ FromImm r1 `SRem` FromImm r2
                 REMU -> do
-                    (r1, r2, rd) <- decodeAndReadRType
-                    ifM (evalBool $ fromImm r2 `Eq` fromUInt 0) 
-                        do writeRegister rd $ fromImm r1
-                        do writeRegister rd $ fromImm r1 `URem` fromImm r2
+                    (r1, r2, rd) <- decodeAndReadRType @v
+                    ifM (evalBool $ FromImm r2 `Eq` fromUInt 0)
+                        do writeRegister rd $ FromImm r1
+                        do writeRegister rd $ FromImm r1 `URem` FromImm r2
                 FENCE -> pure () -- XXX: ignore for now
                 ECALL -> ecall pc
                 EBREAK -> ebreak pc
@@ -343,11 +340,11 @@ buildInstruction width = do
 
     -- Increment PC before execute', allows setting PC to to
     -- different values in execute' for jumps and branches.
-    writePC $ FromImm width pc `Add` FromUInt width 4
+    writePC $ FromImm pc `Add` (FromInt width 4)
     instrSemantics width pc
 
 buildAST :: forall w v r . (KnownNat w, Member (Operations v) r, Member LogInstructionFetch r, Member (Decoding v) r, Member (ExprEval v) r) => v -> Eff r ()
 buildAST entry =
     let
         !width = fromIntegral (intValue (knownNat :: NatRepr w))
-    in writePC (FromImm width entry) >> buildInstruction @v width
+    in writePC (FromImm entry) >> buildInstruction @v width

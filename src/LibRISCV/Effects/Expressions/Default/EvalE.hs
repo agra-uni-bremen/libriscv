@@ -8,8 +8,8 @@ import Data.Word ( Word8 )
 import Data.Bool ( bool )
 
 evalE :: Expr BV -> BV
-evalE (FromImm n a) = bitVec n a
-evalE (FromUInt n i) = bitVec n i
+evalE (FromImm a) = a
+evalE (FromInt n i) = bitVec n i
 evalE (ZExt n e) = zeroExtend n (evalE e)
 evalE (SExt n e) = signExtend n (evalE e)
 evalE (Extract start len e) = evalE e `unsafeShiftR` start .&. ones len

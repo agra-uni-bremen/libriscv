@@ -44,7 +44,7 @@ main' (BasicArgs memAddr memSize trace putReg fp) = do
                 interpretM (defaultDecoding instRef) . 
                 interpretM (if trace then defaultLogging else noLogging)
     runM $ interpreter $ do
-        writeRegister (bitVec 32 $ fromEnum SP) (E.FromImm 32 (bitVec 32 initalSP))
+        writeRegister (bitVec 32 $ fromEnum SP) (E.FromInt 32 $ fromIntegral initalSP)
         buildAST @32 (bitVec 32 entry)
 
     when putReg $
