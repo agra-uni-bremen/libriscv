@@ -6,13 +6,12 @@ import Control.Monad.IO.Class ( MonadIO(..) )
 import LibRISCV.Effects.Logging.Language
     ( LogInstructionFetch(..) )
 import Control.Monad.Freer ( type (~>) )
-import Numeric (showHex)
 
 
 defaultLogging :: MonadIO m => LogInstructionFetch ~> m
 defaultLogging = liftIO . \case
-    LogFetched addr inst -> putStrLn $ showHex addr $ ": " ++ show inst
+    LogFetched inst -> putStrLn $ show inst
 
 noLogging :: Monad m => LogInstructionFetch ~> m
 noLogging = \case
-    LogFetched _ _ -> pure ()
+    LogFetched _ -> pure ()

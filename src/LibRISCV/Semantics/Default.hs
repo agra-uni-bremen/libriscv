@@ -17,7 +17,7 @@ import LibRISCV.Decoder.Opcode
 import Data.Word
 import Control.Monad.Freer
 
-import LibRISCV.Effects.Logging.Language ( LogInstructionFetch )
+import LibRISCV.Effects.Logging.Language ( LogInstructionFetch, logFetched )
 import Conversion
 import LibRISCV.Effects.Expressions.Expr
 import LibRISCV.Effects.Expressions.Language 
@@ -46,6 +46,7 @@ import Control.Monad.Extra (whenM, unlessM, ifM)
 instrSemantics :: forall v r . (Member (Operations v) r, Member LogInstructionFetch r, Member (Decoding v) r, Member (ExprEval v) r) => Int -> v -> Eff r ()
 instrSemantics width pc = do
     ty <- withInstrType @v Proxy id
+    logFetched ty
     case ty of
         InvalidInstruction -> pure ()
         _                  -> exec ty >> buildInstruction @v width

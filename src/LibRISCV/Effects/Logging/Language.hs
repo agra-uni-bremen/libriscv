@@ -14,6 +14,7 @@ import Control.Monad.Freer
 import Control.Monad.Freer.TH ( makeEffect )
 
 data LogInstructionFetch r where
-    LogFetched :: Address -> InstructionType -> LogInstructionFetch ()
+    -- TODO: Log program counter (i.e. instruction address) too.
+    LogFetched :: InstructionType -> LogInstructionFetch ()
 
 makeEffect ''LogInstructionFetch
