@@ -336,7 +336,8 @@ buildInstruction :: forall v r . (Member (Operations v) r, Member LogInstruction
 buildInstruction width = do
     -- fetch instruction at current PC
     pc <- readPC @v
-    setInstr pc
+    instrWord <- load @v Word $ FromImm pc
+    setInstr instrWord
 
     -- Increment PC before execute', allows setting PC to to
     -- different values in execute' for jumps and branches.
