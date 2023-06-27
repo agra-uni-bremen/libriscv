@@ -7,7 +7,7 @@ module LibRISCV.Effects.Operations.Language where
 
 import LibRISCV.Effects.Expressions.Expr (Expr)
 import Control.Monad.Freer.TH ( makeEffect )
-import LibRISCV.Decoder.Opcode (InstructionType)
+import LibRISCV.Decoder.Opcodes (InstructionType)
 
 data Size = Byte | Half | Word deriving (Eq, Show)
 

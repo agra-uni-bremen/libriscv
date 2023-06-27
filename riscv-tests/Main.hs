@@ -76,7 +76,7 @@ main' (BasicArgs memAddr memSize trace putReg fp) = do
         interpreter =
                 interpretM (ecallHandler state) . 
                 interpretM (defaultEval evalEnv) . 
-                interpretM (defaultDecoding instRef) . 
+                interpretM (defaultDecoding @BV instRef) . 
                 interpretM (if trace then defaultLogging else noLogging)
     runM $ interpreter $ buildAST @32 (bitVec 32 entry)
 

@@ -10,7 +10,7 @@ import Data.IORef (IORef, writeIORef, readIORef)
 import Data.Word (Word32)
 import Data.BitVector (BV, bitVec)
 import Control.Monad.Freer ( type (~>) )
-import LibRISCV.Decoder.Opcode (decode)
+import LibRISCV.Decoder.Opcodes (decode)
 import LibRISCV.Decoder.Instruction (mkRd, mkRs1, mkRs2, immI, immS, immB, immU, immJ, mkShamt)
 
 

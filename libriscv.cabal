@@ -15,7 +15,8 @@ license:            MIT
 author:             Sören Tempel, Tobias Brandt, and Christoph Lüth
 maintainer:         Group of Computer Architecture <riscv@informatik.uni-bremen.de>
 copyright:          (c) 2022 University of Bremen
-
+data-files: 
+    data/instr_dict.yaml
 -- A copyright notice.
 -- copyright:
 -- category:
@@ -29,8 +30,10 @@ library
 
     -- Modules included in this executable, other than Main.
     exposed-modules: LibRISCV
-                   , LibRISCV.Decoder.Opcode
+                   , LibRISCV.Decoder.Opcodes
+                   , LibRISCV.Decoder.Generator
                    , LibRISCV.Decoder.Instruction
+                   , LibRISCV.Decoder.YamlParser
                    , LibRISCV.Loader
                    , LibRISCV.CmdLine
                    , LibRISCV.Utils
@@ -47,6 +50,10 @@ library
                    , LibRISCV.Effects.Expressions.Default.EvalE
                    , LibRISCV.Effects.Expressions.Expr
                    , LibRISCV.Semantics.Default
+                   , LibRISCV.Semantics.Utils
+                   , LibRISCV.Semantics.RV_I.Default
+                   , LibRISCV.Semantics.RV32_I.Default
+                   , LibRISCV.Semantics.RV_M.Default
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
@@ -65,6 +72,10 @@ library
         , bv                   ^>= 0.5
         , parameterized-utils  ^>= 2.1.6.0 
         , extra                >= 1.7.13 
+        , yaml                 >= 0.11.11.1
+        , containers           >= 0.6.7
+        , template-haskell     >= 2.18.0
+        , file-embed
 
     hs-source-dirs:   src
     default-language: Haskell2010

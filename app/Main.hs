@@ -11,6 +11,7 @@ import LibRISCV (RegIdx(SP))
 import LibRISCV.Utils (align)
 import LibRISCV.Loader
 import LibRISCV.Semantics.Default
+import LibRISCV.Semantics.Utils
 import LibRISCV.CmdLine
 import LibRISCV.Effects.Logging.Default.Interpreter
     ( defaultLogging, noLogging )
