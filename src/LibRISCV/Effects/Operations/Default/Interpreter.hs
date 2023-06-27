@@ -39,8 +39,8 @@ defaultInstructions (regFile, mem) = liftIO . \case
     ReadRegister idx -> bitVec 32 <$> REG.readRegister regFile (toEnum $ fromIntegral idx)
     WriteRegister idx reg -> REG.writeRegister regFile (toEnum $ fromIntegral idx) (fromIntegral reg)
     Load size addr -> case size of
-        Byte -> bitVec 32 <$> MEM.loadByte mem (fromIntegral addr)
-        Half -> bitVec 32 <$> (MEM.loadHalf mem (fromIntegral addr) :: IO Word16)
+        Byte -> bitVec 8 <$> MEM.loadByte mem (fromIntegral addr)
+        Half -> bitVec 16 <$> (MEM.loadHalf mem (fromIntegral addr) :: IO Word16)
         Word -> bitVec 32 <$> MEM.loadWord @_ @_ @BV mem (fromIntegral addr)
     Store size addr w -> case size of
         Byte -> MEM.storeByte mem (fromIntegral addr) (fromIntegral w)
