@@ -14,14 +14,22 @@ import LibRISCV.Decoder.Opcode (decode)
 import LibRISCV.Decoder.Instruction (mkRd, mkRs1, mkRs2, immI, immS, immB, immU, immJ, mkShamt)
 
 
-type DefaultDecodingEnv = IORef Word32
+type DecoderState = IORef Word32
 
-defaultDecoding :: MonadIO m => DefaultDecodingEnv -> Decoding BV ~> m
+class Decodable a where
+  fromWord :: Word32 -> a
+  toWord   :: a -> Word32
+
+instance Decodable BV where
+  fromWord = bitVec 32
+  toWord   = fromIntegral
+
+defaultDecoding :: forall v m. (Decodable v, MonadIO m) => DecoderState -> Decoding v ~> m
 defaultDecoding instRef = 
     let 
-        decodeAndConvert f = fmap (bitVec 32 . f) . readIORef 
+        decodeAndConvert f = fmap (fromWord . f) . readIORef 
     in liftIO . \case
-        SetInstr v -> writeIORef instRef $ fromIntegral v
+        SetInstr v -> writeIORef instRef $ toWord v
         WithInstrType Proxy f -> f . decode <$> readIORef instRef
         DecodeRD -> decodeAndConvert mkRd instRef
         DecodeRS1 -> decodeAndConvert mkRs1 instRef 

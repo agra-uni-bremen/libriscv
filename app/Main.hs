@@ -43,7 +43,7 @@ main' (BasicArgs memAddr memSize trace putReg fp) = do
         interpreter =
                 interpretM (defaultInstructions state) . 
                 interpretM (defaultEval evalEnv) . 
-                interpretM (defaultDecoding instRef) . 
+                interpretM (defaultDecoding @BV instRef) . 
                 interpretM (if trace then defaultLogging else noLogging)
     runM $ interpreter $ do
         writeRegister (bitVec 32 $ fromEnum SP) (E.FromInt 32 $ fromIntegral initalSP)
