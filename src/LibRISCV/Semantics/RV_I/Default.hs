@@ -57,8 +57,6 @@ instrSemantics width pc =
         XORI -> do
             (r1, rd, imm) <- decodeAndReadIType @v
             writeRegister rd $ r1 `xorImm` imm
-            (rd, imm) <- decodeUType @v
-            writeRegister rd $ FromImm imm
         LUI -> do
             (rd, imm) <- decodeUType @v
             writeRegister rd $ FromImm imm
