@@ -11,4 +11,5 @@ import Control.Monad.Freer ( type (~>) )
 defaultEval :: (MonadIO m) => (v -> Bool, Expr v -> v) -> ExprEval v ~> m
 defaultEval (pred, evalE) = pure . \case
     Eval e  -> evalE e
-    EvalBool e -> pred $ evalE e
+    IsTrue e -> pred $ evalE e
+    IsFalse e -> not . pred $ evalE e

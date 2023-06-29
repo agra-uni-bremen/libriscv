@@ -17,13 +17,13 @@ import Control.Monad.Freer
 import LibRISCV.Effects.Operations.Language (Operations(..), Size(..), exception, readPC, ecall, ebreak)
 import LibRISCV.Effects.Logging.Language (LogInstructionFetch)
 import LibRISCV.Effects.Decoding.Language (Decoding, decodeShamt)
-import LibRISCV.Effects.Expressions.Language (ExprEval, evalBool)
+import LibRISCV.Effects.Expressions.Language (ExprEval, isTrue, isFalse)
 import Data.Int (Int32)
 import LibRISCV.Effects.Expressions.Expr 
 import LibRISCV.Semantics.Utils
 import Data.BitVector (ones)
 import Conversion
-import Control.Monad.Extra (whenM, unlessM, ifM)
+import Control.Monad.Extra (whenM, ifM)
 import Data.Function (on)
 
 
@@ -36,7 +36,7 @@ instrSemantics width =
 
         -- False if a given address is not aligned at the four-byte boundary.
         isMisaligned :: Expr v -> Eff r Bool
-        isMisaligned addr = evalBool $ (addr `And` fromUInt 0x3) `Uge` fromUInt 1
+        isMisaligned addr = isTrue $ (addr `And` fromUInt 0x3) `Uge` fromUInt 1
     in \case 
     MUL -> do
         (r1, r2, rd) <- decodeAndReadRType @v
@@ -65,26 +65,26 @@ instrSemantics width =
     DIV -> do
         (r1, r2, rd) <- decodeAndReadRType
 
-        ifM (evalBool $ FromImm r2 `Eq` fromUInt 0) 
+        ifM (isTrue $ FromImm r2 `Eq` fromUInt 0) 
             do writeRegister rd mask1
-            do ifM (evalBool $ (FromImm r1 `Eq` fromUInt (fromIntegral (minBound :: Int32))) `And` mask1) 
+            do ifM (isTrue $ (FromImm r1 `Eq` fromUInt (fromIntegral (minBound :: Int32))) `And` mask1) 
                 do writeRegister rd $ FromImm r1
                 do writeRegister rd $ FromImm r1 `SDiv` FromImm r2
     DIVU -> do
         (r1, r2, rd) <- decodeAndReadRType
         
-        ifM (evalBool $ FromImm r2 `Eq` fromUInt 0) 
+        ifM (isTrue $ FromImm r2 `Eq` fromUInt 0) 
             do writeRegister rd mask1
             do writeRegister rd $ FromImm r1 `UDiv` FromImm r2
     REM -> do
         (r1, r2, rd) <- decodeAndReadRType
-        ifM (evalBool $ FromImm r2 `Eq` fromUInt 0)
+        ifM (isTrue $ FromImm r2 `Eq` fromUInt 0)
             do writeRegister rd $ FromImm r1
-            do ifM (evalBool $ (FromImm r1 `Eq` fromUInt (fromIntegral (minBound :: Int32))) `And` (FromImm r2 `Eq` fromUInt 0xFFFFFFFF)) 
+            do ifM (isTrue $ (FromImm r1 `Eq` fromUInt (fromIntegral (minBound :: Int32))) `And` (FromImm r2 `Eq` fromUInt 0xFFFFFFFF)) 
                 do writeRegister rd $ fromUInt 0
                 do writeRegister rd $ FromImm r1 `SRem` FromImm r2
     REMU -> do
         (r1, r2, rd) <- decodeAndReadRType
-        ifM (evalBool $ FromImm r2 `Eq` fromUInt 0) 
+        ifM (isTrue $ FromImm r2 `Eq` fromUInt 0) 
             do writeRegister rd $ FromImm r1
             do writeRegister rd $ FromImm r1 `URem` FromImm r2

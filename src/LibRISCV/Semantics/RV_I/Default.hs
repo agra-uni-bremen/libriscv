@@ -17,13 +17,13 @@ import Control.Monad.Freer
 import LibRISCV.Effects.Operations.Language (Operations(..), Size(..), exception, readPC, ecall, ebreak)
 import LibRISCV.Effects.Logging.Language (LogInstructionFetch)
 import LibRISCV.Effects.Decoding.Language (Decoding, decodeShamt)
-import LibRISCV.Effects.Expressions.Language (ExprEval, evalBool)
+import LibRISCV.Effects.Expressions.Language (ExprEval, isTrue, isFalse)
 import Data.Int (Int32)
 import LibRISCV.Effects.Expressions.Expr 
 import LibRISCV.Semantics.Utils
 import Data.BitVector (ones)
 import Conversion
-import Control.Monad.Extra (whenM, unlessM)
+import Control.Monad.Extra (whenM)
 
 
 instrSemantics :: forall v r . (Member (Operations v) r, Member LogInstructionFetch r, Member (Decoding v) r, Member (ExprEval v) r) => Int -> v -> RV_I -> Eff r ()
@@ -35,7 +35,7 @@ instrSemantics width pc =
 
         -- False if a given address is not aligned at the four-byte boundary.
         isMisaligned :: Expr v -> Eff r Bool
-        isMisaligned addr = evalBool $ (addr `And` fromUInt 0x3) `Uge` fromUInt 1
+        isMisaligned addr = isTrue $ (addr `And` fromUInt 0x3) `Uge` fromUInt 1
     in \case 
         ADDI -> do
             (r1, rd, imm) <- decodeAndReadIType @v
@@ -159,19 +159,19 @@ instrSemantics width pc =
             (r1, r2, imm) <- decodeAndReadBType
 
             -- TODO: Alignment handling
-            whenM (evalBool $ FromImm r1 `Eq` FromImm r2) $ do
+            whenM (isTrue $ FromImm r1 `Eq` FromImm r2) $ do
                 writePC $ FromImm pc `Add` FromImm imm
         BNE -> do
             (r1, r2, imm) <- decodeAndReadBType
 
             -- TODO: Alignment handling
-            unlessM (evalBool $ FromImm r1 `Eq` FromImm r2) $ do
+            whenM (isFalse $ FromImm r1 `Eq` FromImm r2) $ do
                 writePC $ FromImm pc `Add` FromImm imm
         BLT -> do
             (r1, r2, imm) <- decodeAndReadBType
 
             let addr = FromImm pc `Add` FromImm imm
-            whenM (evalBool $ FromImm r1 `Slt` FromImm r2) $ do
+            whenM (isTrue $ FromImm r1 `Slt` FromImm r2) $ do
                 writePC addr
                 whenM (isMisaligned addr) $
                     exception pc "misaligned PC"
@@ -179,7 +179,7 @@ instrSemantics width pc =
             (r1, r2, imm) <- decodeAndReadBType
 
             let addr = FromImm pc `Add` FromImm imm
-            whenM (evalBool $ FromImm r1 `Ult` FromImm r2) $ do
+            whenM (isTrue $ FromImm r1 `Ult` FromImm r2) $ do
                 writePC @v $ addr
                 whenM (isMisaligned addr) $
                     exception pc "misaligned PC"
@@ -187,7 +187,7 @@ instrSemantics width pc =
             (r1, r2, imm) <- decodeAndReadBType
 
             let addr = FromImm pc `Add` FromImm imm
-            whenM (evalBool $ FromImm r1 `Sge` FromImm r2) $ do
+            whenM (isTrue $ FromImm r1 `Sge` FromImm r2) $ do
                 writePC addr
                 whenM (isMisaligned addr) $
                     exception pc "misaligned PC"
@@ -195,7 +195,7 @@ instrSemantics width pc =
             (r1, r2, imm) <- decodeAndReadBType
 
             let addr = FromImm pc `Add` FromImm imm
-            whenM (evalBool $ FromImm r1 `Uge` FromImm r2) $ do
+            whenM (isTrue $ FromImm r1 `Uge` FromImm r2) $ do
                 writePC addr
                 whenM (isMisaligned addr) $
                     exception pc "misaligned PC"

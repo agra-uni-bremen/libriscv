@@ -15,7 +15,8 @@ import Control.Monad.Freer ( type (~>) )
 
 
 data ExprEval v r where
-    EvalBool :: Expr v -> ExprEval v Bool
+    IsTrue :: Expr v -> ExprEval v Bool
+    IsFalse :: Expr v -> ExprEval v Bool
     Eval :: Expr v  -> ExprEval v v
 
 makeEffect ''ExprEval
@@ -23,4 +24,5 @@ makeEffect ''ExprEval
 defaultEval :: (MonadIO m) => (v -> Bool, Expr v -> v) -> ExprEval v ~> m
 defaultEval (pred, evalE) = \case
     Eval e  -> pure $ evalE e
-    EvalBool e -> pure $ pred $ evalE e
+    IsTrue e -> pure $ pred $ evalE e
+    IsFalse e -> pure $ not . pred $ evalE e
