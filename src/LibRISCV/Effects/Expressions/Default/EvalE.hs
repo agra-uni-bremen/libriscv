@@ -2,7 +2,7 @@
 module LibRISCV.Effects.Expressions.Default.EvalE where
 
 import LibRISCV.Effects.Expressions.Expr ( Expr(..) )
-import Data.BitVector (BV, Bits (unsafeShiftR, unsafeShiftL, xor, (.|.), (.&.)), signExtend, zeroExtend, bitVec, ones)
+import Data.BitVector (BV, extract, Bits (unsafeShiftR, unsafeShiftL, xor, (.|.), (.&.)), signExtend, zeroExtend, bitVec, ones)
 import Data.Int ( Int32 )
 import Data.Word ( Word8 )
 import Data.Bool ( bool )
@@ -12,7 +12,7 @@ evalE (FromImm a) = a
 evalE (FromInt n i) = bitVec n i
 evalE (ZExt n e) = zeroExtend n (evalE e)
 evalE (SExt n e) = signExtend n (evalE e)
-evalE (Extract start len e) = evalE e `unsafeShiftR` start .&. ones len
+evalE (Extract start len e) = extract (start + (len - 1)) start (evalE e)
 evalE (Add e1 e2) = evalE e1 + evalE e2
 evalE (Sub e1 e2) = fromIntegral $
     (fromIntegral (evalE e1) :: Int32) - fromIntegral (evalE e2)
