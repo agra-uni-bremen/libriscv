@@ -11,6 +11,11 @@ import LibRISCV.Decoder.Opcodes (InstructionType)
 
 data Size = Byte | Half | Word deriving (Eq, Show)
 
+bitSize :: Size -> Int
+bitSize Byte = 8
+bitSize Half = 16
+bitSize Word = 32
+
 data Operations v r where
     ReadRegister :: v -> Operations v v
     WriteRegister :: v -> v -> Operations v ()
