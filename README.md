@@ -87,6 +87,22 @@ If these dependencies are installed (e.g. if you are using the provided Docker i
 
 	$ ./riscv-tests/run.sh
 
+## How to Cite
+
+LibRISCV is further described in the following publication:
+
+	@inproceedings{tempel2023libriscv,
+	    author    = "Sören Tempel and Tobias Brandt and Christoph Lüth",
+	    title     = "Versatile and Flexible Modelling of the {RISC-V} Instruction Set Architecture",
+	    booktitle = "Trends in Functional Programming",
+	    year      = "2023",
+	    publisher = "Springer International Publishing",
+	    location  = "Boston, MA, USA",
+	    address   = "Cham",
+	}
+
+The publication is currently in the process [of being published][springer tfp2023] but a [preprint is available][agra preprint].
+
 ## Acknowledgements
 
 This work was supported in part by the German Federal Ministry of Education and Research (BMBF) within the project EXCL under contract no. 01IW22002 and within the project Scale4Edge under contract no. 16ME0127.
@@ -99,3 +115,5 @@ This work was supported in part by the German Federal Ministry of Education and 
 [docker web]: https://www.docker.io
 [free monads]: https://doi.org/10.1145/2887747.2804319
 [riscv-opcodes github]: https://github.com/riscv/riscv-opcodes
+[springer tfp2023]: https://link.springer.com/book/9783031389399
+[agra preprint]: https://agra.informatik.uni-bremen.de/doc/konf/TFP23_ST.pdf
