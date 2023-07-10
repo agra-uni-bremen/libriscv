@@ -19,6 +19,7 @@ import Data.Array.IO (IOArray)
 import LibRISCV
 import LibRISCV.Spec.Expr
 import LibRISCV.Spec.Operations
+import LibRISCV.Decoder.Instruction (mkRd, mkRs1, mkRs2, immI, immS, immU, immB, immJ, mkShamt)
 import Control.Monad.Freer
 import Conversion
 import Numeric (showHex)
@@ -117,16 +118,16 @@ runExpression (AShr e1 e2) = binOp e1 e2 AShr
 type IftEnv = (Expr (Tainted Word32) -> Tainted Word32, ArchState)
 
 iftBehavior :: IftEnv -> Operations (Tainted Word32) ~> IO
-iftBehavior (evalE , (regFile, mem)) = \case
-    DecodeRS1 _ -> undefined
-    DecodeRS2 _ -> undefined
-    DecodeRD _ -> undefined
-    DecodeImmB _ -> undefined
-    DecodeImmS _ -> undefined
-    DecodeImmU _ -> undefined
-    DecodeImmI _ -> undefined
-    DecodeImmJ _ -> undefined
-    DecodeShamt _ -> undefined
+iftBehavior env@(evalE , (regFile, mem)) = \case
+    DecodeRD inst -> pure $ convert (mkRd $ convert inst)
+    DecodeRS1 inst -> pure $ convert (mkRs1 $ convert inst)
+    DecodeRS2 inst -> pure $ convert (mkRs2 $ convert inst)
+    DecodeImmI inst -> pure $ convert (immI $ convert inst)
+    DecodeImmS inst -> pure $ convert (immS $ convert inst)
+    DecodeImmB inst -> pure $ convert (immB $ convert inst)
+    DecodeImmU inst -> pure $ convert (immU $ convert inst)
+    DecodeImmJ inst -> pure $ convert (immJ $ convert inst)
+    DecodeShamt inst -> pure $ convert (mkShamt $ convert inst)
 
     RunIf e next -> undefined
     RunUnless e next -> undefined
@@ -144,4 +145,6 @@ iftBehavior (evalE , (regFile, mem)) = \case
     Ecall _ -> putStrLn "ECALL"
     Ebreak _ -> putStrLn "EBREAK"
 
-    Append__ _ _ -> undefined    
+    Append__ s s' -> do
+        iftBehavior env s
+        iftBehavior env s'
