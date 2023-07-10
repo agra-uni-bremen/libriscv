@@ -99,6 +99,8 @@ LibRISCV is further described in the following publication:
 	    publisher = "Springer International Publishing",
 	    location  = "Boston, MA, USA",
 	    address   = "Cham",
+	    editor    = "Stephen Chang",
+	    isbn      = {978-3-031-21314-4},
 	}
 
 The publication is currently in the process [of being published][springer tfp2023] but a [preprint is available][agra preprint].
