@@ -3,7 +3,7 @@
 This is an extensible [RISC-V][riscv web] implementation which is based on a formal model of the architecture.
 The formal model is implemented using [free monads][free monads] and a custom expression language for arithmetic operations.
 Based on this formal model, custom interpreters for RISC-V instructions can be easily implemented, e.g. to perform a taint analysis.
-More information about LibRISCV is available in the publication *Versatile and Flexible Modelling of the RISC-V Instruction Set Architecture* which will be published as part of the proceedings of the 2023 *Trends in Functional Programming* conference.
+More information about LibRISCV is available in the publication [*Versatile and Flexible Modelling of the RISC-V Instruction Set Architecture*][agra preprint] which will be published as part of the proceedings of the 2023 [*Trends in Functional Programming*][springer tfp2023] conference.
 
 ## Features
 
