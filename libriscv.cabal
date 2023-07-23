@@ -61,7 +61,7 @@ library
         base                   >= 4.15.0.0
         , array                ^>= 0.5.4.0
         , filepath             ^>= 1.4.2.1
-        , bytestring           >= 0.10.12
+        , bytestring            >= 0.10.10 && <0.12
         , exceptions           ^>= 0.10.4
         , melf                 ^>= 1.3.0
         , freer-simple         ^>= 1.2.1.2
@@ -108,6 +108,6 @@ test-suite test
       , array        >= 0.5.4.0
       , tasty        >= 1.4.2.3
       , tasty-hunit  >= 0.10.0.3
-      , bytestring   >= 0.10.12
+      , bytestring   >= 0.10.10 && <0.12
       , bv                   ^>= 0.5
       , libriscv    >= 0.1.0.0
