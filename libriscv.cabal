@@ -58,7 +58,7 @@ library
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
     build-depends:
-        base                   >= 4.15.0.0
+        base                    >= 4.15.0.0
         , array                ^>= 0.5.4.0
         , filepath             ^>= 1.4.2.1
         , bytestring            >= 0.10.10 && <0.12
@@ -69,11 +69,11 @@ library
         , transformers         ^>= 0.5.6.2
         , optparse-applicative  >= 0.16.1 && <0.19
         , bv                   ^>= 0.5
-        , parameterized-utils  ^>= 2.1.6.0 
-        , extra                >= 1.7.13 
-        , yaml                 >= 0.11.11.1
-        , containers           >= 0.6.7
-        , template-haskell     >= 2.18.0
+        , parameterized-utils  ^>= 2.1.6.0
+        , extra                 >= 1.7.0
+        , yaml                  >= 0.11.8.0
+        , containers            >= 0.6.5.1
+        , template-haskell      >= 2.18.0
         , file-embed
 
     hs-source-dirs:   src
@@ -104,10 +104,10 @@ test-suite test
       DecoderTest
       ArchStateTest
     build-depends:
-        base          >= 4.15.0.0
+        base         >= 4.15.0.0
       , array        >= 0.5.4.0
       , tasty        >= 1.4.2.3
       , tasty-hunit  >= 0.10.0.3
       , bytestring   >= 0.10.10 && <0.12
-      , bv                   ^>= 0.5
-      , libriscv    >= 0.1.0.0
+      , bv          ^>= 0.5
+      , libriscv     >= 0.1.0.0
