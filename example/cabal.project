@@ -1,8 +1,0 @@
-packages: ../*.cabal *.cabal
-
-package riscv-test
-
--- The template-haskell version constraint of freer-simple is too strict.
---
--- See: https://github.com/lexi-lambda/freer-simple/issues/40#issuecomment-1438089449
-allow-newer: freer-simple:template-haskell

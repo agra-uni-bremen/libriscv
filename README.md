@@ -72,8 +72,8 @@ Afterwards, it will dump all register values.
 The concreter interpreter implements just one possible interpretation of RISC-V instructions.
 As the name suggests, LibRISCV is specifically intended to implement custom interpreters on top of the abstract RISC-V model.
 For this purpose, the Cabal file provides a Haskell library component.
-Based on this library, the `example/` subdirectory contains a custom example interpreter which performs a primitive taint analysis on RISC-V machine code.
-Refer to `example/README.md` for more information.
+Based on this library, custom interpreters can be implemented.
+An exemplary interpreter, which implements symbolic execution, is available in [a separate repository](https://github.com/nmeum/formal-symex).
 
 ## Tests
 
