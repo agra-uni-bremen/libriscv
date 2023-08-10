@@ -156,15 +156,19 @@ instrSemantics width pc =
         BEQ -> do
             (r1, r2, imm) <- decodeAndReadBType
 
-            -- TODO: Alignment handling
+            let addr = FromImm pc `Add` FromImm imm
             whenM (isTrue $ FromImm r1 `Eq` FromImm r2) $ do
-                writePC $ FromImm pc `Add` FromImm imm
+                writePC $ addr
+                whenM (isMisaligned addr) $
+                    exception pc "misaligned PC"
         BNE -> do
             (r1, r2, imm) <- decodeAndReadBType
 
-            -- TODO: Alignment handling
+            let addr = FromImm pc `Add` FromImm imm
             whenM (isFalse $ FromImm r1 `Eq` FromImm r2) $ do
-                writePC $ FromImm pc `Add` FromImm imm
+                writePC $ addr
+                whenM (isMisaligned addr) $
+                    exception pc "misaligned PC"
         BLT -> do
             (r1, r2, imm) <- decodeAndReadBType
 
