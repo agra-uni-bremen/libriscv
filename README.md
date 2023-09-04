@@ -96,11 +96,13 @@ LibRISCV is further described in the following publication:
 	    title     = "Versatile and Flexible Modelling of the {RISC-V} Instruction Set Architecture",
 	    booktitle = "Trends in Functional Programming",
 	    year      = "2023",
-	    publisher = "Springer International Publishing",
+	    publisher = "Springer Nature Switzerland",
 	    location  = "Boston, MA, USA",
+	    pages     = "16--35",
 	    address   = "Cham",
 	    editor    = "Stephen Chang",
 	    isbn      = {978-3-031-21314-4},
+	    doi       = "10.1007/978-3-031-38938-2_2",
 	}
 
 The publication is currently in the process [of being published][springer tfp2023] but a [preprint is available][agra preprint].
@@ -117,5 +119,5 @@ This work was supported in part by the German Federal Ministry of Education and 
 [docker web]: https://www.docker.io
 [free monads]: https://doi.org/10.1145/2887747.2804319
 [riscv-opcodes github]: https://github.com/riscv/riscv-opcodes
-[springer tfp2023]: https://link.springer.com/book/9783031389399
+[springer tfp2023]: https://doi.org/10.1007/978-3-031-38938-2_2
 [agra preprint]: https://agra.informatik.uni-bremen.de/doc/konf/TFP23_ST.pdf
