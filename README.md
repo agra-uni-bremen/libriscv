@@ -105,8 +105,6 @@ LibRISCV is further described in the following publication:
 	    doi       = "10.1007/978-3-031-38938-2_2",
 	}
 
-The publication is currently in the process [of being published][springer tfp2023] but a [preprint is available][agra preprint].
-
 ## Acknowledgements
 
 This work was supported in part by the German Federal Ministry of Education and Research (BMBF) within the project EXCL under contract no. 01IW22002 and within the project Scale4Edge under contract no. 16ME0127.
