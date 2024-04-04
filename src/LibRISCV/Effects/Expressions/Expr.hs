@@ -1,14 +1,16 @@
-module LibRISCV.Spec.Expr where
+module LibRISCV.Effects.Expressions.Expr where
 
 import Data.Word
+import Data.Function (on)
+import Data.Int (Int32)
+import Data.BitVector (BV)
 
 data Expr a =
     FromImm a |
-    FromUInt Word32 |
-    ZExtByte (Expr a) |
-    ZExtHalf (Expr a) |
-    SExtByte (Expr a) |
-    SExtHalf (Expr a) |
+    FromInt Int Integer |
+    ZExt Int (Expr a) |
+    SExt Int (Expr a) |
+    Extract Int Int (Expr a) |
     Add  (Expr a) (Expr a) |
     Sub  (Expr a) (Expr a) |
     Eq   (Expr a) (Expr a) |
@@ -21,31 +23,37 @@ data Expr a =
     Xor  (Expr a) (Expr a) |
     LShl (Expr a) (Expr a) |
     LShr (Expr a) (Expr a) |
-    AShr (Expr a) (Expr a)
+    AShr (Expr a) (Expr a) |
+    Mul (Expr a) (Expr a) |
+    UDiv (Expr a) (Expr a) |
+    SDiv (Expr a) (Expr a) |
+    URem (Expr a) (Expr a) |
+    SRem (Expr a) (Expr a) 
 
 addSImm :: a -> a -> Expr a
-addSImm a b = FromImm a `Add` FromImm b
+addSImm = Add `on` FromImm
 
 andImm :: a -> a -> Expr a
-andImm a b = FromImm a `And` FromImm b
+andImm = And `on` FromImm
 
 orImm :: a -> a -> Expr a
-orImm a b = FromImm a `Or` FromImm b
+orImm = Or `on` FromImm
 
 xorImm :: a -> a -> Expr a
-xorImm a b = FromImm a `Xor` FromImm b
+xorImm =  Xor `on` FromImm
 
 lshlImm :: a -> a -> Expr a
-lshlImm a b = FromImm a `LShl` FromImm b
+lshlImm = LShl `on` FromImm
 
 lshrImm :: a -> a -> Expr a
-lshrImm a b = FromImm a `LShr` FromImm b
+lshrImm = LShr `on` FromImm
 
 ashrImm :: a -> a -> Expr a
-ashrImm a b = FromImm a `AShr` FromImm b
+ashrImm = AShr `on` FromImm
+
 
 ------------------------------------------------------------------------
 
 -- Extract shamt value from an expression (lower 5 bits).
-regShamt :: Expr a -> Expr a
-regShamt a = a `And` FromUInt 0x1f
+regShamt :: Int -> Expr a -> Expr a
+regShamt w a = a `And` FromInt w 0x1f

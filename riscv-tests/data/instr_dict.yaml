@@ -1,0 +1,478 @@
+add:
+  encoding: 0000000----------000-----0110011
+  extension:
+  - rv_i
+  mask: '0xfe00707f'
+  match: '0x33'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+addi:
+  encoding: '-----------------000-----0010011'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0x13'
+  variable_fields:
+  - rd
+  - rs1
+  - imm12
+and:
+  encoding: 0000000----------111-----0110011
+  extension:
+  - rv_i
+  mask: '0xfe00707f'
+  match: '0x7033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+andi:
+  encoding: '-----------------111-----0010011'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0x7013'
+  variable_fields:
+  - rd
+  - rs1
+  - imm12
+auipc:
+  encoding: '-------------------------0010111'
+  extension:
+  - rv_i
+  mask: '0x7f'
+  match: '0x17'
+  variable_fields:
+  - rd
+  - imm20
+beq:
+  encoding: '-----------------000-----1100011'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0x63'
+  variable_fields:
+  - bimm12hi
+  - rs1
+  - rs2
+  - bimm12lo
+bge:
+  encoding: '-----------------101-----1100011'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0x5063'
+  variable_fields:
+  - bimm12hi
+  - rs1
+  - rs2
+  - bimm12lo
+bgeu:
+  encoding: '-----------------111-----1100011'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0x7063'
+  variable_fields:
+  - bimm12hi
+  - rs1
+  - rs2
+  - bimm12lo
+blt:
+  encoding: '-----------------100-----1100011'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0x4063'
+  variable_fields:
+  - bimm12hi
+  - rs1
+  - rs2
+  - bimm12lo
+bltu:
+  encoding: '-----------------110-----1100011'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0x6063'
+  variable_fields:
+  - bimm12hi
+  - rs1
+  - rs2
+  - bimm12lo
+bne:
+  encoding: '-----------------001-----1100011'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0x1063'
+  variable_fields:
+  - bimm12hi
+  - rs1
+  - rs2
+  - bimm12lo
+ebreak:
+  encoding: '00000000000100000000000001110011'
+  extension:
+  - rv_i
+  mask: '0xffffffff'
+  match: '0x100073'
+  variable_fields: []
+ecall:
+  encoding: '00000000000000000000000001110011'
+  extension:
+  - rv_i
+  mask: '0xffffffff'
+  match: '0x73'
+  variable_fields: []
+fence:
+  encoding: '-----------------000-----0001111'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0xf'
+  variable_fields: []
+jal:
+  encoding: '-------------------------1101111'
+  extension:
+  - rv_i
+  mask: '0x7f'
+  match: '0x6f'
+  variable_fields:
+  - rd
+  - jimm20
+jalr:
+  encoding: '-----------------000-----1100111'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0x67'
+  variable_fields:
+  - rd
+  - rs1
+  - imm12
+lb:
+  encoding: '-----------------000-----0000011'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0x3'
+  variable_fields:
+  - rd
+  - rs1
+  - imm12
+lbu:
+  encoding: '-----------------100-----0000011'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0x4003'
+  variable_fields:
+  - rd
+  - rs1
+  - imm12
+lh:
+  encoding: '-----------------001-----0000011'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0x1003'
+  variable_fields:
+  - rd
+  - rs1
+  - imm12
+lhu:
+  encoding: '-----------------101-----0000011'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0x5003'
+  variable_fields:
+  - rd
+  - rs1
+  - imm12
+lui:
+  encoding: '-------------------------0110111'
+  extension:
+  - rv_i
+  mask: '0x7f'
+  match: '0x37'
+  variable_fields:
+  - rd
+  - imm20
+lw:
+  encoding: '-----------------010-----0000011'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0x2003'
+  variable_fields:
+  - rd
+  - rs1
+  - imm12
+or:
+  encoding: 0000000----------110-----0110011
+  extension:
+  - rv_i
+  mask: '0xfe00707f'
+  match: '0x6033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+ori:
+  encoding: '-----------------110-----0010011'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0x6013'
+  variable_fields:
+  - rd
+  - rs1
+  - imm12
+sb:
+  encoding: '-----------------000-----0100011'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0x23'
+  variable_fields:
+  - imm12hi
+  - rs1
+  - rs2
+  - imm12lo
+sh:
+  encoding: '-----------------001-----0100011'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0x1023'
+  variable_fields:
+  - imm12hi
+  - rs1
+  - rs2
+  - imm12lo
+sll:
+  encoding: 0000000----------001-----0110011
+  extension:
+  - rv_i
+  mask: '0xfe00707f'
+  match: '0x1033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+slli:
+  encoding: 0000000----------001-----0010011
+  extension:
+  - rv32_i
+  mask: '0xfe00707f'
+  match: '0x1013'
+  variable_fields:
+  - rd
+  - rs1
+  - shamtw
+slt:
+  encoding: 0000000----------010-----0110011
+  extension:
+  - rv_i
+  mask: '0xfe00707f'
+  match: '0x2033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+slti:
+  encoding: '-----------------010-----0010011'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0x2013'
+  variable_fields:
+  - rd
+  - rs1
+  - imm12
+sltiu:
+  encoding: '-----------------011-----0010011'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0x3013'
+  variable_fields:
+  - rd
+  - rs1
+  - imm12
+sltu:
+  encoding: 0000000----------011-----0110011
+  extension:
+  - rv_i
+  mask: '0xfe00707f'
+  match: '0x3033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+sra:
+  encoding: 0100000----------101-----0110011
+  extension:
+  - rv_i
+  mask: '0xfe00707f'
+  match: '0x40005033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+srai:
+  encoding: 0100000----------101-----0010011
+  extension:
+  - rv32_i
+  mask: '0xfe00707f'
+  match: '0x40005013'
+  variable_fields:
+  - rd
+  - rs1
+  - shamtw
+srl:
+  encoding: 0000000----------101-----0110011
+  extension:
+  - rv_i
+  mask: '0xfe00707f'
+  match: '0x5033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+srli:
+  encoding: 0000000----------101-----0010011
+  extension:
+  - rv32_i
+  mask: '0xfe00707f'
+  match: '0x5013'
+  variable_fields:
+  - rd
+  - rs1
+  - shamtw
+sub:
+  encoding: 0100000----------000-----0110011
+  extension:
+  - rv_i
+  mask: '0xfe00707f'
+  match: '0x40000033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+sw:
+  encoding: '-----------------010-----0100011'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0x2023'
+  variable_fields:
+  - imm12hi
+  - rs1
+  - rs2
+  - imm12lo
+xor:
+  encoding: 0000000----------100-----0110011
+  extension:
+  - rv_i
+  mask: '0xfe00707f'
+  match: '0x4033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+xori:
+  encoding: '-----------------100-----0010011'
+  extension:
+  - rv_i
+  mask: '0x707f'
+  match: '0x4013'
+  variable_fields:
+  - rd
+  - rs1
+  - imm12
+
+div:
+  encoding: 0000001----------100-----0110011
+  extension:
+  - rv_m
+  mask: '0xfe00707f'
+  match: '0x2004033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+divu:
+  encoding: 0000001----------101-----0110011
+  extension:
+  - rv_m
+  mask: '0xfe00707f'
+  match: '0x2005033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+mul:
+  encoding: 0000001----------000-----0110011
+  extension:
+  - rv_m
+  mask: '0xfe00707f'
+  match: '0x2000033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+mulh:
+  encoding: 0000001----------001-----0110011
+  extension:
+  - rv_m
+  mask: '0xfe00707f'
+  match: '0x2001033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+mulhsu:
+  encoding: 0000001----------010-----0110011
+  extension:
+  - rv_m
+  mask: '0xfe00707f'
+  match: '0x2002033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+mulhu:
+  encoding: 0000001----------011-----0110011
+  extension:
+  - rv_m
+  mask: '0xfe00707f'
+  match: '0x2003033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+rem:
+  encoding: 0000001----------110-----0110011
+  extension:
+  - rv_m
+  mask: '0xfe00707f'
+  match: '0x2006033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+remu:
+  encoding: 0000001----------111-----0110011
+  extension:
+  - rv_m
+  mask: '0xfe00707f'
+  match: '0x2007033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2

@@ -395,3 +395,84 @@ xori:
   - rd
   - rs1
   - imm12
+
+div:
+  encoding: 0000001----------100-----0110011
+  extension:
+  - rv_m
+  mask: '0xfe00707f'
+  match: '0x2004033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+divu:
+  encoding: 0000001----------101-----0110011
+  extension:
+  - rv_m
+  mask: '0xfe00707f'
+  match: '0x2005033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+mul:
+  encoding: 0000001----------000-----0110011
+  extension:
+  - rv_m
+  mask: '0xfe00707f'
+  match: '0x2000033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+mulh:
+  encoding: 0000001----------001-----0110011
+  extension:
+  - rv_m
+  mask: '0xfe00707f'
+  match: '0x2001033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+mulhsu:
+  encoding: 0000001----------010-----0110011
+  extension:
+  - rv_m
+  mask: '0xfe00707f'
+  match: '0x2002033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+mulhu:
+  encoding: 0000001----------011-----0110011
+  extension:
+  - rv_m
+  mask: '0xfe00707f'
+  match: '0x2003033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+rem:
+  encoding: 0000001----------110-----0110011
+  extension:
+  - rv_m
+  mask: '0xfe00707f'
+  match: '0x2006033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2
+remu:
+  encoding: 0000001----------111-----0110011
+  extension:
+  - rv_m
+  mask: '0xfe00707f'
+  match: '0x2007033'
+  variable_fields:
+  - rd
+  - rs1
+  - rs2

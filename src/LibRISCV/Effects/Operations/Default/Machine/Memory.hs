@@ -1,7 +1,8 @@
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-module LibRISCV.Machine.Memory where
+{-# LANGUAGE TypeApplications #-}
+module LibRISCV.Effects.Operations.Default.Machine.Memory where
 
 import LibRISCV
 import Conversion
@@ -11,6 +12,7 @@ import Data.Word ( Word8, Word16, Word32 )
 import Data.Array.IO
     ( readArray, writeArray, MArray(getBounds, newArray_) )
 import qualified Data.ByteString.Lazy as BSL
+import Data.BitVector (BV, bitVec)
 
 -- Convert half to bytes (and vice versa) in little endian.
 class HalfStorage halfType byteType where
@@ -30,10 +32,19 @@ instance HalfStorage Word16 Word8 where
     toHalf = fromIntegral . mkWord
     halfToBytes = mkBytes . fromIntegral
 
+instance WordStorage BV Word8 where
+    toWord  = bitVec 32 . fromIntegral .  mkWord
+    wordToBytes = mkBytes . fromIntegral
+
+instance HalfStorage BV Word8 where
+    toHalf = bitVec 16 . mkWord
+    halfToBytes = mkBytes . fromIntegral
+
+
 -- Converts a list of bytes to a Word32 in little endian.
 mkWord :: [Word8] -> Word32
 mkWord bytes = foldl (\x (byte,idx) -> (fromIntegral byte `shift` (idx * 8)) .|. x)
-    0 $ zip bytes [0..(length bytes) - 1]
+    0 $ zip bytes [0..length bytes - 1]
 
 -- Split a 32-bit word into four octets in little endian.
 mkBytes :: Word32 -> [Word8]

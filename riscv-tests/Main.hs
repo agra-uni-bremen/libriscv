@@ -1,4 +1,5 @@
 {-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE DataKinds #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE TypeOperators #-}
@@ -17,55 +18,67 @@ import Control.Monad (when, mzero)
 import Control.Monad.Freer
 import Control.Monad.Freer.Reader (runReader)
 import Control.Monad.Trans.Maybe
-import Control.Monad.Trans.Class ( MonadTrans(lift) )
+import Data.IORef (newIORef)
 
 import LibRISCV
-import LibRISCV.Utils (align)
 import LibRISCV.Loader
-import LibRISCV.Spec.AST
-import LibRISCV.Spec.Expr
-import LibRISCV.Spec.Operations
+import LibRISCV.Semantics.Default
 import LibRISCV.CmdLine
-import LibRISCV.Effects.Logging.InstructionFetch
-import LibRISCV.Machine.Interpreter
+import LibRISCV.Effects.Logging.Default.Interpreter
+import LibRISCV.Effects.Operations.Default.Interpreter
+import LibRISCV.Effects.Operations.Language
+import qualified LibRISCV.Effects.Expressions.Expr as E
+import LibRISCV.Effects.Expressions.Default.Interpreter
+import LibRISCV.Effects.Expressions.Default.EvalE 
+import LibRISCV.Effects.Decoding.Default.Interpreter
 import LibRISCV.Utils
+import LibRISCV.Effects.Operations.Default.Machine.Memory (storeByteString)
 
-import qualified LibRISCV.Machine.Register as REG
-import qualified LibRISCV.Machine.Memory as MEM
+import Control.Monad.IO.Class ( MonadIO(..) )
+import qualified LibRISCV.Effects.Operations.Default.Machine.Register as REG
+import Data.BitVector (BV, bitVec)
 
 -- Syscall number for the newlib exit syscall (used by riscv-tests).
 sys_exit :: Int32
 sys_exit = 93
 
+type ECallEnv = DefaultInstructionsEnv
+
 -- The riscv-tests repository uses a special ecall to communicate test
 -- failures to the execution environment. This function implements the
 -- ECALL instruction accordingly.
-ecallHandler :: DefaultEnv -> Operations Word32 ~> MaybeT IO
-ecallHandler (evalE, (regFile, mem)) = \case
+ecallHandler :: ECallEnv -> Operations BV ~> IO
+ecallHandler env@(regFile, mem) = \case
         Ecall pc -> do
-            sys <- lift $ REG.readRegister regFile A7
-            arg <- lift $ REG.readRegister regFile A0
+            sys <- liftIO $ REG.readRegister regFile A7
+            arg <- liftIO $ REG.readRegister regFile A0
 
             when (sys /= sys_exit) $
                 fail "unknown syscall"
 
-            lift $ if arg == 0
-                then exitWith ExitSuccess
+            liftIO $ if arg == 0
+                then exitSuccess
                 else exitWith (ExitFailure $ fromIntegral arg)
-        _ -> mzero
+        x -> defaultInstructions env x
 
 
 main' :: BasicArgs -> IO ()
 main' (BasicArgs memAddr memSize trace putReg fp) = do
-    state <- mkArchState memAddr memSize
-    entry <- loadExecutable fp state
+    state@(_, mem) <- mkArchState memAddr memSize
 
-    let interpreter =
-            if trace then
-                runReader (runExpression, state) . runInstruction (ecallHandler `extends` defaultBehavior) . runLogInstructionFetchM
-            else
-                runReader (runExpression, state) . runInstruction (ecallHandler `extends` defaultBehavior) . runNoLogging
-    runM $ interpreter $ buildAST entry
+    elf <- readElf fp
+    loadElf elf $ storeByteString mem
+    entry <- startAddr elf
+
+    instRef <- newIORef (0 :: Word32)
+    let 
+        evalEnv         = ((==1), evalE)
+        interpreter =
+                interpretM (ecallHandler state) . 
+                interpretM (defaultEval evalEnv) . 
+                interpretM (defaultDecoding @BV instRef) . 
+                interpretM (if trace then defaultLogging else noLogging)
+    runM $ interpreter $ buildAST @32 (bitVec 32 entry)
 
     when putReg $
         dumpState state

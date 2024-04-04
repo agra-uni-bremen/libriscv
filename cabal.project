@@ -1,6 +1,4 @@
-packages: ../*.cabal *.cabal
-
-package riscv-test
+packages: *.cabal
 
 -- The template-haskell version constraint of freer-simple is too strict.
 --

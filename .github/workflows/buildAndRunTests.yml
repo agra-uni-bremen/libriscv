@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: "alpine:3.16"
+      image: "alpine:edge"
 
     steps:
       - name: prep alpine
@@ -27,28 +27,19 @@ jobs:
         env:
           cache-name: cache-cabal
         with:
-          path: ~/.cabal
+          path: ~/.local/state/cabal
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/*.cabal') }}-${{ hashFiles('**/cabal.project') }}
           restore-keys: |
             ${{ runner.os }}-build-${{ env.cache-name }}-
             ${{ runner.os }}-build-
             ${{ runner.os }}-
 
-      # XXX: See comment in Dockerfile regarding the ghc-no-fortify workaround.
       - name: install Haskell dependencies
         run: |
-          printf '#!/bin/sh\nexec ghc "$@" -optcxx -D_FORTIFY_SOURCE=0\n' > /usr/local/bin/ghc-no-fortify
-          chmod +x /usr/local/bin/ghc-no-fortify
-
           cabal update
-          cabal build --with-ghc=/usr/local/bin/ghc-no-fortify --only-dependencies --enable-tests
+          cabal build --only-dependencies --enable-tests
       - name: build and install riscv-tiny
         run: cabal install --overwrite-policy=always
-
-      - name: build riscv-ift example
-        run: |
-          cd example
-          cabal build
 
       - name: run unit tests
         run: cabal test

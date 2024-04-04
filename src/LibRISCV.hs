@@ -1,9 +1,12 @@
+{-# LANGUAGE MultiParamTypeClasses #-}
 module LibRISCV where
 
 import Data.Int
 import Data.Word
 import Data.Ix
 import qualified Data.ByteString.Lazy as BSL
+import Data.BitVector
+import Conversion (Conversion (convert))
 
 type Signed32 = Int32
 type Unsigned32 = Word32
@@ -30,5 +33,5 @@ data RegIdx = Zero | RA | SP | GP | TP | T0 | T1 | T2 | FP
 
 ------------------------------------------------------------------------
 
-class ByteAddrsMem a where
-    storeByteString :: a -> Address -> BSL.ByteString -> IO ()
+instance Conversion BV Word32 where  
+    convert = fromIntegral
