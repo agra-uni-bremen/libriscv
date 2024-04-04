@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM alpine:3.19
 
 RUN apk update && apk add --no-cache build-base cmake gcc-riscv-none-elf \
 	newlib-riscv-none-elf emacs nano vim ghc cabal wget libffi-dev clang lld
