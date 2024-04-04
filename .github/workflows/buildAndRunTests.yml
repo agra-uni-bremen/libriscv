@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: "alpine:edge"
+      image: "alpine:3.19"
 
     steps:
       - name: prep alpine
