@@ -2,5 +2,14 @@ packages: *.cabal
 
 -- The template-haskell version constraint of freer-simple is too strict.
 --
--- See: https://github.com/lexi-lambda/freer-simple/issues/40#issuecomment-1438089449
+-- See: https://github.com/lexi-lambda/freer-simple/pull/44
 allow-newer: freer-simple:template-haskell
+
+-- The template-haskell version constraint of melf is too strict.
+--
+-- See: https://github.com/aleksey-makarov/melf/pull/7
+allow-newer: melf:template-haskell
+
+-- On some versions of Alpine Linux, the text library fails to compile
+-- the vendored simdutf C code. Work around that by disabling the feature.
+constraints: text -simdutf
