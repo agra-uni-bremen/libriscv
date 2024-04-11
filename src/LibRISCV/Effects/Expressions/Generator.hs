@@ -7,8 +7,8 @@ import Data.Char (toLower)
 import Language.Haskell.TH
 import LibRISCV.Effects.Expressions.Type
 
-generateImmediate :: String -> Q Dec
-generateImmediate operator = do
+genImmRval :: String -> Q Dec
+genImmRval operator = do
   let name = mkName $ (map toLower operator) ++ "Imm"
 
   let onName   = mkName "on"
@@ -18,9 +18,9 @@ generateImmediate operator = do
   let body = AppE (AppE (VarE onName) (ConE consName)) (ConE immName)
   return $ FunD name [Clause [] (NormalB body) []]
 
-generateImmediates :: Q [Dec]
-generateImmediates =
-  mapM generateImmediate [
+genImmRvals :: Q [Dec]
+genImmRvals =
+  mapM genImmRval [
     "Add"
     , "Sub"
     , "Eq"
