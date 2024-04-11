@@ -69,22 +69,21 @@ instrSemantics width =
             do writeRegister rd mask1
             do ifM (isTrue $ (FromImm r1 `Eq` fromUInt (fromIntegral (minBound :: Int32))) `And` mask1) 
                 do writeRegister rd $ FromImm r1
-                do writeRegister rd $ FromImm r1 `SDiv` FromImm r2
+                do writeRegister rd $ r1 `sdiv` r2
     DIVU -> do
         (r1, r2, rd) <- decodeAndReadRType
-        
         ifM (isTrue $ FromImm r2 `Eq` fromUInt 0) 
             do writeRegister rd mask1
-            do writeRegister rd $ FromImm r1 `UDiv` FromImm r2
+            do writeRegister rd $ r1 `udiv` r2
     REM -> do
         (r1, r2, rd) <- decodeAndReadRType
         ifM (isTrue $ FromImm r2 `Eq` fromUInt 0)
             do writeRegister rd $ FromImm r1
             do ifM (isTrue $ (FromImm r1 `Eq` fromUInt (fromIntegral (minBound :: Int32))) `And` (FromImm r2 `Eq` fromUInt 0xFFFFFFFF)) 
                 do writeRegister rd $ fromUInt 0
-                do writeRegister rd $ FromImm r1 `SRem` FromImm r2
+                do writeRegister rd $ r1 `srem` r2
     REMU -> do
         (r1, r2, rd) <- decodeAndReadRType
         ifM (isTrue $ FromImm r2 `Eq` fromUInt 0) 
             do writeRegister rd $ FromImm r1
-            do writeRegister rd $ FromImm r1 `URem` FromImm r2
+            do writeRegister rd $ r1 `urem` r2

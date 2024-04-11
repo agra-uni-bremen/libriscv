@@ -19,4 +19,4 @@ regShamt w a = a `And` FromInt w 0x1f
 
 ------------------------------------------------------------------------
 
-genImmRvals
+generateImmediates

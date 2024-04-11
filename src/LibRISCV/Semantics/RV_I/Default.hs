@@ -42,11 +42,11 @@ instrSemantics width pc =
             writeRegister rd $ r1 `addImm` imm
         SLTI -> do
             (r1, rd, imm) <- decodeAndReadIType @v
-            let cond = FromImm r1 `Slt` FromImm imm
+            let cond = r1 `slt` imm
             writeRegister rd $ convert cond
         SLTIU -> do
             (r1, rd, imm) <- decodeAndReadIType @v 
-            let cond = FromImm r1 `Ult` FromImm imm
+            let cond = r1 `ult` imm
             writeRegister rd $ convert cond
         ANDI -> do
             (r1, rd, imm) <- decodeAndReadIType @v
@@ -68,11 +68,11 @@ instrSemantics width pc =
             writeRegister rd $ r1 `addImm` r2
         SLT -> do
             (r1, r2, rd) <- decodeAndReadRType
-            let cond = FromImm r1 `Slt` FromImm r2 :: Expr v
+            let cond = r1 `slt` r2 :: Expr v
             writeRegister rd $ convert cond
         SLTU -> do
             (r1, r2, rd) <- decodeAndReadRType
-            let cond = FromImm r1 `Ult` FromImm r2 :: Expr v
+            let cond = r1 `ult` r2 :: Expr v
             writeRegister rd $ convert cond
         AND -> do
             (r1, r2, rd) <- decodeAndReadRType @v
@@ -91,7 +91,7 @@ instrSemantics width pc =
             writeRegister rd $ FromImm r1 `LShr` regShamt width (FromImm r2)
         SUB -> do
             (r1, r2, rd) <- decodeAndReadRType @v
-            writeRegister rd $ FromImm r1 `Sub` FromImm r2
+            writeRegister rd $ r1 `sub` r2
         SRA -> do
             (r1, r2, rd) <- decodeAndReadRType @v
             writeRegister rd $ FromImm r1 `AShr` regShamt width (FromImm r2)
@@ -156,48 +156,48 @@ instrSemantics width pc =
         BEQ -> do
             (r1, r2, imm) <- decodeAndReadBType
 
-            let addr = FromImm pc `Add` FromImm imm
-            whenM (isTrue $ FromImm r1 `Eq` FromImm r2) $ do
+            let addr = pc `add` imm
+            whenM (isTrue $ r1 `eq` r2) $ do
                 writePC $ addr
                 whenM (isMisaligned addr) $
                     exception pc "misaligned PC"
         BNE -> do
             (r1, r2, imm) <- decodeAndReadBType
 
-            let addr = FromImm pc `Add` FromImm imm
-            whenM (isFalse $ FromImm r1 `Eq` FromImm r2) $ do
+            let addr = pc `add` imm
+            whenM (isFalse $ r1 `eq` r2) $ do
                 writePC $ addr
                 whenM (isMisaligned addr) $
                     exception pc "misaligned PC"
         BLT -> do
             (r1, r2, imm) <- decodeAndReadBType
 
-            let addr = FromImm pc `Add` FromImm imm
-            whenM (isTrue $ FromImm r1 `Slt` FromImm r2) $ do
+            let addr = pc `add` imm
+            whenM (isTrue $ r1 `slt` r2) $ do
                 writePC addr
                 whenM (isMisaligned addr) $
                     exception pc "misaligned PC"
         BLTU -> do
             (r1, r2, imm) <- decodeAndReadBType
 
-            let addr = FromImm pc `Add` FromImm imm
-            whenM (isTrue $ FromImm r1 `Ult` FromImm r2) $ do
+            let addr = pc `add` imm
+            whenM (isTrue $ r1 `ult` r2) $ do
                 writePC @v $ addr
                 whenM (isMisaligned addr) $
                     exception pc "misaligned PC"
         BGE -> do
             (r1, r2, imm) <- decodeAndReadBType
 
-            let addr = FromImm pc `Add` FromImm imm
-            whenM (isTrue $ FromImm r1 `Sge` FromImm r2) $ do
+            let addr = pc `add` imm
+            whenM (isTrue $ r1 `sge` r2) $ do
                 writePC addr
                 whenM (isMisaligned addr) $
                     exception pc "misaligned PC"
         BGEU -> do
             (r1, r2, imm) <- decodeAndReadBType
 
-            let addr = FromImm pc `Add` FromImm imm
-            whenM (isTrue $ FromImm r1 `Uge` FromImm r2) $ do
+            let addr = pc `add` imm
+            whenM (isTrue $ r1 `uge` r2) $ do
                 writePC addr
                 whenM (isMisaligned addr) $
                     exception pc "misaligned PC"
