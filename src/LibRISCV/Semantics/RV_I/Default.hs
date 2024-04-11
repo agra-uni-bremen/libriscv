@@ -39,7 +39,7 @@ instrSemantics width pc =
     in \case 
         ADDI -> do
             (r1, rd, imm) <- decodeAndReadIType @v
-            writeRegister rd $ r1 `addSImm` imm
+            writeRegister rd $ r1 `addImm` imm
         SLTI -> do
             (r1, rd, imm) <- decodeAndReadIType @v
             let cond = FromImm r1 `Slt` FromImm imm
@@ -62,10 +62,10 @@ instrSemantics width pc =
             writeRegister rd $ FromImm imm
         AUIPC -> do
             (rd, imm) <- decodeUType
-            writeRegister rd $ pc `addSImm` imm
+            writeRegister rd $ pc `addImm` imm
         ADD -> do
             (r1, r2, rd) <- decodeAndReadRType @v
-            writeRegister rd $ r1 `addSImm` r2
+            writeRegister rd $ r1 `addImm` r2
         SLT -> do
             (r1, r2, rd) <- decodeAndReadRType
             let cond = FromImm r1 `Slt` FromImm r2 :: Expr v
@@ -99,7 +99,7 @@ instrSemantics width pc =
             nextInstr <- readPC
             (rd, imm) <- decodeJType
 
-            let newPC = pc `addSImm` imm
+            let newPC = pc `addImm` imm
             writePC newPC
             whenM (isMisaligned newPC) $
                 exception pc "misaligned PC"
@@ -108,51 +108,51 @@ instrSemantics width pc =
             nextInstr <- readPC
             (r1, rd, imm) <- decodeAndReadIType
 
-            let newPC = (r1 `addSImm` imm) `And` fromUInt 0xfffffffe
+            let newPC = (r1 `addImm` imm) `And` fromUInt 0xfffffffe
             writePC newPC
             whenM (isMisaligned newPC) $ 
                 exception pc "misaligned PC"
             writeRegister rd $ FromImm nextInstr
         LB -> do
             (r1, rd, imm) <- decodeAndReadIType @v
-            byte <- load Byte $ r1 `addSImm` imm
+            byte <- load Byte $ r1 `addImm` imm
             -- TODO: Alignment handling
             writeRegister rd (SExt 24 $ FromImm byte)
         LBU -> do
             (r1, rd, imm) <- decodeAndReadIType @v
             -- TODO: Alignment handling
-            byte <- load Byte $ r1 `addSImm` imm
+            byte <- load Byte $ r1 `addImm` imm
             writeRegister rd (ZExt 24 $ FromImm byte)
         LH -> do
             (r1, rd, imm) <- decodeAndReadIType @v
             -- TODO: Alignment handling
-            half <- load Half $ r1 `addSImm` imm
+            half <- load Half $ r1 `addImm` imm
             writeRegister rd (SExt 16 $ FromImm half)
         LHU -> do
             (r1, rd, imm) <- decodeAndReadIType @v
             -- TODO: Alignment handling
-            half <- load Half $ r1 `addSImm` imm
+            half <- load Half $ r1 `addImm` imm
             writeRegister rd (ZExt 16 $ FromImm half)
         LW -> do
             (r1, rd, imm) <- decodeAndReadIType @v
 
             -- TODO: Alignment handling
-            word <- load Word $ r1 `addSImm` imm
+            word <- load Word $ r1 `addImm` imm
             writeRegister rd $ FromImm word
         SB -> do
             (r1, r2, imm) <- decodeAndReadSType @v
 
             -- TODO: Alignment handling
-            store Byte (r1 `addSImm` imm) $ FromImm r2
+            store Byte (r1 `addImm` imm) $ FromImm r2
         SH -> do
             (r1, r2, imm) <- decodeAndReadSType @v
 
             -- TODO: Alignment handling
-            store Half (r1 `addSImm` imm) $ FromImm r2
+            store Half (r1 `addImm` imm) $ FromImm r2
         SW -> do
             (r1, r2, imm) <- decodeAndReadSType @v
             -- TODO: Alignment handling
-            store Word (r1 `addSImm` imm) $ FromImm r2
+            store Word (r1 `addImm` imm) $ FromImm r2
         BEQ -> do
             (r1, r2, imm) <- decodeAndReadBType
 

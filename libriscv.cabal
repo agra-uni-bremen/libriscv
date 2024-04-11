@@ -45,6 +45,8 @@ library
                    , LibRISCV.Effects.Operations.Default.Machine.Memory
                    , LibRISCV.Effects.Logging.Language
                    , LibRISCV.Effects.Logging.Default.Interpreter
+                   , LibRISCV.Effects.Expressions.Type
+                   , LibRISCV.Effects.Expressions.Generator
                    , LibRISCV.Effects.Expressions.Language
                    , LibRISCV.Effects.Expressions.Default.Interpreter
                    , LibRISCV.Effects.Expressions.Default.EvalE
