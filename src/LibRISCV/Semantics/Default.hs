@@ -17,7 +17,6 @@ import Data.Word
 import Control.Monad.Freer
 
 import LibRISCV.Effects.Logging.Language ( LogInstructionFetch, logFetched )
-import Conversion
 import LibRISCV.Effects.Expressions.Expr
 import LibRISCV.Effects.Expressions.Language 
 import Control.Applicative (liftA3, Applicative (liftA2))

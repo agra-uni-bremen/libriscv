@@ -33,7 +33,7 @@ main' (BasicArgs memAddr memSize trace putReg fp) = do
     state@(_, mem) <- mkArchState memAddr memSize
 
     elf <- readElf fp
-    loadElf elf $ storeByteString mem
+    loadElf elf $ storeByteString fromIntegral mem
     entry <- startAddr elf
 
     instRef <- newIORef (0 :: Word32)

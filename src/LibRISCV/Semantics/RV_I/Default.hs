@@ -22,9 +22,7 @@ import Data.Int (Int32)
 import LibRISCV.Effects.Expressions.Expr 
 import LibRISCV.Semantics.Utils
 import Data.BitVector (ones)
-import Conversion
 import Control.Monad.Extra (whenM)
-
 
 instrSemantics :: forall v r . (Member (Operations v) r, Member LogInstructionFetch r, Member (Decoding v) r, Member (ExprEval v) r) => Int -> v -> RV_I -> Eff r ()
 instrSemantics width pc = 
@@ -43,11 +41,11 @@ instrSemantics width pc =
         SLTI -> do
             (r1, rd, imm) <- decodeAndReadIType @v
             let cond = r1 `slt` imm
-            writeRegister rd $ convert cond
+            writeRegister rd cond
         SLTIU -> do
             (r1, rd, imm) <- decodeAndReadIType @v 
             let cond = r1 `ult` imm
-            writeRegister rd $ convert cond
+            writeRegister rd cond
         ANDI -> do
             (r1, rd, imm) <- decodeAndReadIType @v
             writeRegister rd $ r1 `andImm` imm
@@ -69,11 +67,11 @@ instrSemantics width pc =
         SLT -> do
             (r1, r2, rd) <- decodeAndReadRType
             let cond = r1 `slt` r2 :: Expr v
-            writeRegister rd $ convert cond
+            writeRegister rd cond
         SLTU -> do
             (r1, r2, rd) <- decodeAndReadRType
             let cond = r1 `ult` r2 :: Expr v
-            writeRegister rd $ convert cond
+            writeRegister rd cond
         AND -> do
             (r1, r2, rd) <- decodeAndReadRType @v
             writeRegister rd $ r1 `andImm` r2

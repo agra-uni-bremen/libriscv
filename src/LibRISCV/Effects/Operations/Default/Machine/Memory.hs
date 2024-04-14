@@ -5,7 +5,6 @@
 module LibRISCV.Effects.Operations.Default.Machine.Memory where
 
 import LibRISCV
-import Conversion
 import Data.Int ()
 import Data.Bits ( Bits((.|.), (.&.), shift, shiftR) )
 import Data.Word ( Word8, Word16, Word32 )
@@ -99,7 +98,12 @@ storeWord :: (MArray t a IO, WordStorage b a) => Memory t a -> Address -> b -> I
 storeWord = store wordToBytes 4
 
 -- Write a ByteString to memory in little endian byteorder.
-storeByteString :: (MArray t a IO, Conversion Word8 a) => Memory t a -> Address -> BSL.ByteString -> IO ()
-storeByteString mem addr bs =
+storeByteString :: (MArray t a IO) =>
+  (Word8 -> a) ->
+  Memory t a ->
+  Address ->
+  BSL.ByteString ->
+  IO ()
+storeByteString convert mem addr bs =
     mapM_ (\(off, val) -> storeByte mem (addr + off) (convert val))
         $ zip [0..] $ BSL.unpack bs

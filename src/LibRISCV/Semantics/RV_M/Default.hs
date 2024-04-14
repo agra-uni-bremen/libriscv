@@ -22,10 +22,8 @@ import Data.Int (Int32)
 import LibRISCV.Effects.Expressions.Expr 
 import LibRISCV.Semantics.Utils
 import Data.BitVector (ones)
-import Conversion
 import Control.Monad.Extra (whenM, ifM)
 import Data.Function (on)
-
 
 instrSemantics :: forall v r . (Member (Operations v) r, Member LogInstructionFetch r, Member (Decoding v) r, Member (ExprEval v) r) => Int -> RV_M -> Eff r ()
 instrSemantics width = 
