@@ -7,8 +7,7 @@ import Control.Monad (when)
 import Control.Monad.Freer
 import Control.Monad.Freer.Reader
 
-import LibRISCV (RegIdx(SP))
-import LibRISCV.Utils (align)
+import LibRISCV (RegIdx(SP), align)
 import LibRISCV.Loader
 import LibRISCV.Semantics.Default
 import LibRISCV.Semantics.Utils

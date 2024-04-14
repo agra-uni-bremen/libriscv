@@ -17,6 +17,10 @@ type Register = Int32
 -- 32-bit addresses for RV32.
 type Address = Word32
 
+-- Align an address on the next word boundary.
+align :: Address -> Address
+align addr = addr - addr `mod` 4
+
 -- | Type to index for the register file.
 --
 -- >>> toEnum 12 :: RegIdx

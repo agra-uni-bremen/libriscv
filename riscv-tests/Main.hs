@@ -31,7 +31,6 @@ import qualified LibRISCV.Effects.Expressions.Expr as E
 import LibRISCV.Effects.Expressions.Default.Interpreter
 import LibRISCV.Effects.Expressions.Default.EvalE 
 import LibRISCV.Effects.Decoding.Default.Interpreter
-import LibRISCV.Utils
 import LibRISCV.Effects.Operations.Default.Machine.Memory (storeByteString)
 
 import Control.Monad.IO.Class ( MonadIO(..) )

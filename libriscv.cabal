@@ -31,7 +31,6 @@ library
     exposed-modules: LibRISCV
                    , LibRISCV.Loader
                    , LibRISCV.CmdLine
-                   , LibRISCV.Utils
                    , LibRISCV.Effects.Decoding.Language
                    , LibRISCV.Effects.Decoding.Default.Interpreter
                    , LibRISCV.Effects.Operations.Language
@@ -49,7 +48,8 @@ library
                    , LibRISCV.Semantics.RV_I.Default
                    , LibRISCV.Semantics.RV32_I.Default
                    , LibRISCV.Semantics.RV_M.Default
-    other-modules: LibRISCV.Effects.Expressions.Type
+    other-modules: LibRISCV.Utils
+                   , LibRISCV.Effects.Expressions.Type
                    , LibRISCV.Decoder.Opcodes
                    , LibRISCV.Decoder.Generator
                    , LibRISCV.Decoder.Instruction

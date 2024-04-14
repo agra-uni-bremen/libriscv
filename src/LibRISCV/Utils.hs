@@ -19,9 +19,3 @@ whenMword mb act = mb >>= flip when act . (==1)
 -- Like Control.Monad.unless but interprets given Word32 as a bool.
 unlessMword :: Monad m => m Word32 -> m () -> m ()
 unlessMword mb act = mb >>= flip unless act . (==1)
-
-------------------------------------------------------------------------
-
--- Align an address on the next word boundary.
-align :: Address -> Address
-align addr = addr - addr `mod` 4
