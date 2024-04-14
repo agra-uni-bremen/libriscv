@@ -31,9 +31,12 @@ binOps = [
 
 ------------------------------------------------------------------------
 
+foldcase :: String -> String
+foldcase = map toLower
+
 genImm :: String -> Q Dec
 genImm operator = do
-  let name = mkName $ map toLower operator
+  let name = mkName $ foldcase operator
 
   let consName = mkName operator
   let immName = mkName "FromImm"
@@ -46,7 +49,7 @@ genImm operator = do
 
 genImmRval :: String -> Q Dec
 genImmRval operator = do
-  let name = mkName $ (map toLower operator) ++ "Imm"
+  let name = mkName $ (foldcase operator) ++ "Imm"
 
   let onName   = mkName "on"
   let consName = mkName operator
