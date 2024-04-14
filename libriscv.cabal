@@ -28,12 +28,7 @@ common opts
 library
     import:          opts
 
-    -- Modules included in this executable, other than Main.
     exposed-modules: LibRISCV
-                   , LibRISCV.Decoder.Opcodes
-                   , LibRISCV.Decoder.Generator
-                   , LibRISCV.Decoder.Instruction
-                   , LibRISCV.Decoder.YamlParser
                    , LibRISCV.Loader
                    , LibRISCV.CmdLine
                    , LibRISCV.Utils
@@ -45,8 +40,6 @@ library
                    , LibRISCV.Effects.Operations.Default.Machine.Memory
                    , LibRISCV.Effects.Logging.Language
                    , LibRISCV.Effects.Logging.Default.Interpreter
-                   , LibRISCV.Effects.Expressions.Type
-                   , LibRISCV.Effects.Expressions.Generator
                    , LibRISCV.Effects.Expressions.Language
                    , LibRISCV.Effects.Expressions.Default.Interpreter
                    , LibRISCV.Effects.Expressions.Default.EvalE
@@ -56,6 +49,12 @@ library
                    , LibRISCV.Semantics.RV_I.Default
                    , LibRISCV.Semantics.RV32_I.Default
                    , LibRISCV.Semantics.RV_M.Default
+    other-modules: LibRISCV.Effects.Expressions.Type
+                   , LibRISCV.Decoder.Opcodes
+                   , LibRISCV.Decoder.Generator
+                   , LibRISCV.Decoder.Instruction
+                   , LibRISCV.Decoder.YamlParser
+                   , LibRISCV.Effects.Expressions.Generator
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
