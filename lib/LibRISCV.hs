@@ -7,14 +7,14 @@ import Data.Ix
 import qualified Data.ByteString.Lazy as BSL
 import Data.BitVector
 
--- 32-bit addresses for RV32.
+-- | Representation of a 32-bit addresses for RV32.
 type Address = Word32
 
--- Align an address on the next word boundary.
+-- | Align an 'Address' on the next word boundary.
 align :: Address -> Address
 align addr = addr - addr `mod` 4
 
--- | Type to index for the register file.
+-- | Type to represent an index for the register file.
 --
 -- >>> toEnum 12 :: RegIdx
 -- A2
