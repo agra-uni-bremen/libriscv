@@ -50,8 +50,8 @@ library
                    , LibRISCV.Semantics.RV_M.Default
     other-modules: LibRISCV.Utils
                    , LibRISCV.Effects.Expressions.Type
-                   , LibRISCV.Decoder.Opcodes
                    , LibRISCV.Decoder.Generator
+                   , LibRISCV.Decoder.Opcodes
                    , LibRISCV.Decoder.Instruction
                    , LibRISCV.Decoder.YamlParser
                    , LibRISCV.Effects.Expressions.Generator
@@ -96,13 +96,20 @@ test-suite test
       Haskell2010
     type:
       exitcode-stdio-1.0
-    hs-source-dirs:
-      test
-    main-is:
-      Main.hs
+    hs-source-dirs: test, src
+    main-is: Main.hs
+
     other-modules:
+      LibRISCV
+      LibRISCV.Decoder.Opcodes
+      LibRISCV.Decoder.Instruction
+      LibRISCV.Decoder.Generator
+      LibRISCV.Decoder.YamlParser
+      LibRISCV.Effects.Operations.Default.Machine.Memory
+      LibRISCV.Effects.Operations.Default.Machine.Register
       DecoderTest
       ArchStateTest
+
     build-depends:
         base         >= 4.15.0.0
       , array        >= 0.5.4.0
@@ -111,3 +118,7 @@ test-suite test
       , bytestring   >= 0.10.10 && <0.12
       , bv          ^>= 0.5
       , libriscv     >= 0.1.0.0
+      , containers
+      , yaml
+      , template-haskell
+      , file-embed
