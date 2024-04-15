@@ -115,22 +115,22 @@ instrSemantics width pc =
             (r1, rd, imm) <- decodeAndReadIType @v
             byte <- load Byte $ r1 `addImm` imm
             -- TODO: Alignment handling
-            writeRegister rd (SExt 24 $ FromImm byte)
+            writeRegister rd $ sextImm 24 byte
         LBU -> do
             (r1, rd, imm) <- decodeAndReadIType @v
             -- TODO: Alignment handling
             byte <- load Byte $ r1 `addImm` imm
-            writeRegister rd (ZExt 24 $ FromImm byte)
+            writeRegister rd $ zextImm 24 byte
         LH -> do
             (r1, rd, imm) <- decodeAndReadIType @v
             -- TODO: Alignment handling
             half <- load Half $ r1 `addImm` imm
-            writeRegister rd (SExt 16 $ FromImm half)
+            writeRegister rd $ sextImm 16 half
         LHU -> do
             (r1, rd, imm) <- decodeAndReadIType @v
             -- TODO: Alignment handling
             half <- load Half $ r1 `addImm` imm
-            writeRegister rd (ZExt 16 $ FromImm half)
+            writeRegister rd $ zextImm 16 half
         LW -> do
             (r1, rd, imm) <- decodeAndReadIType @v
 

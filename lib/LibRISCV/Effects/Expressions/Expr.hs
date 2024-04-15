@@ -19,4 +19,10 @@ regShamt w a = a `And` FromInt w 0x1f
 
 ------------------------------------------------------------------------
 
+zextImm :: Int -> a -> Expr a
+zextImm w = ZExt w . FromImm
+
+sextImm :: Int -> a -> Expr a
+sextImm w = SExt w . FromImm
+
 generateImmediates

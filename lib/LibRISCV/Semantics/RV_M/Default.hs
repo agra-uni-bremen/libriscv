@@ -39,25 +39,25 @@ instrSemantics width =
     MUL -> do
         (r1, r2, rd) <- decodeAndReadRType @v
         let
-            multRes = (Mul `on` (SExt 32 . FromImm)) r1 r2
+            multRes = (Mul `on` (sextImm 32)) r1 r2
             res = extract32 0 multRes
         writeRegister rd res
     MULH -> do
         (r1, r2, rd) <- decodeAndReadRType @v
         let
-            multRes = (Mul `on` (SExt 32 . FromImm)) r1 r2
+            multRes = (Mul `on` (sextImm 32)) r1 r2
             res = extract32 32 multRes
         writeRegister rd res
     MULHU -> do
         (r1, r2, rd) <- decodeAndReadRType @v
         let
-            multRes = (Mul `on` (ZExt 32 . FromImm)) r1 r2
+            multRes = (Mul `on` (zextImm 32)) r1 r2
             res = extract32 32 multRes
         writeRegister rd res
     MULHSU -> do
         (r1, r2, rd) <- decodeAndReadRType @v
         let
-            multRes = (SExt 32 . FromImm) r1 `Mul` (ZExt 32 . FromImm) r2
+            multRes = (sextImm 32) r1 `Mul` (zextImm 32) r2
             res = extract32 32 multRes
         writeRegister rd res
     DIV -> do
