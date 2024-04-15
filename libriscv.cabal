@@ -62,14 +62,15 @@ library
                    , LibRISCV.Effects.Expressions.Default.Interpreter
                    , LibRISCV.Effects.Expressions.Default.EvalE
                    , LibRISCV.Effects.Expressions.Expr
+                   , LibRISCV.Semantics
+    other-modules: LibRISCV.Utils
+                   , LibRISCV.Effects.Expressions.Type
+                   , LibRISCV.Effects.Expressions.Generator
                    , LibRISCV.Semantics.Default
                    , LibRISCV.Semantics.Utils
                    , LibRISCV.Semantics.RV_I.Default
                    , LibRISCV.Semantics.RV32_I.Default
                    , LibRISCV.Semantics.RV_M.Default
-    other-modules: LibRISCV.Utils
-                   , LibRISCV.Effects.Expressions.Type
-                   , LibRISCV.Effects.Expressions.Generator
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

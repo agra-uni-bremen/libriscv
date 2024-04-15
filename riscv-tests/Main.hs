@@ -22,7 +22,7 @@ import Data.IORef (newIORef)
 
 import LibRISCV
 import LibRISCV.Loader
-import LibRISCV.Semantics.Default
+import LibRISCV.Semantics (readRegister, buildAST)
 import LibRISCV.CmdLine
 import LibRISCV.Effects.Logging.Default.Interpreter
 import LibRISCV.Effects.Operations.Default.Interpreter
