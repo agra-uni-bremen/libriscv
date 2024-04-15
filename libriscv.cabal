@@ -76,7 +76,7 @@ library
     -- other-extensions:
     build-depends:
         libriscv-internal
-        , base                    >= 4.15.0.0
+        , base                  >= 4.15.0.0
         , array                ^>= 0.5.4.0
         , filepath             ^>= 1.4.2.1
         , bytestring            >= 0.10.10 && <0.12
@@ -99,11 +99,12 @@ executable riscv-tiny
     hs-source-dirs:       app
     default-language:     Haskell2010
     build-depends:
-        base                    >= 4.15.0.0
-        , libriscv              >= 0.1.0.0
-        , freer-simple         ^>= 1.2.1.2
-        , optparse-applicative  >= 0.16.1 && <0.19
-        , bv                   ^>= 0.5
+        base
+        , libriscv
+        , freer-simple
+        , optparse-applicative
+        , bv
+
 test-suite test
     import: opts
     default-language:
@@ -119,10 +120,10 @@ test-suite test
 
     build-depends:
       libriscv-internal
-      , base         >= 4.15.0.0
-      , array        >= 0.5.4.0
+      , base
+      , libriscv
+      , array
+      , bytestring
+      , bv
       , tasty        >= 1.4.2.3
       , tasty-hunit  >= 0.10.0.3
-      , bytestring   >= 0.10.10 && <0.12
-      , bv          ^>= 0.5
-      , libriscv     >= 0.1.0.0
