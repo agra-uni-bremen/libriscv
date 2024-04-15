@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
-module LibRISCV.Decoder.YamlParser where
+module LibRISCV.Internal.Decoder.YamlParser where
 
 import Data.Word (Word32)
 import GHC.Generics ( Generic )

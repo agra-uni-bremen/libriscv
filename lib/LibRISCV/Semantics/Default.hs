@@ -12,7 +12,7 @@
 {-# LANGUAGE BangPatterns #-}
 module LibRISCV.Semantics.Default where
 
-import LibRISCV.Decoder.Opcodes
+import LibRISCV.Internal.Decoder.Opcodes
 import Data.Word
 import Control.Monad.Freer
 

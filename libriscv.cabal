@@ -25,6 +25,25 @@ data-files:
 common opts
     ghc-options:    -Wincomplete-patterns -Wincomplete-uni-patterns -Wunused-matches -Werror
 
+library libriscv-internal
+    import:          opts
+
+    exposed-modules: LibRISCV.Internal.Decoder.Generator
+                   , LibRISCV.Internal.Decoder.Opcodes
+                   , LibRISCV.Internal.Decoder.Instruction
+                   , LibRISCV.Internal.Decoder.YamlParser
+
+    build-depends:
+        base
+        , yaml                  >= 0.11.8.0
+        , containers
+        , template-haskell
+        , bv
+        , file-embed
+
+    hs-source-dirs:   internal
+    default-language: Haskell2010
+
 library
     import:          opts
 
@@ -50,16 +69,13 @@ library
                    , LibRISCV.Semantics.RV_M.Default
     other-modules: LibRISCV.Utils
                    , LibRISCV.Effects.Expressions.Type
-                   , LibRISCV.Decoder.Generator
-                   , LibRISCV.Decoder.Opcodes
-                   , LibRISCV.Decoder.Instruction
-                   , LibRISCV.Decoder.YamlParser
                    , LibRISCV.Effects.Expressions.Generator
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
     build-depends:
-        base                    >= 4.15.0.0
+        libriscv-internal
+        , base                    >= 4.15.0.0
         , array                ^>= 0.5.4.0
         , filepath             ^>= 1.4.2.1
         , bytestring            >= 0.10.10 && <0.12
@@ -71,12 +87,9 @@ library
         , bv                   ^>= 0.5
         , parameterized-utils  ^>= 2.1.6.0
         , extra                 >= 1.7.0
-        , yaml                  >= 0.11.8.0
-        , containers            >= 0.6.5.1
         , template-haskell      >= 2.18.0
-        , file-embed
 
-    hs-source-dirs:   src
+    hs-source-dirs:   lib
     default-language: Haskell2010
 
 executable riscv-tiny
@@ -96,29 +109,19 @@ test-suite test
       Haskell2010
     type:
       exitcode-stdio-1.0
-    hs-source-dirs: test, src
+    hs-source-dirs: test
     main-is: Main.hs
 
     other-modules:
-      LibRISCV
-      LibRISCV.Decoder.Opcodes
-      LibRISCV.Decoder.Instruction
-      LibRISCV.Decoder.Generator
-      LibRISCV.Decoder.YamlParser
-      LibRISCV.Effects.Operations.Default.Machine.Memory
-      LibRISCV.Effects.Operations.Default.Machine.Register
       DecoderTest
       ArchStateTest
 
     build-depends:
-        base         >= 4.15.0.0
+      libriscv-internal
+      , base         >= 4.15.0.0
       , array        >= 0.5.4.0
       , tasty        >= 1.4.2.3
       , tasty-hunit  >= 0.10.0.3
       , bytestring   >= 0.10.10 && <0.12
       , bv          ^>= 0.5
       , libriscv     >= 0.1.0.0
-      , containers
-      , yaml
-      , template-haskell
-      , file-embed

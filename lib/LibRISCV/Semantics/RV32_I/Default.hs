@@ -13,7 +13,7 @@
 
 module LibRISCV.Semantics.RV32_I.Default where
 
-import LibRISCV.Decoder.Opcodes (RV_I(..), RV_M (..), RV32_I (..))
+import LibRISCV.Internal.Decoder.Opcodes (RV_I(..), RV_M (..), RV32_I (..))
 import Control.Monad.Freer
 import LibRISCV.Effects.Operations.Language (Operations(..))
 import LibRISCV.Effects.Logging.Language (LogInstructionFetch)

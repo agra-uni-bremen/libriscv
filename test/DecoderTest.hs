@@ -6,8 +6,8 @@ import Test.Tasty.HUnit
 import Data.Int
 
 import LibRISCV
-import LibRISCV.Decoder.Opcodes
-import LibRISCV.Decoder.Instruction
+import LibRISCV.Internal.Decoder.Opcodes
+import LibRISCV.Internal.Decoder.Instruction
 
 import Data.BitVector 
 

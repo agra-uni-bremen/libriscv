@@ -1,4 +1,4 @@
-module LibRISCV.Decoder.Instruction where
+module LibRISCV.Internal.Decoder.Instruction where
 
 import Data.Word
 import Data.Bits

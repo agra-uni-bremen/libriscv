@@ -4,7 +4,7 @@
 module LibRISCV.Effects.Decoding.Language where
 
 import Data.Data (Proxy)
-import LibRISCV.Decoder.Opcodes (InstructionType)
+import LibRISCV.Internal.Decoder.Opcodes (InstructionType)
 import Control.Monad.Freer.TH (makeEffect)
 
 

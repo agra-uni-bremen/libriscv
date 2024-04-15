@@ -9,7 +9,7 @@
 module LibRISCV.Effects.Logging.Language where
 
 import LibRISCV (Address)
-import LibRISCV.Decoder.Opcodes (InstructionType)
+import LibRISCV.Internal.Decoder.Opcodes (InstructionType)
 import Control.Monad.Freer
 import Control.Monad.Freer.TH ( makeEffect )
 

@@ -1,9 +1,9 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# LANGUAGE TupleSections #-}
-module LibRISCV.Decoder.Generator where
+module LibRISCV.Internal.Decoder.Generator where
 
 import Language.Haskell.TH hiding (match)
-import LibRISCV.Decoder.YamlParser
+import LibRISCV.Internal.Decoder.YamlParser
 import Data.Yaml
 import Control.Monad.IO.Class (liftIO, MonadIO)
 import Control.Monad (forM)
