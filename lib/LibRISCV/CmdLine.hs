@@ -1,20 +1,26 @@
+-- | Implementation of common command-line arguments using <https://hackage.haskell.org/package/optparse-applicative  optparse-applicative>.
 module LibRISCV.CmdLine where
 
 import Data.Word
 import Options.Applicative
 
--- BasicArgs can be combined with additional parsers using
--- the <*> applicative operator provided by optparse-applicative.
---
--- See: https://github.com/pcapriotti/optparse-applicative#applicative
-
+-- | t'BasicArgs' can be combined/extended with additional parsers using
+-- the '<*>' applicative operator provided by "Options.Applicative".
 data BasicArgs = BasicArgs
     { memAddr  :: Word32
+    -- ^ Start address of the general-purpose memory.
     , memStart :: Word32
+    -- ^ Size of the memory in bytes.
     , trace    :: Bool
+    -- ^ Whether to enable instruction tracing.
     , putRegs  :: Bool
-    , file     :: String }
+    -- ^ Whether to print all register values at the end.
+    , file     :: String
+    -- ^ Path to ELf file which should be executed.
+    }
+-- TODO: Rename memStart to memSize.
 
+-- | "Options.Applicative" parser for t'BasicArgs'.
 basicArgs :: Parser BasicArgs
 basicArgs = BasicArgs
     <$> option auto
