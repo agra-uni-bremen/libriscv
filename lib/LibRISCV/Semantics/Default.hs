@@ -45,7 +45,10 @@ import Control.Monad.Extra (whenM, unlessM, ifM)
 --
 -- See: https://github.com/lexi-lambda/freer-simple/issues/7
 
-instrSemantics :: forall v r . (Member (Operations v) r, Member LogInstructionFetch r, Member (Decoding v) r, Member (ExprEval v) r) => Int -> v -> Eff r ()
+instrSemantics :: forall v r .
+  ( Member (Operations v) r
+  , Member LogInstructionFetch r
+  , Member (Decoding v) r, Member (ExprEval v) r) => Int -> v -> Eff r ()
 instrSemantics width pc = do 
     ty <- withInstrType @v Proxy id
     logFetched ty
@@ -55,7 +58,11 @@ instrSemantics width pc = do
         RV_M inst   -> RV_M.instrSemantics @v width inst >> buildInstruction @v width
         InvalidInstruction -> pure ()
 
-buildInstruction :: forall v r . (Member (Operations v) r, Member LogInstructionFetch r, Member (Decoding v) r, Member (ExprEval v) r) => Int -> Eff r ()
+buildInstruction :: forall v r .
+  ( Member (Operations v) r
+  , Member LogInstructionFetch r
+  , Member (Decoding v) r
+  , Member (ExprEval v) r) => Int -> Eff r ()
 buildInstruction width = do
     -- fetch instruction at current PC
     pc <- readPC @v
@@ -67,7 +74,16 @@ buildInstruction width = do
     writePC $ FromImm pc `Add` FromInt width 4
     instrSemantics width pc
 
-buildAST :: forall w v r . (KnownNat w, Member (Operations v) r, Member LogInstructionFetch r, Member (Decoding v) r, Member (ExprEval v) r) => v -> Eff r ()
+-- | Obtain the free monad AST for a program loaded into memory, e.g. through
+-- the provided ELF 'LibRISCV.Loader' implementation. The function takes one
+-- argument  which corresponds to an address in memory at which program
+-- execution will start. An instruction word will be loaded from this address,
+-- decoded, and executed.
+buildAST :: forall w v r .
+  ( KnownNat w
+  , Member (Operations v) r
+  , Member LogInstructionFetch r
+  , Member (Decoding v ) r, Member (ExprEval v) r) => v -> Eff r ()
 buildAST entry =
     let
         !width = fromIntegral (intValue (knownNat :: NatRepr w))

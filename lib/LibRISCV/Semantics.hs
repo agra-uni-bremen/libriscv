@@ -1,3 +1,5 @@
+-- | Functions for interacting with the free monad abstraction used to formally
+-- describe the semantics of RISC-V instructions.
 module LibRISCV.Semantics
   ( LibRISCV.Semantics.Default.buildAST
   , LibRISCV.Semantics.Utils.writeRegister
