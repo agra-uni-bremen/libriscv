@@ -9,7 +9,7 @@ import Options.Applicative
 data BasicArgs = BasicArgs
     { memAddr  :: Word32
     -- ^ Start address of the general-purpose memory.
-    , memStart :: Word32
+    , memSize  :: Word32
     -- ^ Size of the memory in bytes.
     , trace    :: Bool
     -- ^ Whether to enable instruction tracing.
