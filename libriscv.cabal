@@ -2,25 +2,35 @@ cabal-version:      2.4
 name:               libriscv
 version:            0.1.0.0
 
--- A short (one-line) description of the package.
--- synopsis:
+synopsis:           A versatile and flexible formal model for building custom RISC-V instruction interpreters.
+description:
+  A formal model for the <https://riscv.org/ RISC-V> /Instruction Set Architecture/ (ISA).
+  Contrary to other Haskell RISC-V ISA models, like <https://github.com/GaloisInc/grift GRIFT>
+  or <https://github.com/mit-plv/riscv-semantics riscv-semantics>, LibRISCV is specifically
+  tailored to the creation of custom ISA interpreters. To this end, it is designed for
+  flexibility, allowing a versatile representation of instruction operands. For example,
+  instruction operands can be <https://en.wikipedia.org/wiki/Satisfiability_modulo_theories SMT>
+  expressions for <https://doi.org/10.48550/arXiv.2404.04132 symbolic execution> of binary code.
+  .
+  LibRISCV abstractly describes instruction semantics using an /Embedded Domain Specific Language/
+  (EDSL) with <https://doi.org/10.1145/2887747.2804319 free(r) monads>. This Haskell library
+  is intended to build custom interpreters for this free monad. The entry point for this purpose is
+  the 'LibRISCV.Semantics.buildAST' function which obtains the free monad AST based on an entry address.
+  The entry address can be obtained from a provided ELF loader implementation, this "Loader" module
+  is also responsible for loading binary instructions into a provided memory implementation. Refer to
+  provided example interpreters in the <https://github.com/agra-uni-bremen/libriscv GitHub repository>
+  for practical usage instruction. More detailed information on LibRISCV and its concepts is also
+  available in a <https://doi.org/10.1007/978-3-031-38938-2_2 TFP'23 publication>.
 
--- A longer description of the package.
--- description:
-
--- A URL where users can report bugs.
--- bug-reports:
-
+homepage:           https://github.com/agra-uni-bremen/libriscv
+bug-reports:        https://github.com/agra-uni-bremen/libriscv/issues
 license:            MIT
+license-file:       LICENSE.txt
 author:             Sören Tempel, Tobias Brandt, and Christoph Lüth
 maintainer:         Group of Computer Architecture <riscv@informatik.uni-bremen.de>
 copyright:          (c) 2022 University of Bremen
-data-files: 
-    data/instr_dict.yaml
--- A copyright notice.
--- copyright:
--- category:
--- extra-source-files: CHANGELOG.md
+data-files:         data/instr_dict.yaml
+category:           Formal Languages
 
 common opts
     ghc-options:    -Wincomplete-patterns -Wincomplete-uni-patterns -Wunused-matches -Werror
