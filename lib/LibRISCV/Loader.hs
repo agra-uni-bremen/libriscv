@@ -3,7 +3,10 @@
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE RankNTypes #-}
 
-module LibRISCV.Loader (readElf, loadElf, startAddr) where
+-- | An implementation of an /Executable Loadable Format/ (ELF) loader. The module
+-- is responsible for loading instructions into a provided memory implementation
+-- and obtaining the entry point for the executable.
+module LibRISCV.Loader (readElf, LoadFunc, loadElf, startAddr) where
 
 import LibRISCV
 import Control.Monad.IO.Class (MonadIO, liftIO)
@@ -30,9 +33,6 @@ import qualified Data.ByteString.Lazy as BSL
 import System.FilePath ()
 import Debug.Trace (trace)
 
--- Load a ByteString into memory at a given address.
-type LoadFunc m = Address -> BSL.ByteString -> m ()
-
 -- Filter all ELF segments with type PT_LOAD.
 loadableSegments :: ElfListXX a -> [ElfXX 'Segment a]
 loadableSegments (ElfListCons v@(ElfSegment { .. }) l) =
@@ -57,17 +57,23 @@ loadSegment loadFunc ElfSegment{..} =
 
 ------------------------------------------------------------------------
 
--- Load all loadable segments of an ELF file into memory.
+-- | Load a 'BSL.ByteString' into memory at a given address..
+type LoadFunc m = Address -> BSL.ByteString -> m ()
+
+-- | Load all loadable segments of an ELF file into memory. An addition to the
+-- 'Data.Elf.Elf' file, it requires an implementation of a 'LoadFunc' which is
+-- responsible for converting a 'BSL.ByteString' to the internal value
+-- representation.
 loadElf :: (Monad m) => Elf -> LoadFunc m -> m ()
 loadElf (Elf classS elfs) loadFunc = withSingElfClassI classS $ do
     let loadable = loadableSegments elfs
     mapM_ (loadSegment loadFunc) loadable
 
--- Read ELF from given file.
+-- | Read an ELF from a given 'FilePath'.
 readElf :: FilePath -> IO Elf
 readElf path = readFileLazy path >>= parseElf
 
--- Return the entry point from the ELF header.
+-- | Return the entry point from the ELF header.
 startAddr :: MonadCatch m => Elf -> m Word32
 startAddr (Elf SELFCLASS32 elfs) = ehEntry <$> elfFindHeader elfs
 startAddr (Elf SELFCLASS64 _) = error "64-bit executables not supported"
