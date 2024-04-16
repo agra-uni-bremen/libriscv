@@ -16,8 +16,7 @@ import LibRISCV.Effects.Logging.Default.Interpreter
 import LibRISCV.Effects.Operations.Default.Interpreter
     ( mkArchState, dumpState, defaultInstructions )
 import qualified LibRISCV.Effects.Expressions.Expr as E
-import LibRISCV.Effects.Expressions.Default.Interpreter (defaultEval)
-import LibRISCV.Effects.Expressions.Default.EvalE ( evalE )
+import LibRISCV.Effects.Expressions.Default.Interpreter (defaultEval, evalE)
 import LibRISCV.Effects.Decoding.Default.Interpreter
     ( defaultDecoding )
 import Data.BitVector 

@@ -70,7 +70,6 @@ library
                    , LibRISCV.Effects.Logging.Default.Interpreter
                    , LibRISCV.Effects.Expressions.Language
                    , LibRISCV.Effects.Expressions.Default.Interpreter
-                   , LibRISCV.Effects.Expressions.Default.EvalE
                    , LibRISCV.Effects.Expressions.Expr
                    , LibRISCV.Semantics
     other-modules: LibRISCV.Utils

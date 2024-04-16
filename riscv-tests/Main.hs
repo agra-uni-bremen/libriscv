@@ -29,7 +29,6 @@ import LibRISCV.Effects.Operations.Default.Interpreter
 import LibRISCV.Effects.Operations.Language
 import qualified LibRISCV.Effects.Expressions.Expr as E
 import LibRISCV.Effects.Expressions.Default.Interpreter
-import LibRISCV.Effects.Expressions.Default.EvalE 
 import LibRISCV.Effects.Decoding.Default.Interpreter
 import LibRISCV.Effects.Operations.Default.Machine.Memory (storeByteString)
 
