@@ -7,12 +7,6 @@ import Data.Ix
 import qualified Data.ByteString.Lazy as BSL
 import Data.BitVector
 
-type Signed32 = Int32
-type Unsigned32 = Word32
-
--- Type used to represent RISC-V registers.
-type Register = Int32
-
 -- 32-bit addresses for RV32.
 type Address = Word32
 
