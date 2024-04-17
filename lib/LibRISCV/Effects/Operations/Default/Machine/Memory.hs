@@ -1,7 +1,6 @@
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE TypeApplications #-}
 
 -- | Provides an implementatio of a byte-addressable memory, intended for internal
 -- usage in interpreters for the 'LibRISCV.Effects.Operations.Operations' effect.

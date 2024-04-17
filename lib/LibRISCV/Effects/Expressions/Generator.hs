@@ -49,7 +49,7 @@ genImm operator = do
 
 genImmRval :: String -> Q Dec
 genImmRval operator = do
-  let name = mkName $ (foldcase operator) ++ "Imm"
+  let name = mkName $ foldcase operator ++ "Imm"
 
   let onName   = mkName "on"
   let consName = mkName operator

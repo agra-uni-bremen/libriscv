@@ -16,7 +16,7 @@ import Control.Monad.Freer ( type (~>) )
 -- debugging but is quite verbose in the common case.
 defaultLogging :: MonadIO m => LogInstructionFetch ~> m
 defaultLogging = liftIO . \case
-    LogFetched inst -> putStrLn $ show inst
+    LogFetched inst -> print inst
 
 -- | A stub implementation of an effectful interpreter which ignores any logging
 -- effects entirely. Should be used when no debugging output is desired.

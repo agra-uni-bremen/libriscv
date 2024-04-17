@@ -8,7 +8,7 @@
 -- | Implements the default (concrete) interpreter for the 'Operations' effect.
 module LibRISCV.Effects.Operations.Default.Interpreter where
 
-import Data.Int (Int32)
+import Data.Int ( Int32, Int32 )
 import Control.Monad.IO.Class ( MonadIO(..) )
 import LibRISCV.Effects.Operations.Language
     ( Operations(..), Size(Word, Byte, Half) )
@@ -17,7 +17,6 @@ import LibRISCV ( Address )
 import qualified LibRISCV.Effects.Operations.Default.Machine.Memory as MEM
 import qualified LibRISCV.Effects.Operations.Default.Machine.Register as REG
 import Data.Word ( Word8, Word16, Word32 )
-import Data.Int ( Int32 )
 import Data.BitVector ( bitVec, BV )
 import Control.Monad.Freer ( type (~>) )
 import Numeric (showHex)

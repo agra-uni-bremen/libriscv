@@ -19,13 +19,13 @@ import LibRISCV.Effects.Logging.Language (LogInstructionFetch)
 import LibRISCV.Effects.Decoding.Language (Decoding, decodeShamt)
 import LibRISCV.Effects.Expressions.Language (ExprEval, isTrue, isFalse)
 import Data.Int (Int32)
-import LibRISCV.Effects.Expressions.Expr 
+import LibRISCV.Effects.Expressions.Expr
 import LibRISCV.Semantics.Utils
 import Data.BitVector (ones)
 import Control.Monad.Extra (whenM)
 
 instrSemantics :: forall v r . (Member (Operations v) r, Member LogInstructionFetch r, Member (Decoding v) r, Member (ExprEval v) r) => Int -> v -> RV_I -> Eff r ()
-instrSemantics width pc = 
+instrSemantics width pc =
     let
         fromUInt = FromInt width
         mask1 = FromInt width (2^width - 1)
@@ -34,7 +34,7 @@ instrSemantics width pc =
         -- False if a given address is not aligned at the four-byte boundary.
         isMisaligned :: Expr v -> Eff r Bool
         isMisaligned addr = isTrue $ (addr `And` fromUInt 0x3) `Uge` fromUInt 1
-    in \case 
+    in \case
         ADDI -> do
             (r1, rd, imm) <- decodeAndReadIType @v
             writeRegister rd $ r1 `addImm` imm
@@ -43,7 +43,7 @@ instrSemantics width pc =
             let cond = r1 `slt` imm
             writeRegister rd cond
         SLTIU -> do
-            (r1, rd, imm) <- decodeAndReadIType @v 
+            (r1, rd, imm) <- decodeAndReadIType @v
             let cond = r1 `ult` imm
             writeRegister rd cond
         ANDI -> do
@@ -108,7 +108,7 @@ instrSemantics width pc =
 
             let newPC = (r1 `addImm` imm) `And` fromUInt 0xfffffffe
             writePC newPC
-            whenM (isMisaligned newPC) $ 
+            whenM (isMisaligned newPC) $
                 exception pc "misaligned PC"
             writeRegister rd $ FromImm nextInstr
         LB -> do
@@ -156,7 +156,7 @@ instrSemantics width pc =
 
             let addr = pc `add` imm
             whenM (isTrue $ r1 `eq` r2) $ do
-                writePC $ addr
+                writePC addr
                 whenM (isMisaligned addr) $
                     exception pc "misaligned PC"
         BNE -> do
@@ -164,7 +164,7 @@ instrSemantics width pc =
 
             let addr = pc `add` imm
             whenM (isFalse $ r1 `eq` r2) $ do
-                writePC $ addr
+                writePC addr
                 whenM (isMisaligned addr) $
                     exception pc "misaligned PC"
         BLT -> do
