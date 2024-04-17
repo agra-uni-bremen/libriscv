@@ -40,12 +40,10 @@ import Data.BitVector (BV, bitVec)
 sys_exit :: Int32
 sys_exit = 93
 
-type ECallEnv = DefaultInstructionsEnv
-
 -- The riscv-tests repository uses a special ecall to communicate test
 -- failures to the execution environment. This function implements the
 -- ECALL instruction accordingly.
-ecallHandler :: ECallEnv -> Operations BV ~> IO
+ecallHandler :: ArchState -> Operations BV ~> IO
 ecallHandler env@(regFile, mem) = \case
         Ecall pc -> do
             sys <- liftIO $ REG.readRegister regFile A7

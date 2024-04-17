@@ -5,6 +5,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
 
+-- | Implements the default (concrete) interpreter for the 'Operations' effect.
 module LibRISCV.Effects.Operations.Default.Interpreter where
 
 import Data.Int (Int32)
@@ -21,23 +22,23 @@ import Data.BitVector ( bitVec, BV )
 import Control.Monad.Freer ( type (~>) )
 import Numeric (showHex)
 
-
--- Architectural state of the executor.
+-- | Representation of the concrete architectural state of the interpreter.
 type ArchState = (REG.RegisterFile IOUArray Int32, MEM.Memory IOUArray Word8)
 
+-- | Create a new 'ArchState' based on a memory start address and a memory size.
 mkArchState :: Address -> Word32 -> IO ArchState
 mkArchState memStart memSize = do
     reg <- REG.mkRegFile 0
     mem <- MEM.mkMemory memStart memSize
     pure (reg, mem)
 
+-- | Write a textual representation of the 'ArchState' to standard output.
 dumpState :: ArchState -> IO ()
 dumpState (r, _) =
     REG.dumpRegs (showHex . fromIntegral @Int32 @Word32) r >>= putStr
 
-type DefaultInstructionsEnv = ArchState
-
-defaultInstructions :: MonadIO m => DefaultInstructionsEnv -> Operations BV ~> m
+-- | Implements concrete interpretation of the 'Operations' effect based on a 'BV' value representation.
+defaultInstructions :: MonadIO m => ArchState -> Operations BV ~> m
 defaultInstructions (regFile, mem) = liftIO . \case
     ReadRegister idx -> bitVec 32 <$> REG.readRegister regFile (toEnum $ fromIntegral idx)
     WriteRegister idx reg -> REG.writeRegister regFile (toEnum $ fromIntegral idx) (fromIntegral reg)

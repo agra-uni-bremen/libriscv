@@ -3,14 +3,20 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE InstanceSigs #-}
 {-# LANGUAGE LambdaCase #-}
+
+-- | Implements an effect for interactions with the architectural state, upon
+-- which instructions are executed (register file, memory, program counter, etc.).
 module LibRISCV.Effects.Operations.Language where
 
 import LibRISCV.Effects.Expressions.Expr (Expr)
 import Control.Monad.Freer.TH ( makeEffect )
 import LibRISCV.Internal.Decoder.Opcodes (InstructionType)
 
-data Size = Byte | Half | Word deriving (Eq, Show)
+-- | Abstraction for expressing a 8-, 16-, or 32-bit size.
+data Size = Byte | Half | Word
+  deriving (Eq, Show)
 
+-- | Returns the size in bits (either 8, 16, or 32).
 bitSize :: Size -> Int
 bitSize Byte = 8
 bitSize Half = 16
