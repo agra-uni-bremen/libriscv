@@ -6,6 +6,9 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE DataKinds #-}
+
+-- | Implements the logging effect for instruction tracing. This effect
+-- is primarly intended to be used for debugging.
 module LibRISCV.Effects.Logging.Language where
 
 import LibRISCV (Address)
