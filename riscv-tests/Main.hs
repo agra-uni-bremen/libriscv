@@ -22,16 +22,14 @@ import Data.IORef (newIORef)
 
 import LibRISCV
 import LibRISCV.Loader
-import LibRISCV.Semantics.Default
+import LibRISCV.Semantics (readRegister, buildAST)
 import LibRISCV.CmdLine
 import LibRISCV.Effects.Logging.Default.Interpreter
 import LibRISCV.Effects.Operations.Default.Interpreter
 import LibRISCV.Effects.Operations.Language
 import qualified LibRISCV.Effects.Expressions.Expr as E
 import LibRISCV.Effects.Expressions.Default.Interpreter
-import LibRISCV.Effects.Expressions.Default.EvalE 
 import LibRISCV.Effects.Decoding.Default.Interpreter
-import LibRISCV.Utils
 import LibRISCV.Effects.Operations.Default.Machine.Memory (storeByteString)
 
 import Control.Monad.IO.Class ( MonadIO(..) )
@@ -42,16 +40,14 @@ import Data.BitVector (BV, bitVec)
 sys_exit :: Int32
 sys_exit = 93
 
-type ECallEnv = DefaultInstructionsEnv
-
 -- The riscv-tests repository uses a special ecall to communicate test
 -- failures to the execution environment. This function implements the
 -- ECALL instruction accordingly.
-ecallHandler :: ECallEnv -> Operations BV ~> IO
-ecallHandler env@(regFile, mem) = \case
+ecallHandler :: ArchState -> Operations BV ~> IO
+ecallHandler env = \case
         Ecall pc -> do
-            sys <- liftIO $ REG.readRegister regFile A7
-            arg <- liftIO $ REG.readRegister regFile A0
+            sys <- liftIO $ REG.readRegister (getReg env) A7
+            arg <- liftIO $ REG.readRegister (getReg env) A0
 
             when (sys /= sys_exit) $
                 fail "unknown syscall"
@@ -64,10 +60,10 @@ ecallHandler env@(regFile, mem) = \case
 
 main' :: BasicArgs -> IO ()
 main' (BasicArgs memAddr memSize trace putReg fp) = do
-    state@(_, mem) <- mkArchState memAddr memSize
+    state <- mkArchState memAddr memSize
 
     elf <- readElf fp
-    loadElf elf $ storeByteString mem
+    loadElf elf $ storeByteString fromIntegral (getMem state)
     entry <- startAddr elf
 
     instRef <- newIORef (0 :: Word32)
