@@ -31,8 +31,10 @@ instrSemantics :: forall v r .
   Member (ExprEval v) r) => Int -> v -> RV_I -> Eff r ()
 instrSemantics width pc =
     let
+        fromUInt :: Integer -> Expr v
         fromUInt = FromInt width
-        mask1 = FromInt width (2^width - 1)
+
+        extract32 :: Int -> Expr v -> Expr v
         extract32 = flip Extract 32
 
         -- False if a given address is not aligned at the four-byte boundary.
