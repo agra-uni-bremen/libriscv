@@ -78,20 +78,22 @@ mkBytes w = map (\off -> fromIntegral $ shiftR w off .&. 0xff) offs
 -- | Representation of a byte-addressable memory. The type is parameterized
 -- over an array implementation (such as 'Data.Array.IO.IOUArray') and a
 -- generic value type (used to represent instruction operands).
-type Memory t a = (Address, t Address a)
--- TODO: Don't use a type alias here.
+data Memory t a = Memory
+  { memStart :: Address
+  , memBytes :: t Address a
+  }
 
 -- | Create a new memory of the given size starting at the given address.
 mkMemory :: MArray t a IO => Address -> Word32 -> IO (Memory t a)
-mkMemory addr size = fmap (addr, ) (newArray_ (0, size - 1))
+mkMemory addr size = fmap (Memory addr) (newArray_ (0, size - 1))
 
 -- Translate global address to a memory-local address.
 toMemAddr :: Memory t a -> Address -> Address
-toMemAddr (startAddr, _) addr = addr - startAddr
+toMemAddr mem addr = addr - (memStart mem)
 
 -- | Returns the size of the memory in bytes.
 memSize :: MArray t a IO => Memory t a -> IO Word32
-memSize = fmap ((+1) . snd) .  getBounds . snd
+memSize = fmap ((+1) . snd) . getBounds . memBytes
 
 ------------------------------------------------------------------------
 
@@ -100,7 +102,7 @@ memSize = fmap ((+1) . snd) .  getBounds . snd
 
 -- | Load a single byte from memory at the given address.
 loadByte :: MArray t a IO => Memory t a -> Address -> IO a
-loadByte mem@(_, array) = readArray array . toMemAddr mem
+loadByte mem = readArray (memBytes mem) . toMemAddr mem
 
 load :: (MArray t a IO) => ([a] -> b) -> Word32 -> Memory t a -> Address -> IO b
 load proc bytesize mem addr = proc <$>
@@ -116,7 +118,7 @@ loadWord = load toWord 4
 
 -- | Store a single byte in memory.
 storeByte :: MArray t a IO => Memory t a -> Address -> a -> IO ()
-storeByte mem@(_, array) addr = writeArray array $ toMemAddr mem addr
+storeByte mem addr = writeArray (memBytes mem) $ toMemAddr mem addr
 
 store :: (MArray t a IO) => (b -> [a]) -> Word32 -> Memory t a -> Address -> b -> IO ()
 store proc bytesize mem addr =
@@ -133,7 +135,7 @@ storeWord = store wordToBytes 4
 
 -- | Write a 'BSL.ByteString' to memory in little endian byteorder. Expects a
 -- function to convert single bytes ('Word8') to the chosen value
--- representation, a 'Memory', as well the 'Address' where the string should be
+-- representation, a t'Memory', as well the 'Address' where the string should be
 -- stored and the 'BSL.ByteString' itself.
 storeByteString :: (MArray t a IO) =>
   (Word8 -> a) ->
