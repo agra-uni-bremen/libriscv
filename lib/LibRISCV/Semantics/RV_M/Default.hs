@@ -43,6 +43,13 @@ instrSemantics width =
 
         extract32 :: Int -> Expr v -> Expr v
         extract32 = flip Extract 32
+
+        mostNegative :: Integer
+        mostNegative = 2^(width - 1)
+
+        -- Signed division overflow occurs when the most-negative integer is divided by -1.
+        sdivOverflow :: v -> v -> Expr v
+        sdivOverflow n divisor = (n `immEqInt` mostNegative) `And` (divisor `immEqInt` (-1))
     in \case
     MUL -> do
         (r1, r2, rd) <- decodeAndReadRType
@@ -70,10 +77,9 @@ instrSemantics width =
         writeRegister rd res
     DIV -> do
         (r1, r2, rd) <- decodeAndReadRType
-
         ifExprM (r2 `immEqInt` 0)
             do writeRegister rd mask1
-            do ifExprM ((r1 `immEqInt` fromIntegral (minBound :: Int32)) `And` mask1)
+            do ifExprM (sdivOverflow r1 r2)
                 do writeRegister rd $ FromImm r1
                 do writeRegister rd $ r1 `sdiv` r2
     DIVU -> do
@@ -85,7 +91,7 @@ instrSemantics width =
         (r1, r2, rd) <- decodeAndReadRType
         ifExprM (r2 `immEqInt` 0)
             do writeRegister rd $ FromImm r1
-            do ifExprM ((r1 `immEqInt` fromIntegral (minBound :: Int32)) `And` (r2 `immEqInt` 0xFFFFFFFF))
+            do ifExprM (sdivOverflow r1 r2)
                 do writeRegister rd $ fromUInt 0
                 do writeRegister rd $ r1 `srem` r2
     REMU -> do
