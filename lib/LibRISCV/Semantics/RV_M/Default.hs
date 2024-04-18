@@ -9,7 +9,6 @@
 {-# LANGUAGE QualifiedDo #-}
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE TypeApplications #-}
 module LibRISCV.Semantics.RV_M.Default where
 
 import LibRISCV.Internal.Decoder.Opcodes (RV_I(..), RV_M (..), RV32_I (..))
