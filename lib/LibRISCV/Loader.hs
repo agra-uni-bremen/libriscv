@@ -57,7 +57,7 @@ loadSegment loadFunc ElfSegment{..} =
 
 ------------------------------------------------------------------------
 
--- | Load a 'BSL.ByteString' into memory at a given address..
+-- | Load a 'BSL.ByteString' into memory at a given address.
 type LoadFunc m = Address -> BSL.ByteString -> m ()
 
 -- | Load all loadable segments of an ELF file into memory. An addition to the
