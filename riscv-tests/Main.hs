@@ -44,10 +44,10 @@ sys_exit = 93
 -- failures to the execution environment. This function implements the
 -- ECALL instruction accordingly.
 ecallHandler :: ArchState -> Operations BV ~> IO
-ecallHandler env@(regFile, mem) = \case
+ecallHandler env = \case
         Ecall pc -> do
-            sys <- liftIO $ REG.readRegister regFile A7
-            arg <- liftIO $ REG.readRegister regFile A0
+            sys <- liftIO $ REG.readRegister (getReg env) A7
+            arg <- liftIO $ REG.readRegister (getReg env) A0
 
             when (sys /= sys_exit) $
                 fail "unknown syscall"
@@ -60,10 +60,10 @@ ecallHandler env@(regFile, mem) = \case
 
 main' :: BasicArgs -> IO ()
 main' (BasicArgs memAddr memSize trace putReg fp) = do
-    state@(_, mem) <- mkArchState memAddr memSize
+    state <- mkArchState memAddr memSize
 
     elf <- readElf fp
-    loadElf elf $ storeByteString fromIntegral mem
+    loadElf elf $ storeByteString fromIntegral (getMem state)
     entry <- startAddr elf
 
     instRef <- newIORef (0 :: Word32)

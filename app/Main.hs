@@ -14,7 +14,7 @@ import LibRISCV.CmdLine
 import LibRISCV.Effects.Logging.Default.Interpreter
     ( defaultLogging, noLogging )
 import LibRISCV.Effects.Operations.Default.Interpreter
-    ( mkArchState, dumpState, defaultInstructions )
+    ( mkArchState, getMem, dumpState, defaultInstructions )
 import qualified LibRISCV.Effects.Expressions.Expr as E
 import LibRISCV.Effects.Expressions.Default.Interpreter (defaultEval, evalE)
 import LibRISCV.Effects.Decoding.Default.Interpreter
@@ -28,10 +28,10 @@ import LibRISCV.Effects.Operations.Default.Machine.Memory (storeByteString)
 
 main' :: BasicArgs -> IO ()
 main' (BasicArgs memAddr memSize trace putReg fp) = do
-    state@(_, mem) <- mkArchState memAddr memSize
+    state <- mkArchState memAddr memSize
 
     elf <- readElf fp
-    loadElf elf $ storeByteString fromIntegral mem
+    loadElf elf $ storeByteString fromIntegral (getMem state)
     entry <- startAddr elf
 
     instRef <- newIORef (0 :: Word32)
