@@ -1,8 +1,8 @@
 # A Versatile and Flexible RISC-V Model
 
-This is an extensible [RISC-V][riscv web] implementation which is based on a formal model of the architecture.
+This is an extensible [RISC-V][riscv web] implementation which provides an executable, formal model of the architecture.
 The formal model is implemented using [free monads][free monads] and a custom expression language for arithmetic operations.
-Based on this formal model, custom interpreters for RISC-V instructions can be easily implemented, e.g. to perform a taint analysis.
+Based on this formal model, custom interpreters for RISC-V instructions can be easily implemented, e.g. to perform [symbolic execution][symbolic execution wikipedia] of binary code.
 More information about LibRISCV is available in the publication [*Versatile and Flexible Modelling of the RISC-V Instruction Set Architecture*][agra preprint] which was published as part of the proceedings of the 2023 [*Trends in Functional Programming*][springer tfp2023] conference.
 
 ## Features
@@ -80,7 +80,7 @@ Exemplary interpreters are available as follows:
 
 1. The [concrete interpreter][riscv-tiny github] bundled with LibRISCV itself
 2. A [symbolic interpreter][binsym github] performing [symbolic execution][symbolic execution wikipedia] of RISC-V binary code
-3. An interpreter for [C/C++ code generation][formal-iss github] for generating RISC-V simulators (uses an older LibRISCV version)
+3. An interpreter for [code generation][formal-iss github] for RISC-V simulators (uses an older LibRISCV version)
 
 ## Concrete Interpretation
 
