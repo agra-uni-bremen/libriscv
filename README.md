@@ -12,7 +12,6 @@ More information about LibRISCV is available in the publication [*Versatile and 
     * Instruction operands must not be concrete fixed-width integers
     * Can also be SMT expressions for example (useful for symbolic execution)
 * Polymorphic implementations of byte-addressable memory and register file
-* Algebraic effects for instruction tracing etc
 * RISC-V instruction decoder which is auto-generated from [riscv-opcodes][riscv-opcodes github]
 
 ## Installation
@@ -41,14 +40,53 @@ This will drop you in an interactive shell within the Docker container.
 See the section below for more information on which commands can be run within the container.
 Within the container, the LibRISCV source code is available in the LibRISCV subdirectory.
 
-## Usage
+## Overview
 
-This section provides more information on using the provided library and the concrete interpreter.
+<p align="center">
+	<img alt="Overview of the creation of custom interpreters using LibRISCV" src="images/overview.svg" width="80%" />
+</p>
 
-### The Concrete Interpreter
+LibRISCV is a library which enables the creation of custom interpreters/executors for RISC-V binary code.
+To this end, it includes a decoder which is generated from the existing [riscv-opcodes][riscv-opcodes github] tooling.
+Based on decoded opcodes, LibRISCV provides a formal model which *abstractly* describes the semantics of RISC-V instructions using a [Haskell-based EDSL][haskell edsl].
+This description is embedded directly into LibRISCV and available in the `lib/LibRISCV/Semantics` subdirectory[^1].
+As an example, the abstract description of the RISC-V LH (load half) instruction looks as follows:
 
-The concrete interpreter, which is build upon the formal RISC-V model, can execute any `rv32i` RISC-V machine code.
-Assuming you have a RISC-V compiler toolchain available, run the following commands to execute a sample assembly program:
+```Haskell
+instrSemantics LH = do
+    (r1, rd, imm) <- decodeAndReadIType
+    half <- load Half $ r1 `addImm` imm
+    writeRegister rd $ sextImm 16 half
+```
+
+This description describes the abstract semantics in terms of several primitives (`load`, `addImm`, `sextImm`, …).
+Based on these primitives, we can build custom interpreters which supply the *actual semantics* for these primitives.
+The standard example in this regard would be a concrete interpreter which supplies a concrete implementation of the register file, memory, … to implement concrete semantics for these language primitives.
+In fact, such a concrete interpreter is provided by the LibRISCV library (see below) and provides polymorphic implementations of the register file, etc. which can be reused for the creation of custom interpreters.
+More information on the creation of custom interpreters is provided below.
+
+[^1]: Presently, abstract semantics for custom instructions cannot be supplied without modifying LibRISCV.
+
+## Building Interpreters
+
+Information on building custom interpreters is provided through the Haddock Haskell documentation.
+The entry point in this regard is the `LibRISCV.Semantics.buildAST` function.
+This function returns an effect which must then be interpreted.
+Conceptually, LibRISCV differentiates several modular effects (see the `LibRISCV.Effects` namespace for a list of available effects).
+This facilitates reuse and composition of existing interpreters, for example, even a symbolic interpreter may reuse a concrete decoder.
+Therefore, the LibRISCV library commonly provides a default, concrete interpreter for all effects.
+
+Exemplary interpreters are available as follows:
+
+1. The [concrete interpreter][riscv-tiny github] bundled with LibRISCV itself
+2. A [symbolic interpreter][binsym github] performing [symbolic execution][symbolic execution wikipedia] of RISC-V binary code
+3. An interpreter for [C/C++ code generation][formal-iss github] for generating RISC-V simulators (uses an older LibRISCV version)
+
+## Concrete Interpretation
+
+Apart from the library, LibRISCV also provides an executable called `riscv-tiny` for concrete interpretation of a given RISC-V binary.
+This interpreter can execute `rv32im` RISC-V machine code concretely.
+As an example, assuming you have a RISC-V compiler toolchain available, run the following commands to execute a very simple assembly program:
 
     $ cat sample.S
     .globl _start
@@ -65,15 +103,8 @@ Assuming you have a RISC-V compiler toolchain available, run the following comma
 
 The sample program loads a value from memory and then decrements this value by 1.
 The `riscv-tiny` invocation will then print all instructions executed for this program and exits after encountering the first invalid instruction.
-Afterwards, it will dump all register values.
-
-### The Library Interface
-
-The concreter interpreter implements just one possible interpretation of RISC-V instructions.
-As the name suggests, LibRISCV is specifically intended to implement custom interpreters on top of the abstract RISC-V model.
-For this purpose, the Cabal file provides a Haskell library component.
-Based on this library, custom interpreters can be implemented.
-An exemplary interpreter, which implements symbolic execution, is available in [a separate repository](https://github.com/nmeum/formal-symex).
+Afterward, it will dump all register values.
+Naturally, the interpreter can also execute more complex code, e.g. compiled C code.
 
 ## Tests
 
@@ -119,3 +150,8 @@ This work was supported in part by the German Federal Ministry of Education and 
 [riscv-opcodes github]: https://github.com/riscv/riscv-opcodes
 [springer tfp2023]: https://doi.org/10.1007/978-3-031-38938-2_2
 [agra preprint]: https://agra.informatik.uni-bremen.de/doc/konf/TFP23_ST.pdf
+[haskell edsl]: https://doi.org/10.1007/978-3-031-23669-3_10
+[riscv-tiny github]: https://github.com/agra-uni-bremen/libriscv/blob/master/app/Main.hs
+[binsym github]: https://github.com/agra-uni-bremen/binsym
+[formal-iss github]: https://github.com/agra-uni-bremen/formal-iss
+[symbolic execution wikipedia]: https://en.wikipedia.org/wiki/Symbolic_execution
