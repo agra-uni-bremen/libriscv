@@ -9,8 +9,7 @@ import LibRISCV
 import LibRISCV.Internal.Decoder.Opcodes
 import LibRISCV.Internal.Decoder.Instruction
 
-import Data.BitVector 
-
+decoderTests :: TestTree
 decoderTests = testGroup "Decoder Tests"
   [ testCase "Decode ADD instruction" $ do
       let inst = 0x00a605b3

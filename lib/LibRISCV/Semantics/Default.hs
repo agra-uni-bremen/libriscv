@@ -13,30 +13,22 @@
 module LibRISCV.Semantics.Default where
 
 import LibRISCV.Internal.Decoder.Opcodes
-import Data.Word
 import Control.Monad.Freer
 
 import LibRISCV.Effects.Logging.Language ( LogInstructionFetch, logFetched )
 import LibRISCV.Effects.Expressions.Expr
 import LibRISCV.Effects.Expressions.Language 
-import Control.Applicative (liftA3, Applicative (liftA2))
-import Data.Int (Int32)
 
 import Data.Parameterized.NatRepr
 import GHC.TypeLits
-import Data.BitVector (BV, bitVec, pow, ones)
-import Debug.Trace (trace)
-import Data.Function (on)
 import Data.Data (Proxy(..))
 import LibRISCV.Effects.Decoding.Language
 import LibRISCV.Effects.Operations.Language hiding (writeRegister, readRegister, writePC, load, store)
-import qualified LibRISCV.Effects.Operations.Language as Op
 import LibRISCV.Semantics.Utils
 import qualified LibRISCV.Semantics.RV_I.Default as RV_I
 import qualified LibRISCV.Semantics.RV32_I.Default as RV32_I
 import qualified LibRISCV.Semantics.RV_M.Default as RV_M
-import Control.Monad (when)
-import Control.Monad.Extra (whenM, unlessM, ifM)
+
 ------------------------------------------------------------------------
 
 -- We require type annotations here to workaround a limitation of

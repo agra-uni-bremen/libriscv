@@ -1,10 +1,10 @@
 {-# LANGUAGE TemplateHaskell #-}
 
+-- generateDefaultDecoder doesn't generate signatures.
+{-# OPTIONS_GHC -Wno-missing-signatures #-}
+
 module LibRISCV.Internal.Decoder.Opcodes where
 
-import Data.Word
-import Data.Bits
-import Data.BitVector (BV)
 import LibRISCV.Internal.Decoder.Generator
 
 generateDefaultDecoder

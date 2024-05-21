@@ -10,7 +10,7 @@ module LibRISCV.Effects.Expressions.Default.Interpreter where
 import Data.Int ( Int32 )
 import Data.Word ( Word8 )
 import Data.Bool ( bool )
-import Data.BitVector (BV, extract, Bits (unsafeShiftR, unsafeShiftL, xor, (.|.), (.&.)), signExtend, zeroExtend, bitVec, ones)
+import Data.BitVector (BV, extract, Bits (unsafeShiftR, unsafeShiftL, xor, (.|.), (.&.)), signExtend, zeroExtend, bitVec)
 import Control.Monad.IO.Class ( MonadIO )
 import LibRISCV.Effects.Expressions.Language ( ExprEval(..) )
 import LibRISCV.Effects.Expressions.Expr ( Expr(..) )

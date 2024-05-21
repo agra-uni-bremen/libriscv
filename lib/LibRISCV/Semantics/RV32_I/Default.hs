@@ -13,16 +13,14 @@
 
 module LibRISCV.Semantics.RV32_I.Default where
 
-import LibRISCV.Internal.Decoder.Opcodes (RV_I(..), RV_M (..), RV32_I (..))
+import LibRISCV.Internal.Decoder.Opcodes (RV32_I (..))
 import Control.Monad.Freer
 import LibRISCV.Effects.Operations.Language (Operations(..))
 import LibRISCV.Effects.Logging.Language (LogInstructionFetch)
 import LibRISCV.Effects.Decoding.Language (Decoding, decodeShamt)
 import LibRISCV.Effects.Expressions.Language (ExprEval)
-import Data.Int (Int32)
 import LibRISCV.Effects.Expressions.Expr 
 import LibRISCV.Semantics.Utils
-
 
 instrSemantics :: forall v r . (Member (Operations v) r, Member LogInstructionFetch r, Member (Decoding v) r, Member (ExprEval v) r) => RV32_I -> Eff r ()
 instrSemantics = \case 

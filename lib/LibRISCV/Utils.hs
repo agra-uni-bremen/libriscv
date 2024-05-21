@@ -1,11 +1,7 @@
 module LibRISCV.Utils where
 
-import LibRISCV
-
 import Data.Word ( Word32 )
 import Control.Monad (when,unless)
-import Control.Monad.Trans.Maybe (MaybeT (runMaybeT))
-import Control.Monad.Trans.Class (lift)
 
 -- Convert bool to a Word32.
 boolToWord :: Bool -> Word32

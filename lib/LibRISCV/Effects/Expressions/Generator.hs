@@ -5,7 +5,6 @@ module LibRISCV.Effects.Expressions.Generator (generateImmediates) where
 
 import Data.Char (toLower)
 import Language.Haskell.TH
-import LibRISCV.Effects.Expressions.Type
 
 binOps :: [String]
 binOps = [

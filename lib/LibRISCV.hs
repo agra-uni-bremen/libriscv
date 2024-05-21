@@ -1,11 +1,8 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 module LibRISCV where
 
-import Data.Int
 import Data.Word
 import Data.Ix
-import qualified Data.ByteString.Lazy as BSL
-import Data.BitVector
 
 -- | Representation of a 32-bit addresses for RV32.
 type Address = Word32

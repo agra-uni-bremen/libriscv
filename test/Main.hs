@@ -3,6 +3,7 @@ import Test.Tasty
 import DecoderTest
 import ArchStateTest
 
+main :: IO ()
 main = defaultMain tests
 
 tests :: TestTree

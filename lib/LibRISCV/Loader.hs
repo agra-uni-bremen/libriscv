@@ -9,7 +9,6 @@
 module LibRISCV.Loader (readElf, LoadFunc, loadElf, startAddr) where
 
 import LibRISCV
-import Control.Monad.IO.Class (MonadIO, liftIO)
 import LibRISCV.Utils ()
 import Control.Monad.Catch ( MonadCatch )
 import Data.Bits ()
@@ -31,7 +30,6 @@ import Data.Elf.Constants
 import Data.Elf.PrettyPrint (readFileLazy)
 import qualified Data.ByteString.Lazy as BSL
 import System.FilePath ()
-import Debug.Trace (trace)
 
 -- Filter all ELF segments with type PT_LOAD.
 loadableSegments :: ElfListXX a -> [ElfXX 'Segment a]
