@@ -1,6 +1,6 @@
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE TemplateHaskell #-}
-{-# LANGUAGE FlexibleContexts #-}
 
 -- | Implements an effect for instruction decoding. Specifically, the effect
 -- is only used to describe obtaining of instruction operands. The instruction
@@ -11,9 +11,9 @@
 -- to every decoding function.
 module LibRISCV.Effects.Decoding.Language where
 
+import Control.Monad.Freer.TH (makeEffect)
 import Data.Data (Proxy)
 import LibRISCV.Internal.Decoder.Opcodes (InstructionType)
-import Control.Monad.Freer.TH (makeEffect)
 
 data Decoding v r where
     DecodeRS1 :: Decoding v v
@@ -25,7 +25,6 @@ data Decoding v r where
     DecodeImmU :: Decoding v v
     DecodeImmJ :: Decoding v v
     DecodeShamt :: Decoding v v
-
     SetInstr :: v -> Decoding v ()
     -- TODO: WithInstrType is only used to determine which Haskell module
     -- provides the semantics for a given instruction. Can we eliminate

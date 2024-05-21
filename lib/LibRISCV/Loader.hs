@@ -1,39 +1,50 @@
-{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TypeFamilies #-}
 
 -- | An implementation of an /Executable Loadable Format/ (ELF) loader. The module
 -- is responsible for loading instructions into a provided memory implementation
 -- and obtaining the entry point for the executable.
 module LibRISCV.Loader (readElf, LoadFunc, loadElf, startAddr) where
 
+import Control.Monad.Catch (MonadCatch)
+import Data.Bits ()
+import qualified Data.ByteString.Lazy as BSL
+import Data.Elf (
+    Elf (..),
+    ElfListXX (..),
+    ElfNodeType (..),
+    ElfSectionData (ElfSectionData),
+    ElfXX (
+        ElfSection,
+        ElfSegment,
+        ehEntry,
+        epAddMemSize,
+        epData,
+        epType,
+        esAddr,
+        esData
+    ),
+    elfFindHeader,
+    parseElf,
+ )
+import Data.Elf.Constants
+import Data.Elf.Headers (
+    SingElfClass (SELFCLASS32, SELFCLASS64),
+    SingElfClassI,
+    withSingElfClassI,
+ )
+import Data.Elf.PrettyPrint (readFileLazy)
+import Data.Int (Int64)
+import Data.Word (Word32)
 import LibRISCV
 import LibRISCV.Utils ()
-import Control.Monad.Catch ( MonadCatch )
-import Data.Bits ()
-import Data.Int ( Int64 )
-import Data.Word ( Word32 )
-import Data.Elf
-    ( elfFindHeader,
-      parseElf,
-      Elf(..),
-      ElfListXX(..),
-      ElfNodeType(..),
-      ElfSectionData(ElfSectionData),
-      ElfXX(ElfSection, ElfSegment, esData, ehEntry,
-            esAddr, epType, epAddMemSize, epData)
-    )
-import Data.Elf.Headers
-    ( withSingElfClassI, SingElfClassI, SingElfClass(SELFCLASS32, SELFCLASS64) )
-import Data.Elf.Constants 
-import Data.Elf.PrettyPrint (readFileLazy)
-import qualified Data.ByteString.Lazy as BSL
 import System.FilePath ()
 
 -- Filter all ELF segments with type PT_LOAD.
 loadableSegments :: ElfListXX a -> [ElfXX 'Segment a]
-loadableSegments (ElfListCons v@(ElfSegment { .. }) l) =
+loadableSegments (ElfListCons v@(ElfSegment{..}) l) =
     if epType == PT_LOAD
         then v : loadableSegments l
         else loadableSegments l
@@ -72,6 +83,6 @@ readElf :: FilePath -> IO Elf
 readElf path = readFileLazy path >>= parseElf
 
 -- | Return the entry point from the ELF header.
-startAddr :: MonadCatch m => Elf -> m Word32
+startAddr :: (MonadCatch m) => Elf -> m Word32
 startAddr (Elf SELFCLASS32 elfs) = ehEntry <$> elfFindHeader elfs
 startAddr (Elf SELFCLASS64 _) = error "64-bit executables not supported"

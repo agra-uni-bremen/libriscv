@@ -1,40 +1,38 @@
-{-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE DataKinds #-}
-{-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE GADTs #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
+
 module Main where
 
-import Numeric
-import Data.Word
-import Data.Int
-import System.Environment ()
-import System.Exit
-import Options.Applicative
-import Control.Monad (when, mzero)
+import Control.Monad (mzero, when)
 import Control.Monad.Freer
 import Control.Monad.Freer.Reader (runReader)
+import Control.Monad.IO.Class (MonadIO (..))
 import Control.Monad.Trans.Maybe
+import Data.BitVector (BV, bitVec)
 import Data.IORef (newIORef)
-
+import Data.Int
+import Data.Word
 import LibRISCV
-import LibRISCV.Loader
-import LibRISCV.Semantics (readRegister, buildAST)
 import LibRISCV.CmdLine
+import LibRISCV.Effects.Decoding.Default.Interpreter
+import LibRISCV.Effects.Expressions.Default.Interpreter
+import qualified LibRISCV.Effects.Expressions.Expr as E
 import LibRISCV.Effects.Logging.Default.Interpreter
 import LibRISCV.Effects.Operations.Default.Interpreter
-import LibRISCV.Effects.Operations.Language
-import qualified LibRISCV.Effects.Expressions.Expr as E
-import LibRISCV.Effects.Expressions.Default.Interpreter
-import LibRISCV.Effects.Decoding.Default.Interpreter
 import LibRISCV.Effects.Operations.Default.Machine.Memory (storeByteString)
-
-import Control.Monad.IO.Class ( MonadIO(..) )
 import qualified LibRISCV.Effects.Operations.Default.Machine.Register as REG
-import Data.BitVector (BV, bitVec)
+import LibRISCV.Effects.Operations.Language
+import LibRISCV.Loader
+import LibRISCV.Semantics (buildAST, readRegister)
+import Numeric
+import Options.Applicative
+import System.Environment ()
+import System.Exit
 
 -- Syscall number for the newlib exit syscall (used by riscv-tests).
 sys_exit :: Int32
@@ -45,18 +43,18 @@ sys_exit = 93
 -- ECALL instruction accordingly.
 ecallHandler :: ArchState -> Operations BV ~> IO
 ecallHandler env = \case
-        Ecall pc -> do
-            sys <- liftIO $ REG.readRegister (getReg env) A7
-            arg <- liftIO $ REG.readRegister (getReg env) A0
+    Ecall pc -> do
+        sys <- liftIO $ REG.readRegister (getReg env) A7
+        arg <- liftIO $ REG.readRegister (getReg env) A0
 
-            when (sys /= sys_exit) $
-                fail "unknown syscall"
+        when (sys /= sys_exit) $
+            fail "unknown syscall"
 
-            liftIO $ if arg == 0
+        liftIO $
+            if arg == 0
                 then exitSuccess
                 else exitWith (ExitFailure $ fromIntegral arg)
-        x -> defaultInstructions env x
-
+    x -> defaultInstructions env x
 
 main' :: BasicArgs -> IO ()
 main' (BasicArgs memAddr memSize trace putReg fp) = do
@@ -67,13 +65,13 @@ main' (BasicArgs memAddr memSize trace putReg fp) = do
     entry <- startAddr elf
 
     instRef <- newIORef (0 :: Word32)
-    let 
-        evalEnv         = ((==1), evalE)
+    let
+        evalEnv = ((== 1), evalE)
         interpreter =
-                interpretM (ecallHandler state) . 
-                interpretM (defaultEval evalEnv) . 
-                interpretM (defaultDecoding @BV instRef) . 
-                interpretM (if trace then defaultLogging else noLogging)
+            interpretM (ecallHandler state)
+                . interpretM (defaultEval evalEnv)
+                . interpretM (defaultDecoding @BV instRef)
+                . interpretM (if trace then defaultLogging else noLogging)
     runM $ interpreter $ buildAST @32 (bitVec 32 entry)
 
     when putReg $
@@ -81,7 +79,10 @@ main' (BasicArgs memAddr memSize trace putReg fp) = do
 
 main :: IO ()
 main = main' =<< execParser opts
-    where
-        opts = info (basicArgs <**> helper)
+  where
+    opts =
+        info
+            (basicArgs <**> helper)
             ( fullDesc
-           <> progDesc "Concrete execution of RV32I machine code")
+                <> progDesc "Concrete execution of RV32I machine code"
+            )

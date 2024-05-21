@@ -1,8 +1,9 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
+
 module LibRISCV where
 
-import Data.Word
 import Data.Ix
+import Data.Word
 
 -- | Representation of a 32-bit addresses for RV32.
 type Address = Word32
@@ -19,7 +20,6 @@ align addr = addr - addr `mod` 4
 -- T6
 -- >>> fromEnum (minBound :: RegIdx)
 -- 0
---
 {- FOURMOLU_DISABLE -}
 data RegIdx = Zero | RA | SP | GP | TP | T0 | T1 | T2 | FP
     | S1 | A0 | A1 | A2 | A3 | A4 | A5 | A6 | A7 | S2 | S3

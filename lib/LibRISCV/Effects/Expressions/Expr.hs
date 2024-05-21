@@ -1,5 +1,4 @@
 {-# LANGUAGE TemplateHaskell #-}
-
 -- generateImmediates doesn't generate signatures.
 {-# OPTIONS_GHC -Wno-missing-signatures #-}
 
@@ -10,13 +9,13 @@
 -- several smart constructors for utilzing the expression lanuage, these
 -- are generated using template-haskell.
 module LibRISCV.Effects.Expressions.Expr (
-  module LibRISCV.Effects.Expressions.Type,
-  module LibRISCV.Effects.Expressions.Expr,
+    module LibRISCV.Effects.Expressions.Type,
+    module LibRISCV.Effects.Expressions.Expr,
 ) where
 
 import Data.Function (on)
-import LibRISCV.Effects.Expressions.Type
 import LibRISCV.Effects.Expressions.Generator
+import LibRISCV.Effects.Expressions.Type
 
 -- | Extract shamt value from an expression (lower 5 bits).
 regShamt :: Int -> Expr a -> Expr a
