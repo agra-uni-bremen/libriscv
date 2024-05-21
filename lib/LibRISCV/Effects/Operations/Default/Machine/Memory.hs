@@ -57,7 +57,7 @@ instance HalfStorage Word16 Word8 where
     halfToBytes = mkBytes . fromIntegral
 
 instance WordStorage BV Word8 where
-    toWord  = bitVec 32 . fromIntegral .  mkWord
+    toWord  = (bitVec 32 :: Word32 -> BV). fromIntegral . mkWord
     wordToBytes = mkBytes . fromIntegral
 
 instance HalfStorage BV Word8 where

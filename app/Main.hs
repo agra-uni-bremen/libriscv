@@ -5,7 +5,6 @@ module Main where
 import Options.Applicative
 import Control.Monad (when)
 import Control.Monad.Freer
-import Control.Monad.Freer.Reader
 
 import LibRISCV (RegIdx(SP), align)
 import LibRISCV.Loader
@@ -19,8 +18,7 @@ import qualified LibRISCV.Effects.Expressions.Expr as E
 import LibRISCV.Effects.Expressions.Default.Interpreter (defaultEval, evalE)
 import LibRISCV.Effects.Decoding.Default.Interpreter
     ( defaultDecoding )
-import Data.BitVector 
-import qualified Debug.Trace as Debug
+import Data.BitVector
 import Data.IORef (newIORef)
 import Data.Word (Word32)
 import LibRISCV.Effects.Operations.Default.Machine.Memory (storeByteString)

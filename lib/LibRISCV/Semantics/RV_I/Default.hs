@@ -12,17 +12,14 @@
 {-# LANGUAGE LambdaCase #-}
 
 module LibRISCV.Semantics.RV_I.Default where
-import LibRISCV.Internal.Decoder.Opcodes (RV_I(..), RV_M (..), RV32_I (..))
+import LibRISCV.Internal.Decoder.Opcodes (RV_I(..))
 import Control.Monad.Freer
 import LibRISCV.Effects.Operations.Language (Operations(..), Size(..), exception, readPC, ecall, ebreak)
 import LibRISCV.Effects.Logging.Language (LogInstructionFetch)
-import LibRISCV.Effects.Decoding.Language (Decoding, decodeShamt)
+import LibRISCV.Effects.Decoding.Language (Decoding)
 import LibRISCV.Effects.Expressions.Language (ExprEval, whenExprM, unlessExprM)
-import Data.Int (Int32)
 import LibRISCV.Effects.Expressions.Expr
 import LibRISCV.Semantics.Utils
-import Data.BitVector (ones)
-import Control.Monad.Extra (whenM)
 
 instrSemantics :: forall v r .
   ( Member (Operations v) r
@@ -33,9 +30,6 @@ instrSemantics width pc =
     let
         fromUInt :: Integer -> Expr v
         fromUInt = FromInt width
-
-        extract32 :: Int -> Expr v -> Expr v
-        extract32 = flip Extract 32
 
         -- False if a given address is not aligned at the four-byte boundary.
         isMisaligned :: Expr v -> Expr v

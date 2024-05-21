@@ -8,9 +8,7 @@
 -- which instructions are executed (register file, memory, program counter, etc.).
 module LibRISCV.Effects.Operations.Language where
 
-import LibRISCV.Effects.Expressions.Expr (Expr)
 import Control.Monad.Freer.TH ( makeEffect )
-import LibRISCV.Internal.Decoder.Opcodes (InstructionType)
 
 -- | Abstraction for expressing a 8-, 16-, or 32-bit size.
 data Size = Byte | Half | Word

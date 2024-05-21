@@ -8,15 +8,12 @@ import Data.Yaml
 import Control.Monad.IO.Class (liftIO, MonadIO)
 import Control.Monad (forM)
 import qualified Data.Map.Strict as M
-import Data.List (find, sortBy, nub)
+import Data.List (nub)
 import Data.Char (toUpper)
-import Data.Function (on)
 import Data.Bits ((.&.))
 import Data.Word (Word32)
 import Data.Maybe (isJust, fromJust)
 import Data.FileEmbed (makeRelativeToProject)
-
-
 
 readAndParse :: MonadIO m => FilePath -> m [(String, InstructionFields)]
 readAndParse filePath = M.toList <$> liftIO (decodeFileThrow filePath)

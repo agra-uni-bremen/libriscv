@@ -14,6 +14,7 @@ import qualified Data.ByteString.Lazy as BSL
 mkReg :: IO (RegisterFile IOUArray Word32)
 mkReg = mkRegFile 0
 
+registerTests :: TestTree
 registerTests = testGroup "RegisterFile Tests"
   [ testCase "Read and write general-puropose register" $ do
       r <- mkReg
@@ -41,6 +42,7 @@ registerTests = testGroup "RegisterFile Tests"
       assertEqual "Zero can be written to PC" 0 regVal
   ]
 
+memoryTests :: TestTree
 memoryTests = testGroup "Memory Tests"
   [ testCase "Create memory and extract its size" $ do
       m <- mkMemory 0x0 512 :: IO (Memory IOUArray Word8)

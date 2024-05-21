@@ -1,5 +1,8 @@
 {-# LANGUAGE TemplateHaskell #-}
 
+-- generateImmediates doesn't generate signatures.
+{-# OPTIONS_GHC -Wno-missing-signatures #-}
+
 -- | Defines the expression abstraction to express arithmetic and logic
 -- operations within the formal description of RISC-V instructions. The
 -- abstraction is just a non-monadic algebraic data type called 'Expr'.
@@ -12,7 +15,6 @@ module LibRISCV.Effects.Expressions.Expr (
 ) where
 
 import Data.Function (on)
-import Data.BitVector (BV)
 import LibRISCV.Effects.Expressions.Type
 import LibRISCV.Effects.Expressions.Generator
 
