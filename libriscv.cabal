@@ -46,7 +46,7 @@ library libriscv-internal
     build-depends:
         base
         , yaml                  >= 0.11.8.0
-        , containers
+        , containers            >= 0.6.5.1
         , template-haskell
         , bv
         , file-embed
