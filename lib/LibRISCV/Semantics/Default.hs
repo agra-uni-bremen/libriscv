@@ -1,33 +1,32 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE QualifiedDo #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
-{-# LANGUAGE AllowAmbiguousTypes #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TypeFamilies #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
-{-# LANGUAGE GADTs #-}
-{-# LANGUAGE QualifiedDo #-}
-{-# LANGUAGE BlockArguments #-}
-{-# LANGUAGE BangPatterns #-}
+
 module LibRISCV.Semantics.Default where
 
-import LibRISCV.Internal.Decoder.Opcodes
 import Control.Monad.Freer
-
-import LibRISCV.Effects.Logging.Language ( LogInstructionFetch, logFetched )
-import LibRISCV.Effects.Expressions.Expr
-import LibRISCV.Effects.Expressions.Language 
-
+import Data.Data (Proxy (..))
 import Data.Parameterized.NatRepr
 import GHC.TypeLits
-import Data.Data (Proxy(..))
 import LibRISCV.Effects.Decoding.Language
-import LibRISCV.Effects.Operations.Language hiding (writeRegister, readRegister, writePC, load, store)
-import LibRISCV.Semantics.Utils
-import qualified LibRISCV.Semantics.RV_I.Default as RV_I
+import LibRISCV.Effects.Expressions.Expr
+import LibRISCV.Effects.Expressions.Language
+import LibRISCV.Effects.Logging.Language (LogInstructionFetch, logFetched)
+import LibRISCV.Effects.Operations.Language hiding (load, readRegister, store, writePC, writeRegister)
+import LibRISCV.Internal.Decoder.Opcodes
 import qualified LibRISCV.Semantics.RV32_I.Default as RV32_I
+import qualified LibRISCV.Semantics.RV_I.Default as RV_I
 import qualified LibRISCV.Semantics.RV_M.Default as RV_M
+import LibRISCV.Semantics.Utils
 
 ------------------------------------------------------------------------
 
@@ -37,24 +36,34 @@ import qualified LibRISCV.Semantics.RV_M.Default as RV_M
 --
 -- See: https://github.com/lexi-lambda/freer-simple/issues/7
 
-instrSemantics :: forall v r .
-  ( Member (Operations v) r
-  , Member LogInstructionFetch r
-  , Member (Decoding v) r, Member (ExprEval v) r) => Int -> v -> Eff r ()
-instrSemantics width pc = do 
+instrSemantics ::
+    forall v r.
+    ( Member (Operations v) r
+    , Member LogInstructionFetch r
+    , Member (Decoding v) r
+    , Member (ExprEval v) r
+    ) =>
+    Int ->
+    v ->
+    Eff r ()
+instrSemantics width pc = do
     ty <- withInstrType @v Proxy id
     logFetched ty
     case ty of
-        RV_I inst   -> RV_I.instrSemantics width pc inst >> buildInstruction @v width
+        RV_I inst -> RV_I.instrSemantics width pc inst >> buildInstruction @v width
         RV32_I inst -> RV32_I.instrSemantics @v inst >> buildInstruction @v width
-        RV_M inst   -> RV_M.instrSemantics @v width inst >> buildInstruction @v width
+        RV_M inst -> RV_M.instrSemantics @v width inst >> buildInstruction @v width
         InvalidInstruction -> pure ()
 
-buildInstruction :: forall v r .
-  ( Member (Operations v) r
-  , Member LogInstructionFetch r
-  , Member (Decoding v) r
-  , Member (ExprEval v) r) => Int -> Eff r ()
+buildInstruction ::
+    forall v r.
+    ( Member (Operations v) r
+    , Member LogInstructionFetch r
+    , Member (Decoding v) r
+    , Member (ExprEval v) r
+    ) =>
+    Int ->
+    Eff r ()
 buildInstruction width = do
     -- fetch instruction at current PC
     pc <- readPC @v
@@ -71,12 +80,18 @@ buildInstruction width = do
 -- argument  which corresponds to an address in memory at which program
 -- execution will start. An instruction word will be loaded from this address,
 -- decoded, and executed.
-buildAST :: forall w v r .
-  ( KnownNat w
-  , Member (Operations v) r
-  , Member LogInstructionFetch r
-  , Member (Decoding v ) r, Member (ExprEval v) r) => v -> Eff r ()
+buildAST ::
+    forall w v r.
+    ( KnownNat w
+    , Member (Operations v) r
+    , Member LogInstructionFetch r
+    , Member (Decoding v) r
+    , Member (ExprEval v) r
+    ) =>
+    v ->
+    Eff r ()
 buildAST entry =
     let
         !width = fromIntegral (intValue (knownNat :: NatRepr w))
-    in writePC (FromImm entry) >> buildInstruction @v width
+     in
+        writePC (FromImm entry) >> buildInstruction @v width

@@ -1,22 +1,22 @@
 module LibRISCV.Internal.Decoder.Instruction where
 
-import Data.Word
 import Data.Bits
+import Data.Word
 
 -- Convert to an unsigned word (in two's complement) to a signed number.
 fromTwoscomp :: Word32 -> Word32 -> Word32
 fromTwoscomp numBits n = fromIntegral $ -(n .&. mask) + (n .&. complement mask)
-    where
-        mask :: Word32
-        mask = 2^(numBits - 1)
+  where
+    mask :: Word32
+    mask = 2 ^ (numBits - 1)
 
 -- Extract a bit field from a RISC-V instruction word.
 instrField :: Int -> Int -> Word32 -> Word32
 instrField start end w = mask start (end + 1) .&. shiftR w start
-    where
-        -- Create a 32-bit bit mask in the range [start,end-1].
-        mask :: Int -> Int -> Word32
-        mask start end = complement $ shift (maxBound :: Word32) (end - start)
+  where
+    -- Create a 32-bit bit mask in the range [start,end-1].
+    mask :: Int -> Int -> Word32
+    mask start end = complement $ shift (maxBound :: Word32) (end - start)
 
 ------------------------------------------------------------------------
 
@@ -24,8 +24,10 @@ immI :: Word32 -> Word32
 immI = fromTwoscomp 12 . instrField 20 31
 
 immS :: Word32 -> Word32
-immS i = fromTwoscomp 12 $ fromIntegral $
-    (instrField 25 31 i `shift` 5) .|.  instrField 07 11 i
+immS i =
+    fromTwoscomp 12 $
+        fromIntegral $
+            (instrField 25 31 i `shift` 5) .|. instrField 07 11 i
 
 immU :: Word32 -> Word32
 immU i = instrField 12 31 i `shiftL` 12

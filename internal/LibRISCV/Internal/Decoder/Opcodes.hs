@@ -1,5 +1,4 @@
 {-# LANGUAGE TemplateHaskell #-}
-
 -- generateDefaultDecoder doesn't generate signatures.
 {-# OPTIONS_GHC -Wno-missing-signatures #-}
 
