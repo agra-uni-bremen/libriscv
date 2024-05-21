@@ -1,0 +1,18 @@
+#!/bin/sh
+
+if ! command -v fourmolu 1>/dev/null; then
+	echo "error: fourmolu is not installed" 1>&2
+	exit 1
+fi
+
+# TODO: Add an option to fourmolu to only print file names.
+files=$(git diff --diff-filter=MA --cached --name-only | \
+	awk '/..*\.hs/' | \
+	xargs -r fourmolu --mode check 2>&1 | \
+	awk '/[a-zA-Z.\/][a-zA-Z.\/]*\.hs/')
+
+if [ -n "${files}" ]; then
+	printf "The following files need to be formated with 'fourmolu':\n\n" 1>&2
+	printf "%s\n" "${files}" | sed 's/^/\t/' 1>&2
+	exit 1
+fi

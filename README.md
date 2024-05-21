@@ -118,6 +118,14 @@ If these dependencies are installed (e.g. if you are using the provided Docker i
 
 	$ ./riscv-tests/run.sh
 
+
+### Development
+
+Code should be formatted using [fourmolu][fourmolu github].
+A githook for this purpose is available which can be enabled using:
+
+    $ git config --local core.hooksPath .githooks
+
 ## How to Cite
 
 LibRISCV is further described in the following publication:
@@ -155,3 +163,4 @@ This work was supported in part by the German Federal Ministry of Education and 
 [binsym github]: https://github.com/agra-uni-bremen/binsym
 [formal-iss github]: https://github.com/agra-uni-bremen/formal-iss
 [symbolic execution wikipedia]: https://en.wikipedia.org/wiki/Symbolic_execution
+[fourmolu github]: https://github.com/fourmolu/fourmolu
