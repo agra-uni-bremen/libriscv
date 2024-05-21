@@ -80,7 +80,9 @@ Exemplary interpreters are available as follows:
 
 1. The [concrete interpreter][riscv-tiny github] bundled with LibRISCV itself
 2. A [symbolic interpreter][binsym github] performing [symbolic execution][symbolic execution wikipedia] of RISC-V binary code
-3. An interpreter for [code generation][formal-iss github] for RISC-V simulators (uses an older LibRISCV version)
+3. A [custom concrete interpreter][riscv-tests interpreter] for [riscv-tests][riscv-tests github]
+4. An interpreter for [code generation][formal-iss github] for RISC-V simulators (uses an older LibRISCV version)
+5. A primitive implementation of [dynamic information flow tracking][riscv-dift interpreter] (uses an older LibRISCV version)
 
 ## Concrete Interpretation
 
@@ -117,7 +119,6 @@ These tests require a [riscv-gnu-toolchain][riscv-gnu-toolchain github] as well 
 If these dependencies are installed (e.g. if you are using the provided Docker image), run the tests using:
 
 	$ ./riscv-tests/run.sh
-
 
 ### Development
 
@@ -160,6 +161,8 @@ This work was supported in part by the German Federal Ministry of Education and 
 [agra preprint]: https://agra.informatik.uni-bremen.de/doc/konf/TFP23_ST.pdf
 [haskell edsl]: https://doi.org/10.1007/978-3-031-23669-3_10
 [riscv-tiny github]: https://github.com/agra-uni-bremen/libriscv/blob/master/app/Main.hs
+[riscv-tests interpreter]: https://github.com/agra-uni-bremen/libriscv/blob/master/riscv-tests/Main.hs
+[riscv-dift interpreter]: https://github.com/agra-uni-bremen/libriscv/tree/tfp-2023/example
 [binsym github]: https://github.com/agra-uni-bremen/binsym
 [formal-iss github]: https://github.com/agra-uni-bremen/formal-iss
 [symbolic execution wikipedia]: https://en.wikipedia.org/wiki/Symbolic_execution
