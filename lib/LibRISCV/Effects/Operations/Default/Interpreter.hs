@@ -29,11 +29,11 @@ import Numeric (showHex)
 
 -- | Representation of the concrete architectural state of the interpreter.
 data ArchState = ArchState
-  { getReg :: REG.RegisterFile IOUArray Int32
-  -- | ^ Register file implementation of the architectural state.
-  , getMem :: MEM.Memory IOUArray Word8
-  -- | ^ Memory implementation of the architectural state.
-  }
+    { getReg :: REG.RegisterFile IOUArray Int32
+    -- ^ Register file implementation of the architectural state.
+    , getMem :: MEM.Memory IOUArray Word8
+    -- ^ Memory implementation of the architectural state.
+    }
 
 -- | Create a new t'ArchState' based on a memory start address and a memory size.
 mkArchState :: Address -> Word32 -> IO ArchState

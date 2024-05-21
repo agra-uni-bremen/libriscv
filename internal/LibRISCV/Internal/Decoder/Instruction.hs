@@ -27,6 +27,10 @@ immS :: Word32 -> Word32
 immS i = fromTwoscomp 12 $ fromIntegral $
     (instrField 25 31 i `shift` 5) .|.  instrField 07 11 i
 
+immU :: Word32 -> Word32
+immU i = instrField 12 31 i `shiftL` 12
+
+{- FOURMOLU_DISABLE -}
 immB :: Word32 -> Word32
 immB i = fromTwoscomp 13 $
          (instrField 31 31 i `shift` 12)
@@ -34,15 +38,13 @@ immB i = fromTwoscomp 13 $
      .|. (instrField 25 30 i `shift` 05)
      .|. (instrField 08 11 i `shift` 01)
 
-immU :: Word32 -> Word32
-immU i = instrField 12 31 i `shiftL` 12
-
 immJ :: Word32 -> Word32
 immJ i = fromTwoscomp 21 $
-        (instrField 31 31 i `shift` 20)
+         (instrField 31 31 i `shift` 20)
      .|. (instrField 12 19 i `shift` 12)
      .|. (instrField 20 20 i `shift` 11)
      .|. (instrField 21 30 i `shift` 1)
+{- FOURMOLU_ENABLE -}
 
 mkShamt :: Word32 -> Word32
 mkShamt = instrField 20 25
