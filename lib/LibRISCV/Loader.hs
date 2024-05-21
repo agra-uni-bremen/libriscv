@@ -39,7 +39,6 @@ import Data.Elf.PrettyPrint (readFileLazy)
 import Data.Int (Int64)
 import Data.Word (Word32)
 import LibRISCV
-import LibRISCV.Utils ()
 import System.FilePath ()
 
 -- Filter all ELF segments with type PT_LOAD.
