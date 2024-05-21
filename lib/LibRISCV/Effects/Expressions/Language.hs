@@ -46,19 +46,23 @@ defaultEval (pred, evalE) = \case
 -- having to export the isTrue / isFalse smart constructor. The standard
 -- constructor is still exported as it will need to be interpreted.
 
+condExprM :: forall v r v' .
+  Member (ExprEval v) r => (Expr v -> Eff r Bool) -> Expr v -> Eff r v' -> Eff r v' -> Eff r v'
+condExprM p b t f = do
+  b <- p b
+  if b then t else f
+
 -- | Like 'Control.Monad.Extra.ifM' but with internal expression evaluation.
 ifExprM :: forall v r v' .
   Member (ExprEval v) r => Expr v -> Eff r v' -> Eff r v' -> Eff r v'
-ifExprM b t f = do
-  b <- isTrue b
-  if b then t else f
+ifExprM = (condExprM isTrue)
 
 -- | Like 'Control.Monad.Extra.whenM' but with internal expression evaluation.
 whenExprM :: forall v r .
   Member (ExprEval v) r => Expr v -> Eff r () -> Eff r ()
-whenExprM b t = ifExprM b t (pure ())
+whenExprM b t = (condExprM isTrue) b t (pure ())
 
 -- | Like 'Control.Monad.Extra.unlessM' but with internal expression evaluation.
 unlessExprM :: forall v r .
   Member (ExprEval v) r => Expr v -> Eff r () -> Eff r ()
-unlessExprM b t = ifExprM b (pure ()) t
+unlessExprM b t = (condExprM isFalse) b t (pure ())
