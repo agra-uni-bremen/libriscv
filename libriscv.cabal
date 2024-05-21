@@ -72,8 +72,7 @@ library
                    , LibRISCV.Effects.Expressions.Default.Interpreter
                    , LibRISCV.Effects.Expressions.Expr
                    , LibRISCV.Semantics
-    other-modules: LibRISCV.Utils
-                   , LibRISCV.Effects.Expressions.Type
+    other-modules: LibRISCV.Effects.Expressions.Type
                    , LibRISCV.Effects.Expressions.Generator
                    , LibRISCV.Semantics.Default
                    , LibRISCV.Semantics.Utils
