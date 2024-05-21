@@ -33,7 +33,7 @@ data-files:         data/instr_dict.yaml
 category:           Formal Languages
 
 common opts
-    ghc-options:    -Wall -Wno-name-shadowing
+    ghc-options:    -Wall -Wno-name-shadowing -Werror
 
 library libriscv-internal
     import:          opts
