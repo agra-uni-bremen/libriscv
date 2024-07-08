@@ -2,7 +2,7 @@ cabal-version:      2.4
 name:               libriscv
 version:            0.1.0.0
 
-synopsis:           A versatile and flexible formal model for building custom RISC-V instruction interpreters.
+synopsis:           A versatile, flexible and executable formal model for the RISC-V architecture.
 description:
   A formal model for the <https://riscv.org/ RISC-V> /Instruction Set Architecture/ (ISA).
   Contrary to other Haskell RISC-V ISA models, like <https://github.com/GaloisInc/grift GRIFT>
