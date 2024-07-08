@@ -13,7 +13,7 @@
 
 (let ((libriscv (load* "guix.scm" (make-user-module '()))))
   (concatenate-manifests
-    (list (packages->manifest (list libriscv))
+    (list (package->development-manifest libriscv)
           (specifications->manifest
             ;; Additional packages useful for working on LibRISCV.
             ;;
@@ -21,8 +21,6 @@
             ;; TODO: Add RV32 cross compiler
             (list "cabal-install"
                   "git"
-                  "ghc"
-                  "gcc-toolchain"
 
                   ;; For RISC-V cross compilation (see comment above).
                   "clang-toolchain"
