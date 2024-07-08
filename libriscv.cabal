@@ -28,7 +28,7 @@ license:            MIT
 license-file:       LICENSE.txt
 author:             Sören Tempel, Tobias Brandt, and Christoph Lüth
 maintainer:         Group of Computer Architecture <riscv@informatik.uni-bremen.de>
-copyright:          (c) 2022 University of Bremen
+copyright:          (c) 2022-2024 University of Bremen
 data-files:         data/instr_dict.yaml
 category:           Formal Languages
 
