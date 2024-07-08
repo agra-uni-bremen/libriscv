@@ -84,7 +84,7 @@ library
     -- other-extensions:
     build-depends:
         libriscv-internal
-        , base                  >= 4.15.0.0
+        , base                  >= 4.15.0.0 && <4.20.0.0
         , array                ^>= 0.5.4.0
         , filepath             ^>= 1.4.2.1
         , bytestring            >= 0.10.10 && <0.12
