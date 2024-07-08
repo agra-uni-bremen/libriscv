@@ -16,8 +16,8 @@ More information about LibRISCV is available in the publication [*Versatile and 
 
 ## Installation
 
-This software can be installed either using [Cabal][cabal web] or [Docker][docker web].
-The latter installation method may be preferable if you don't have a RISC-V cross compiler installed on your system.
+This software can be installed either using [Cabal][cabal web] or [Guix][guix web].
+The latter installation method may be preferable if you don't have a compatible GHC version installed.
 Both methods are described further below under the assumption that the repository has been cloned already.
 
 ### Cabal
@@ -28,17 +28,19 @@ Assuming cabal has already been setup, run the following command within the sour
 
 This should place the concrete example interpreter (`riscv-tiny`) in your `$PATH`.
 
-### Docker
+### Guix
 
-To ease installation of a RISC-V cross compiler toolchain a Dockerfile is provided.
-To build and run a Docker container using this file invoke the following commands:
+Alternatively, it is also possible to use the Guix package manager to obtain and install all dependencies, including GHC.
+In order to drop into an ephemeral Guix-based development environment for LibRISCV, run the following command:
 
-    $ docker build -t libriscv .
-    $ docker run -it libriscv
+    $ guix time-machine -C channels.scm -- shell
 
-This will drop you in an interactive shell within the Docker container.
-See the section below for more information on which commands can be run within the container.
-Within the container, the LibRISCV source code is available in the LibRISCV subdirectory.
+Within this environment, LibRISCV can be compiled using `cabal build`.
+Alternatively, LibRISCV can also be installed into the current profile using:
+
+    $ guix time-machine -C channels.scm -- package -f guix.scm
+
+Similar to `cabal install`, the latter command will also make `riscv-tiny` available in your `$PATH`.
 
 ## Overview
 
@@ -116,7 +118,7 @@ A unit test suite is available which can be invoked using:
 
 Furthermore, a version of [riscv-tests][riscv-tests github] is included in this repository for performing minimal compliance tests.
 These tests require a [riscv-gnu-toolchain][riscv-gnu-toolchain github] as well as [GNU Make][make web].
-If these dependencies are installed (e.g. if you are using the provided Docker image), run the tests using:
+If these dependencies are installed, run the tests using:
 
 	$ ./riscv-tests/run.sh
 
@@ -154,7 +156,7 @@ This work was supported in part by the German Federal Ministry of Education and 
 [make web]: https://www.gnu.org/software/make
 [riscv-tests github]: https://github.com/riscv-software-src/riscv-tests
 [riscv-gnu-toolchain github]: https://github.com/riscv-collab/riscv-gnu-toolchain
-[docker web]: https://www.docker.io
+[guix web]: https://guix.gnu.org
 [free monads]: https://doi.org/10.1145/2887747.2804319
 [riscv-opcodes github]: https://github.com/riscv/riscv-opcodes
 [springer tfp2023]: https://doi.org/10.1007/978-3-031-38938-2_2
