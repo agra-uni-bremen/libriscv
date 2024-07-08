@@ -37,7 +37,7 @@ source-repository head
     location: https://github.com/agra-uni-bremen/libriscv.git
 
 common opts
-    ghc-options:    -Wall -Wno-name-shadowing -Werror
+    ghc-options:    -Wall -Wno-name-shadowing
 
 library libriscv-internal
     import:          opts
