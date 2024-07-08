@@ -32,6 +32,10 @@ copyright:          (c) 2022 University of Bremen
 data-files:         data/instr_dict.yaml
 category:           Formal Languages
 
+source-repository head
+    type: git
+    location: https://github.com/agra-uni-bremen/libriscv.git
+
 common opts
     ghc-options:    -Wall -Wno-name-shadowing -Werror
 
