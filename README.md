@@ -17,21 +17,20 @@ More information about LibRISCV is available in the publication [*Versatile and 
 ## Installation
 
 This software can be installed either using [Cabal][cabal web] or [Guix][guix web].
-The latter installation method may be preferable if you don't have a compatible GHC version installed.
-Both methods are described further below under the assumption that the repository has been cloned already.
 
 ### Cabal
 
-Assuming cabal has already been setup, run the following command within the source directory to install LibRISCV:
+Released versions of LibRISCV are [available through Hackage][libriscv hackage], to install them run the following command:
 
-    $ cabal install
+    $ cabal install libriscv
 
-This should place the concrete example interpreter (`riscv-tiny`) in your `$PATH`.
+This should install the Haskell library and place the concrete example interpreter (`riscv-tiny`) in your `$PATH`.
 
 ### Guix
 
 Alternatively, it is also possible to use the Guix package manager to obtain and install all dependencies, including GHC.
-In order to drop into an ephemeral Guix-based development environment for LibRISCV, run the following command:
+This requires cloning the repository first.
+In order to drop into an ephemeral Guix-based development environment for LibRISCV, run the following command from the repository root:
 
     $ guix time-machine -C channels.scm -- shell
 
@@ -154,6 +153,7 @@ This work was supported in part by the German Federal Ministry of Education and 
 [riscv web]: https://riscv.org
 [cabal web]: https://www.haskell.org/cabal/
 [make web]: https://www.gnu.org/software/make
+[libriscv hackage]: https://hackage.haskell.org/package/libriscv
 [riscv-tests github]: https://github.com/riscv-software-src/riscv-tests
 [riscv-gnu-toolchain github]: https://github.com/riscv-collab/riscv-gnu-toolchain
 [guix web]: https://guix.gnu.org
