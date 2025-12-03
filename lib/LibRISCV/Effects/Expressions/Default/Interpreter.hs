@@ -16,6 +16,12 @@ import Data.Word (Word8)
 import LibRISCV.Effects.Expressions.Expr (Expr (..))
 import LibRISCV.Effects.Expressions.Language (ExprEval (..))
 
+trueConst :: BV
+trueConst = bitVec 32 (1 :: Int32)
+
+falseConst :: BV
+falseConst = bitVec 32 (0 :: Int32)
+
 -- | Evaluate an 'Expr' abstraction which encapsulates a concrete 'BV'.
 evalE :: Expr BV -> BV
 evalE (FromImm a) = a
@@ -27,11 +33,11 @@ evalE (Add e1 e2) = evalE e1 + evalE e2
 evalE (Sub e1 e2) =
     fromIntegral $
         (fromIntegral (evalE e1) :: Int32) - fromIntegral (evalE e2)
-evalE (Eq e1 e2) = bool 0 1 $ (fromIntegral (evalE e1) :: Int32) == fromIntegral (evalE e2)
-evalE (Slt e1 e2) = bool 0 1 $ (fromIntegral (evalE e1) :: Int32) < fromIntegral (evalE e2)
-evalE (Sge e1 e2) = bool 0 1 $ (fromIntegral (evalE e1) :: Int32) >= fromIntegral (evalE e2)
-evalE (Ult e1 e2) = bool 0 1 $ evalE e1 < evalE e2
-evalE (Uge e1 e2) = bool 0 1 $ evalE e1 >= evalE e2
+evalE (Eq e1 e2) = bool falseConst trueConst $ (fromIntegral (evalE e1) :: Int32) == fromIntegral (evalE e2)
+evalE (Slt e1 e2) = bool falseConst trueConst $ (fromIntegral (evalE e1) :: Int32) < fromIntegral (evalE e2)
+evalE (Sge e1 e2) = bool falseConst trueConst $ (fromIntegral (evalE e1) :: Int32) >= fromIntegral (evalE e2)
+evalE (Ult e1 e2) = bool falseConst trueConst $ evalE e1 < evalE e2
+evalE (Uge e1 e2) = bool falseConst trueConst $ evalE e1 >= evalE e2
 evalE (And e1 e2) = evalE e1 .&. evalE e2
 evalE (Or e1 e2) = evalE e1 .|. evalE e2
 evalE (Xor e1 e2) = evalE e1 `xor` evalE e2
